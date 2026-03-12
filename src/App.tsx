@@ -51,6 +51,7 @@ const AppRoutes = () => {
         <Route path="/player/:playerId/shots" element={<ShotTracker />} />
         <Route path="/shots" element={<ShotTracker />} />
         <Route path="/manage-users" element={<UserManagement />} />
+        <Route path="/challenges" element={<ChallengesPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
