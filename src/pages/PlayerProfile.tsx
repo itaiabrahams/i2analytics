@@ -3,15 +3,19 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { store } from '@/lib/store';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Plus, LogOut, Pencil } from 'lucide-react';
+import { ArrowRight, Plus, LogOut, Pencil, Video } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import PlayerFormDialog from '@/components/PlayerFormDialog';
+import ScheduleMeetingDialog from '@/components/ScheduleMeetingDialog';
+import NotificationBell from '@/components/NotificationBell';
+import UpcomingMeetings from '@/components/UpcomingMeetings';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const [editOpen, setEditOpen] = useState(false);
+  const [meetingOpen, setMeetingOpen] = useState(false);
   const [, setRefresh] = useState(0);
   const forceRefresh = useCallback(() => setRefresh(n => n + 1), []);
 
@@ -55,13 +59,20 @@ const PlayerProfile = () => {
               <ArrowRight className="mr-2 h-4 w-4" />
             </Button>
           ) : (
-            <Button variant="ghost" onClick={logout} className="text-muted-foreground">
-              <LogOut className="ml-2 h-4 w-4" />
-              יציאה
-            </Button>
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+              <Button variant="ghost" onClick={logout} className="text-muted-foreground">
+                <LogOut className="ml-2 h-4 w-4" />
+                יציאה
+              </Button>
+            </div>
           )}
           {auth.role === 'coach' && (
             <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setMeetingOpen(true)} className="text-muted-foreground">
+                <Video className="ml-2 h-4 w-4" />
+                תזמן פגישה
+              </Button>
               <Button variant="outline" onClick={() => setEditOpen(true)} className="text-muted-foreground">
                 <Pencil className="ml-2 h-4 w-4" />
                 ערוך שחקן
@@ -87,6 +98,9 @@ const PlayerProfile = () => {
             </div>
           </div>
         </div>
+
+        {/* Upcoming meetings */}
+        <UpcomingMeetings playerId={id} />
 
         {/* Aggregate stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -159,7 +173,10 @@ const PlayerProfile = () => {
           </div>
         </div>
         {auth.role === 'coach' && (
-          <PlayerFormDialog open={editOpen} onOpenChange={setEditOpen} player={player} onSaved={forceRefresh} />
+          <>
+            <PlayerFormDialog open={editOpen} onOpenChange={setEditOpen} player={player} onSaved={forceRefresh} />
+            <ScheduleMeetingDialog open={meetingOpen} onOpenChange={setMeetingOpen} playerId={id} playerName={player.name} />
+          </>
         )}
       </div>
     </div>
