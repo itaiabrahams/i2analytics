@@ -11,6 +11,7 @@ import PlayerProfile from "./pages/PlayerProfile";
 import SessionDetail from "./pages/SessionDetail";
 import NewSession from "./pages/NewSession";
 import UserManagement from "./pages/UserManagement";
+import ShotTracker from "./pages/ShotTracker";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,8 @@ const AppRoutes = () => {
         <Route path="/player/:playerId" element={<PlayerProfile />} />
         <Route path="/player/:playerId/new-session" element={<NewSession />} />
         <Route path="/session/:sessionId" element={<SessionDetail />} />
+        <Route path="/player/:playerId/shots" element={<ShotTracker />} />
+        <Route path="/shots" element={<ShotTracker />} />
         <Route path="/manage-users" element={<UserManagement />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

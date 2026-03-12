@@ -328,6 +328,83 @@ export type Database = {
         }
         Relationships: []
       }
+      shot_sessions: {
+        Row: {
+          coach_id: string | null
+          created_at: string
+          date: string
+          id: string
+          notes: string | null
+          player_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          coach_id?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          player_id: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          coach_id?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          player_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      shots: {
+        Row: {
+          attempts: number
+          created_at: string
+          element: string | null
+          finish_type: string | null
+          id: string
+          made: number
+          session_id: string
+          shot_type: string
+          zone: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          element?: string | null
+          finish_type?: string | null
+          id?: string
+          made?: number
+          session_id: string
+          shot_type?: string
+          zone: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          element?: string | null
+          finish_type?: string | null
+          id?: string
+          made?: number
+          session_id?: string
+          shot_type?: string
+          zone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shots_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "shot_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string

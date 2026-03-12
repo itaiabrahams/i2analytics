@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Plus, LogOut, Pencil, Video } from 'lucide-react';
+import { ArrowRight, Plus, LogOut, Pencil, Video, Target } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import ScheduleMeetingDialog from '@/components/ScheduleMeetingDialog';
 import NotificationBell from '@/components/NotificationBell';
@@ -59,6 +59,10 @@ const PlayerProfile = () => {
             </Button>
           ) : (
             <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={() => navigate('/shots')} className="text-muted-foreground">
+                <Target className="ml-2 h-4 w-4" />
+                מעקב קליעות
+              </Button>
               <NotificationBell />
               <Button variant="ghost" onClick={logout} className="text-muted-foreground">
                 <LogOut className="ml-2 h-4 w-4" />
@@ -68,6 +72,10 @@ const PlayerProfile = () => {
           )}
           {auth.role === 'coach' && (
             <div className="flex gap-2">
+              <Button variant="outline" onClick={() => navigate(`/player/${id}/shots`)} className="text-muted-foreground">
+                <Target className="ml-2 h-4 w-4" />
+                מעקב קליעות
+              </Button>
               <Button variant="outline" onClick={() => setMeetingOpen(true)} className="text-muted-foreground">
                 <Video className="ml-2 h-4 w-4" />
                 תזמן פגישה
