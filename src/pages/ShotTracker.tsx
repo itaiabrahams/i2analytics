@@ -3,13 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Flame, BarChart3 } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ArrowRight, Flame, BarChart3, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import BasketballCourt from '@/components/shots/BasketballCourt';
 import ShotInputDialog from '@/components/shots/ShotInputDialog';
 import ShotStats from '@/components/shots/ShotStats';
 import ShotProgressChart from '@/components/shots/ShotProgressChart';
 import ShotCalendar from '@/components/shots/ShotCalendar';
+import WeeklyChallenges from '@/components/challenges/WeeklyChallenges';
+import PlayerChallenges from '@/components/challenges/PlayerChallenges';
 import { ZoneId, ZoneStats, ZONES, ShotType, Element, FinishType } from '@/lib/shotZones';
 import { usePlayer } from '@/hooks/useSupabaseData';
 
