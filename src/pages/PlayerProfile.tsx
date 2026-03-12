@@ -15,6 +15,7 @@ const PlayerProfile = () => {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const [editOpen, setEditOpen] = useState(false);
+  const [meetingOpen, setMeetingOpen] = useState(false);
   const [, setRefresh] = useState(0);
   const forceRefresh = useCallback(() => setRefresh(n => n + 1), []);
 
