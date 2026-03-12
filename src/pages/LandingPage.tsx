@@ -186,8 +186,8 @@ const LandingPage = () => {
 
               <div className="mb-8">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-foreground">₪149</span>
-                  <span className="text-muted-foreground text-sm">/ סשן</span>
+                   <span className="text-5xl font-black text-foreground">₪350</span>
+                   <span className="text-muted-foreground text-sm">/ סשן</span>
                 </div>
               </div>
 
