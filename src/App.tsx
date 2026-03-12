@@ -47,6 +47,8 @@ const AppRoutes = () => {
         <Route path="/player/:playerId" element={<PlayerProfile />} />
         <Route path="/player/:playerId/new-session" element={<NewSession />} />
         <Route path="/session/:sessionId" element={<SessionDetail />} />
+        <Route path="/player/:playerId/shots" element={<ShotTracker />} />
+        <Route path="/shots" element={<ShotTracker />} />
         <Route path="/manage-users" element={<UserManagement />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
