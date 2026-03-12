@@ -54,6 +54,7 @@ const AppRoutes = () => {
         <Route path="/manage-users" element={<UserManagement />} />
         <Route path="/challenges" element={<ChallengesPage />} />
         <Route path="/player/:playerId/challenges" element={<ChallengesPage />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
