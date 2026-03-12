@@ -5,16 +5,18 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import LoginPage from "./pages/LoginPage";
+import PendingApproval from "./pages/PendingApproval";
 import CoachDashboard from "./pages/CoachDashboard";
 import PlayerProfile from "./pages/PlayerProfile";
 import SessionDetail from "./pages/SessionDetail";
 import NewSession from "./pages/NewSession";
+import UserManagement from "./pages/UserManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
-  const { role, loading } = useAuth();
+  const { role, loading, isApproved } = useAuth();
 
   if (loading) {
     return (
@@ -33,6 +35,10 @@ const AppRoutes = () => {
     return <LoginPage />;
   }
 
+  if (!isApproved) {
+    return <PendingApproval />;
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -40,6 +46,7 @@ const AppRoutes = () => {
         <Route path="/player/:playerId" element={<PlayerProfile />} />
         <Route path="/player/:playerId/new-session" element={<NewSession />} />
         <Route path="/session/:sessionId" element={<SessionDetail />} />
+        <Route path="/manage-users" element={<UserManagement />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
