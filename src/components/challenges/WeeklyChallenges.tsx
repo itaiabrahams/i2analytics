@@ -1,0 +1,270 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Trophy, Plus, Medal, Target } from 'lucide-react';
+import { toast } from 'sonner';
+import { ZONES } from '@/lib/shotZones';
+
+interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  zone: string | null;
+  target_percentage: number;
+  target_attempts: number;
+  week_start: string;
+  week_end: string;
+  created_by: string;
+}
+
+interface Entry {
+  id: string;
+  challenge_id: string;
+  player_id: string;
+  attempts: number;
+  made: number;
+  percentage: number;
+  player_name?: string;
+}
+
+const WeeklyChallenges = () => {
+  const { user, auth } = useAuth();
+  const isCoach = auth.role === 'coach';
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [entries, setEntries] = useState<Record<string, Entry[]>>({});
+  const [creating, setCreating] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ title: '', description: '', zone: 'all', target_percentage: 50, target_attempts: 20 });
+
+  const fetchChallenges = async () => {
+    const { data } = await supabase
+      .from('weekly_challenges')
+      .select('*')
+      .order('week_start', { ascending: false })
+      .limit(10);
+    if (data) {
+      setChallenges(data as unknown as Challenge[]);
+      // Fetch entries for each challenge
+      const ids = data.map((c: any) => c.id);
+      if (ids.length > 0) {
+        const { data: entriesData } = await supabase
+          .from('challenge_entries')
+          .select('*')
+          .in('challenge_id', ids)
+          .order('percentage', { ascending: false });
+
+        if (entriesData) {
+          // Fetch player names
+          const playerIds = [...new Set(entriesData.map((e: any) => e.player_id))];
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('user_id, display_name')
+            .in('user_id', playerIds);
+          const nameMap: Record<string, string> = {};
+          profiles?.forEach((p: any) => { nameMap[p.user_id] = p.display_name; });
+
+          const grouped: Record<string, Entry[]> = {};
+          entriesData.forEach((e: any) => {
+            if (!grouped[e.challenge_id]) grouped[e.challenge_id] = [];
+            grouped[e.challenge_id].push({ ...e, player_name: nameMap[e.player_id] || 'שחקן' });
+          });
+          setEntries(grouped);
+        }
+      }
+    }
+  };
+
+  useEffect(() => { fetchChallenges(); }, []);
+
+  const handleCreate = async () => {
+    if (!form.title.trim()) { toast.error('יש להזין כותרת'); return; }
+    setCreating(true);
+    const { error } = await supabase.from('weekly_challenges').insert({
+      title: form.title,
+      description: form.description,
+      zone: form.zone === 'all' ? null : form.zone,
+      target_percentage: form.target_percentage,
+      target_attempts: form.target_attempts,
+      created_by: user?.id,
+    });
+    if (error) { toast.error('שגיאה ביצירת אתגר'); }
+    else { toast.success('אתגר חדש נוצר!'); setShowForm(false); setForm({ title: '', description: '', zone: 'all', target_percentage: 50, target_attempts: 20 }); fetchChallenges(); }
+    setCreating(false);
+  };
+
+  const handleSubmitEntry = async (challengeId: string, attempts: number, made: number) => {
+    const percentage = attempts > 0 ? Math.round((made / attempts) * 100) : 0;
+    const { error } = await supabase.from('challenge_entries').upsert({
+      challenge_id: challengeId,
+      player_id: user?.id,
+      attempts,
+      made,
+      percentage,
+    }, { onConflict: 'challenge_id,player_id' });
+    if (error) toast.error('שגיאה בשליחת תוצאות');
+    else { toast.success('תוצאות נשלחו!'); fetchChallenges(); }
+  };
+
+  const getZoneLabel = (zone: string | null) => {
+    if (!zone) return 'כל האזורים';
+    return ZONES.find(z => z.id === zone)?.label || zone;
+  };
+
+  const getMedalIcon = (index: number) => {
+    if (index === 0) return <Medal className="h-4 w-4 text-yellow-400" />;
+    if (index === 1) return <Medal className="h-4 w-4 text-gray-400" />;
+    if (index === 2) return <Medal className="h-4 w-4 text-amber-700" />;
+    return <span className="text-xs text-muted-foreground w-4 text-center">{index + 1}</span>;
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          {isCoach && (
+            <Button size="sm" onClick={() => setShowForm(!showForm)} className="gradient-accent text-accent-foreground">
+              <Plus className="ml-1 h-4 w-4" />
+              אתגר חדש
+            </Button>
+          )}
+        </div>
+        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+          <span>אתגרים שבועיים</span>
+          <Trophy className="h-5 w-5 text-accent" />
+        </h2>
+      </div>
+
+      {/* Create form */}
+      {showForm && isCoach && (
+        <div className="gradient-card rounded-xl p-4 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1 col-span-2">
+              <Label className="text-right block">כותרת האתגר</Label>
+              <Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder='לדוגמה: "אתגר שלשות השבוע"' className="text-right" />
+            </div>
+            <div className="space-y-1 col-span-2">
+              <Label className="text-right block">תיאור</Label>
+              <Input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="תיאור קצר של האתגר" className="text-right" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-right block">אזור</Label>
+              <Select value={form.zone} onValueChange={v => setForm({ ...form, zone: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">כל האזורים</SelectItem>
+                  {ZONES.map(z => <SelectItem key={z.id} value={z.id}>{z.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-right block">יעד אחוז קליעה</Label>
+              <Input type="number" value={form.target_percentage} onChange={e => setForm({ ...form, target_percentage: Number(e.target.value) })} min={1} max={100} />
+            </div>
+          </div>
+          <Button onClick={handleCreate} disabled={creating} className="w-full gradient-accent text-accent-foreground">
+            {creating ? 'יוצר...' : 'צור אתגר'}
+          </Button>
+        </div>
+      )}
+
+      {/* Challenges list */}
+      {challenges.length === 0 ? (
+        <div className="gradient-card rounded-xl p-6 text-center">
+          <Target className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">אין אתגרים פעילים כרגע</p>
+        </div>
+      ) : (
+        challenges.map(c => (
+          <ChallengeCard
+            key={c.id}
+            challenge={c}
+            entries={entries[c.id] || []}
+            isCoach={isCoach}
+            userId={user?.id}
+            getZoneLabel={getZoneLabel}
+            getMedalIcon={getMedalIcon}
+            onSubmitEntry={handleSubmitEntry}
+          />
+        ))
+      )}
+    </div>
+  );
+};
+
+// Individual challenge card component
+const ChallengeCard = ({
+  challenge, entries, isCoach, userId, getZoneLabel, getMedalIcon, onSubmitEntry
+}: {
+  challenge: any; entries: Entry[]; isCoach: boolean; userId?: string;
+  getZoneLabel: (z: string | null) => string; getMedalIcon: (i: number) => JSX.Element;
+  onSubmitEntry: (id: string, attempts: number, made: number) => void;
+}) => {
+  const [attempts, setAttempts] = useState('');
+  const [made, setMade] = useState('');
+  const myEntry = entries.find(e => e.player_id === userId);
+
+  return (
+    <div className="gradient-card rounded-xl p-4">
+      <div className="flex items-start justify-between mb-3">
+        <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent">
+          {getZoneLabel(challenge.zone)}
+        </span>
+        <div className="text-right">
+          <h3 className="font-semibold text-foreground">{challenge.title}</h3>
+          {challenge.description && <p className="text-xs text-muted-foreground">{challenge.description}</p>}
+          <p className="text-xs text-muted-foreground mt-1">
+            יעד: {challenge.target_percentage}% · {new Date(challenge.week_start).toLocaleDateString('he-IL')} - {new Date(challenge.week_end).toLocaleDateString('he-IL')}
+          </p>
+        </div>
+      </div>
+
+      {/* Leaderboard */}
+      {entries.length > 0 && (
+        <div className="rounded-lg bg-secondary p-3 mb-3">
+          <h4 className="text-xs font-medium text-muted-foreground text-right mb-2">טבלת מובילים</h4>
+          <div className="space-y-1.5">
+            {entries.map((e, i) => (
+              <div key={e.id} className="flex items-center justify-between text-sm">
+                <span className={`font-bold ${e.percentage >= challenge.target_percentage ? 'text-success' : 'text-foreground'}`}>
+                  {e.percentage}% ({e.made}/{e.attempts})
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-foreground">{e.player_name}</span>
+                  {getMedalIcon(i)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Submit entry (player only) */}
+      {!isCoach && (
+        <div className="flex gap-2 items-end">
+          <Button
+            size="sm"
+            onClick={() => onSubmitEntry(challenge.id, Number(attempts), Number(made))}
+            disabled={!attempts || !made}
+            className="gradient-accent text-accent-foreground shrink-0"
+          >
+            {myEntry ? 'עדכן' : 'שלח'}
+          </Button>
+          <div className="flex-1 space-y-1">
+            <Label className="text-xs text-right block">קלועות</Label>
+            <Input type="number" min={0} value={made} onChange={e => setMade(e.target.value)} className="h-8 text-right" placeholder={myEntry ? String(myEntry.made) : '0'} />
+          </div>
+          <div className="flex-1 space-y-1">
+            <Label className="text-xs text-right block">ניסיונות</Label>
+            <Input type="number" min={1} value={attempts} onChange={e => setAttempts(e.target.value)} className="h-8 text-right" placeholder={myEntry ? String(myEntry.attempts) : '0'} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default WeeklyChallenges;

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Plus, LogOut, Pencil, Video, Target } from 'lucide-react';
+import { ArrowRight, Plus, LogOut, Pencil, Video, Target, Trophy } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import ScheduleMeetingDialog from '@/components/ScheduleMeetingDialog';
 import NotificationBell from '@/components/NotificationBell';
@@ -62,6 +62,10 @@ const PlayerProfile = () => {
               <Button variant="outline" onClick={() => navigate('/shots')} className="text-muted-foreground">
                 <Target className="ml-2 h-4 w-4" />
                 מעקב קליעות
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/challenges')} className="text-muted-foreground">
+                <Trophy className="ml-2 h-4 w-4" />
+                אתגרים
               </Button>
               <NotificationBell />
               <Button variant="ghost" onClick={logout} className="text-muted-foreground">

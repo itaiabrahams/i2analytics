@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield } from 'lucide-react';
+import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Trophy } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
 import AddPlayerDialog from '@/components/AddPlayerDialog';
@@ -42,6 +42,10 @@ const CoachDashboard = () => {
             <Button variant="outline" onClick={() => navigate('/manage-users')} className="text-muted-foreground">
               <Shield className="ml-2 h-4 w-4" />
               ניהול משתמשים
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/challenges')} className="text-muted-foreground">
+              <Trophy className="ml-2 h-4 w-4" />
+              אתגרים
             </Button>
             <Button onClick={() => setAddPlayerOpen(true)} className="gradient-accent text-accent-foreground">
               <Plus className="ml-2 h-4 w-4" />

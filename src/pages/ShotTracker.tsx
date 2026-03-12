@@ -10,6 +10,8 @@ import { toast } from 'sonner';
 import BasketballCourt from '@/components/shots/BasketballCourt';
 import ShotInputDialog from '@/components/shots/ShotInputDialog';
 import ShotStats from '@/components/shots/ShotStats';
+import ShotProgressChart from '@/components/shots/ShotProgressChart';
+import VideoUpload from '@/components/shots/VideoUpload';
 import { ZoneId, ZoneStats, ZONES, ShotType, Element, FinishType } from '@/lib/shotZones';
 import { usePlayer } from '@/hooks/useSupabaseData';
 
@@ -223,6 +225,20 @@ const ShotTracker = () => {
           </div>
         )}
 
+        {/* Video upload for active session */}
+        {activeSessionId && (
+          <div className="mb-6">
+            <VideoUpload
+              sessionId={activeSessionId}
+              currentUrl={activeSession?.video_url || null}
+              playerId={id}
+              onUploaded={(url) => {
+                setSessions(prev => prev.map(s => s.id === activeSessionId ? { ...s, video_url: url } : s));
+              }}
+            />
+          </div>
+        )}
+
         {/* Session selector */}
         {sessions.length > 0 && (
           <div className="flex gap-2 mb-6 overflow-x-auto pb-2 justify-end">
@@ -259,6 +275,11 @@ const ShotTracker = () => {
                   <h3 className="font-semibold text-foreground text-right mb-2">סה"כ כל הסשנים</h3>
                   <ShotStats zoneStats={allTimeStats} />
                 </div>
+              )}
+
+              {/* Progress chart */}
+              {sessions.length > 1 && (
+                <ShotProgressChart sessions={sessions} allShots={allShots} />
               )}
             </div>
           </div>

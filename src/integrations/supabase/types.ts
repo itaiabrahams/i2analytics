@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenge_entries: {
+        Row: {
+          attempts: number | null
+          challenge_id: string
+          id: string
+          made: number | null
+          percentage: number | null
+          player_id: string
+          submitted_at: string
+          video_url: string | null
+        }
+        Insert: {
+          attempts?: number | null
+          challenge_id: string
+          id?: string
+          made?: number | null
+          percentage?: number | null
+          player_id: string
+          submitted_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          attempts?: number | null
+          challenge_id?: string
+          id?: string
+          made?: number | null
+          percentage?: number | null
+          player_id?: string
+          submitted_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_entries_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       game_actions: {
         Row: {
           created_at: string
@@ -85,6 +126,54 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      player_challenges: {
+        Row: {
+          challenged_attempts: number | null
+          challenged_id: string
+          challenged_made: number | null
+          challenger_attempts: number | null
+          challenger_id: string
+          challenger_made: number | null
+          created_at: string
+          expires_at: string
+          id: string
+          status: string
+          target_attempts: number | null
+          winner_id: string | null
+          zone: string | null
+        }
+        Insert: {
+          challenged_attempts?: number | null
+          challenged_id: string
+          challenged_made?: number | null
+          challenger_attempts?: number | null
+          challenger_id: string
+          challenger_made?: number | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          status?: string
+          target_attempts?: number | null
+          winner_id?: string | null
+          zone?: string | null
+        }
+        Update: {
+          challenged_attempts?: number | null
+          challenged_id?: string
+          challenged_made?: number | null
+          challenger_attempts?: number | null
+          challenger_id?: string
+          challenger_made?: number | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          status?: string
+          target_attempts?: number | null
+          winner_id?: string | null
+          zone?: string | null
         }
         Relationships: []
       }
@@ -338,6 +427,7 @@ export type Database = {
           player_id: string
           title: string
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           coach_id?: string | null
@@ -348,6 +438,7 @@ export type Database = {
           player_id: string
           title?: string
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           coach_id?: string | null
@@ -358,6 +449,7 @@ export type Database = {
           player_id?: string
           title?: string
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -420,6 +512,45 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      weekly_challenges: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          target_attempts: number | null
+          target_percentage: number | null
+          title: string
+          week_end: string
+          week_start: string
+          zone: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          target_attempts?: number | null
+          target_percentage?: number | null
+          title: string
+          week_end?: string
+          week_start?: string
+          zone?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          target_attempts?: number | null
+          target_percentage?: number | null
+          title?: string
+          week_end?: string
+          week_start?: string
+          zone?: string | null
         }
         Relationships: []
       }
