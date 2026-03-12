@@ -10,6 +10,8 @@ import { toast } from 'sonner';
 import BasketballCourt from '@/components/shots/BasketballCourt';
 import ShotInputDialog from '@/components/shots/ShotInputDialog';
 import ShotStats from '@/components/shots/ShotStats';
+import ShotProgressChart from '@/components/shots/ShotProgressChart';
+import VideoUpload from '@/components/shots/VideoUpload';
 import { ZoneId, ZoneStats, ZONES, ShotType, Element, FinishType } from '@/lib/shotZones';
 import { usePlayer } from '@/hooks/useSupabaseData';
 
