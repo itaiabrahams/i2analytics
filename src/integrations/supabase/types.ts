@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      game_actions: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          minute: number
+          quarter: number
+          score: number
+          session_id: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          minute: number
+          quarter: number
+          score?: number
+          session_id: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          minute?: number
+          quarter?: number
+          score?: number
+          session_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_actions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -218,6 +259,66 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      sessions: {
+        Row: {
+          assists: number
+          coach_id: string
+          coach_notes: string | null
+          created_at: string
+          date: string
+          fg_percentage: number
+          id: string
+          meeting_url: string | null
+          opponent: string
+          overall_score: number
+          player_id: string
+          points: number
+          rebounds: number
+          steals: number
+          turnovers: number
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          assists?: number
+          coach_id: string
+          coach_notes?: string | null
+          created_at?: string
+          date: string
+          fg_percentage?: number
+          id?: string
+          meeting_url?: string | null
+          opponent: string
+          overall_score?: number
+          player_id: string
+          points?: number
+          rebounds?: number
+          steals?: number
+          turnovers?: number
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          assists?: number
+          coach_id?: string
+          coach_notes?: string | null
+          created_at?: string
+          date?: string
+          fg_percentage?: number
+          id?: string
+          meeting_url?: string | null
+          opponent?: string
+          overall_score?: number
+          player_id?: string
+          points?: number
+          rebounds?: number
+          steals?: number
+          turnovers?: number
+          updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
       }
