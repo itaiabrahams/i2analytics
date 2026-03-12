@@ -54,7 +54,7 @@ const LoginPage = () => {
     if (result.error) {
       setError(result.error);
     } else {
-      setSuccess('ההרשמה הצליחה! בדוק את המייל שלך לאישור.');
+      setSuccess('ההרשמה הצליחה! חשבונך ממתין לאישור המאמן הראשי.');
     }
     setIsLoading(false);
   };
