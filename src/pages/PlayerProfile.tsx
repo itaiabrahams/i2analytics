@@ -9,6 +9,8 @@ import PlayerFormDialog from '@/components/PlayerFormDialog';
 import ScheduleMeetingDialog from '@/components/ScheduleMeetingDialog';
 import NotificationBell from '@/components/NotificationBell';
 import UpcomingMeetings from '@/components/UpcomingMeetings';
+import PlayerRatings from '@/components/PlayerRatings';
+import PlayerGoals from '@/components/PlayerGoals';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
@@ -149,6 +151,12 @@ const PlayerProfile = () => {
             </div>
           </div>
         )}
+
+        {/* Ratings & Goals */}
+        <div className="grid gap-4 md:grid-cols-2 mb-6">
+          <PlayerGoals playerId={id} isCoach={auth.role === 'coach'} />
+          <PlayerRatings playerId={id} isCoach={auth.role === 'coach'} />
+        </div>
 
         {/* Session history */}
         <div className="gradient-card rounded-xl p-4">
