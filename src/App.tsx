@@ -32,7 +32,7 @@ const AppRoutes = () => {
   }
 
   if (!role) {
-    return <LoginPage />;
+    return <LandingPage />;
   }
 
   if (!isApproved) {
