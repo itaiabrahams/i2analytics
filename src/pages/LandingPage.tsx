@@ -186,8 +186,8 @@ const LandingPage = () => {
 
               <div className="mb-8">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-foreground">₪149</span>
-                  <span className="text-muted-foreground text-sm">/ סשן</span>
+                   <span className="text-5xl font-black text-foreground">₪350</span>
+                   <span className="text-muted-foreground text-sm">/ סשן</span>
                 </div>
               </div>
 
@@ -226,19 +226,20 @@ const LandingPage = () => {
                   <Star className="h-6 w-6" />
                 </div>
                 <h3 className="text-2xl font-bold">מנוי חודשי</h3>
-                <p className="text-muted-foreground text-sm">ליווי שוטף שמביא לתוצאות — המסלול שהכי מקדם שחקנים</p>
+                <p className="text-muted-foreground text-sm">ליווי מלא עם 4-5 סשנים בחודש — המסלול שהכי מקדם שחקנים</p>
               </div>
 
               <div className="mb-8">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-accent">₪349</span>
+                  <span className="text-5xl font-black text-accent">₪1,500</span>
                   <span className="text-muted-foreground text-sm">/ חודש</span>
                 </div>
               </div>
 
               <ul className="space-y-3 mb-8 flex-1">
                 {[
-                  'ניתוח של עד 4 משחקים בחודש',
+                  '4-5 סשנים מלאים בחודש',
+                  'ליווי מאמן מלא ושוטף',
                   'סטטיסטיקות מתקדמות + גרפי התקדמות',
                   'פגישות וידאו שבועיות עם מאמן (45 דק׳)',
                   'הגדרת יעדים אישיים + מעקב התקדמות',
@@ -267,20 +268,22 @@ const LandingPage = () => {
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/20 text-warning">
                   <Crown className="h-6 w-6" />
                 </div>
-                <h3 className="text-2xl font-bold">פרימיום</h3>
-                <p className="text-muted-foreground text-sm">חבילה אינטנסיבית לשחקנים שרוצים להגיע לרמה הגבוהה ביותר</p>
+                <h3 className="text-2xl font-bold">מנוי עונתי</h3>
+                <p className="text-muted-foreground text-sm">מנוי לעונה שלמה במחיר מוזל — לשחקנים שמחויבים להתפתחות מקסימלית</p>
               </div>
 
               <div className="mb-8">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-foreground">₪599</span>
+                  <span className="text-5xl font-black text-foreground">₪1,250</span>
                   <span className="text-muted-foreground text-sm">/ חודש</span>
                 </div>
+                <p className="text-sm text-warning font-medium mt-2">חיסכון של ₪250 בחודש לעומת מנוי חודשי!</p>
               </div>
 
               <ul className="space-y-3 mb-8 flex-1">
                 {[
-                  'ניתוח ללא הגבלה של משחקים',
+                  'כל מה שכלול במנוי החודשי',
+                  'התחייבות לעונה שלמה = מחיר מוזל',
                   'סטטיסטיקות מתקדמות + השוואה עונתית',
                   'פגישות וידאו ללא הגבלה עם מאמן',
                   'יעדים + תוכנית פיתוח רבעונית',
@@ -301,7 +304,7 @@ const LandingPage = () => {
                 variant="outline"
                 className="w-full border-warning/50 text-warning hover:bg-warning hover:text-warning-foreground py-5 text-base font-semibold transition-all"
               >
-                הצטרף לפרימיום
+                הצטרף למנוי עונתי
               </Button>
             </div>
           </div>
