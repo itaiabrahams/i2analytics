@@ -96,6 +96,14 @@ export const store = {
     return parseFloat((ps.reduce((sum, s) => sum + s.overallScore, 0) / ps.length).toFixed(2));
   },
 
+  addPlayer: (player: Player) => {
+    players = [...players, player];
+  },
+
+  updatePlayer: (id: string, data: Partial<Omit<Player, 'id'>>) => {
+    players = players.map(p => p.id === id ? { ...p, ...data } : p);
+  },
+
   authenticateCoach: (password: string) => password === 'coach123',
   authenticatePlayer: (playerId: string, password: string) => {
     const player = players.find(p => p.id === playerId);
