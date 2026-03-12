@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus } from 'lucide-react';
 import PlayerFormDialog from '@/components/PlayerFormDialog';
+import NotificationBell from '@/components/NotificationBell';
 
 const CoachDashboard = () => {
   const { logout } = useAuth();
