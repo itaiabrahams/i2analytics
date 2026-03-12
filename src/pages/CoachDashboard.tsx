@@ -47,6 +47,10 @@ const CoachDashboard = () => {
               <Trophy className="ml-2 h-4 w-4" />
               אתגרים
             </Button>
+            <Button variant="outline" onClick={() => navigate('/leaderboard')} className="text-muted-foreground">
+              <BarChart3 className="ml-2 h-4 w-4" />
+              דירוג
+            </Button>
             <Button onClick={() => setAddPlayerOpen(true)} className="gradient-accent text-accent-foreground">
               <Plus className="ml-2 h-4 w-4" />
               הוסף שחקן
