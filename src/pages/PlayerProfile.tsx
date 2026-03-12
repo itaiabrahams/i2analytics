@@ -11,6 +11,9 @@ const PlayerProfile = () => {
   const { playerId } = useParams();
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
+  const [editOpen, setEditOpen] = useState(false);
+  const [, setRefresh] = useState(0);
+  const forceRefresh = useCallback(() => setRefresh(n => n + 1), []);
 
   const id = auth.role === 'player' ? auth.playerId! : playerId!;
   const player = store.getPlayer(id);
