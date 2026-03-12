@@ -1,14 +1,19 @@
+import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { store } from '@/lib/store';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Plus, LogOut } from 'lucide-react';
+import { ArrowRight, Plus, LogOut, Pencil } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import PlayerFormDialog from '@/components/PlayerFormDialog';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
+  const [editOpen, setEditOpen] = useState(false);
+  const [, setRefresh] = useState(0);
+  const forceRefresh = useCallback(() => setRefresh(n => n + 1), []);
 
   const id = auth.role === 'player' ? auth.playerId! : playerId!;
   const player = store.getPlayer(id);
@@ -56,10 +61,16 @@ const PlayerProfile = () => {
             </Button>
           )}
           {auth.role === 'coach' && (
-            <Button onClick={() => navigate(`/player/${id}/new-session`)} className="gradient-accent text-accent-foreground">
-              <Plus className="ml-2 h-4 w-4" />
-              סשן חדש
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setEditOpen(true)} className="text-muted-foreground">
+                <Pencil className="ml-2 h-4 w-4" />
+                ערוך שחקן
+              </Button>
+              <Button onClick={() => navigate(`/player/${id}/new-session`)} className="gradient-accent text-accent-foreground">
+                <Plus className="ml-2 h-4 w-4" />
+                סשן חדש
+              </Button>
+            </div>
           )}
         </div>
 
@@ -147,6 +158,9 @@ const PlayerProfile = () => {
             ))}
           </div>
         </div>
+        {auth.role === 'coach' && (
+          <PlayerFormDialog open={editOpen} onOpenChange={setEditOpen} player={player} onSaved={forceRefresh} />
+        )}
       </div>
     </div>
   );
