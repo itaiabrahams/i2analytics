@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { BarChart3, Video, Target, Users, TrendingUp, Shield, ChevronDown } from 'lucide-react';
+import { BarChart3, Video, Target, Users, TrendingUp, Shield, ChevronDown, Check, Star, Zap, Crown } from 'lucide-react';
 import LoginPage from './LoginPage';
 
 const LandingPage = () => {
@@ -159,7 +159,160 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* Pricing Section */}
+      <section className="py-24 px-6 md:px-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16 space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-sm text-accent font-medium">
+              <Star className="h-4 w-4" />
+              מחירון
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black">בחר את המסלול שמתאים לך</h2>
+            <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+              כל מסלול כולל ליווי מאמן מקצועי — ההבדל הוא בעומק הניתוח והתדירות
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 items-stretch">
+            {/* Single Session */}
+            <div className="relative rounded-2xl border border-border bg-card p-8 flex flex-col hover:border-muted-foreground/30 transition-all duration-300 group">
+              <div className="space-y-4 mb-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20 text-primary-foreground">
+                  <Zap className="h-6 w-6" />
+                </div>
+                <h3 className="text-2xl font-bold">סשן בודד</h3>
+                <p className="text-muted-foreground text-sm">מושלם לטעימה ראשונה או ניתוח ממוקד של משחק ספציפי</p>
+              </div>
+
+              <div className="mb-8">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-5xl font-black text-foreground">₪149</span>
+                  <span className="text-muted-foreground text-sm">/ סשן</span>
+                </div>
+              </div>
+
+              <ul className="space-y-3 mb-8 flex-1">
+                {[
+                  'ניתוח משחק אחד מלא',
+                  'סטטיסטיקות מפורטות של המשחק',
+                  'פגישת וידאו אישית עם מאמן (30 דק׳)',
+                  'דו"ח ביצועים מסכם',
+                  'המלצות לשיפור ממוקדות',
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm">
+                    <Check className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground">{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Button
+                onClick={() => setShowLogin(true)}
+                variant="outline"
+                className="w-full border-border hover:border-accent hover:text-accent py-5 text-base font-semibold transition-all"
+              >
+                נסה סשן אחד
+              </Button>
+            </div>
+
+            {/* Monthly - Featured */}
+            <div className="relative rounded-2xl border-2 border-accent bg-card p-8 flex flex-col shadow-2xl shadow-accent/10 scale-[1.02] md:scale-105">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground text-sm font-bold px-5 py-1.5 rounded-full shadow-lg">
+                הכי פופולרי ⭐
+              </div>
+
+              <div className="space-y-4 mb-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/20 text-accent">
+                  <Star className="h-6 w-6" />
+                </div>
+                <h3 className="text-2xl font-bold">מנוי חודשי</h3>
+                <p className="text-muted-foreground text-sm">ליווי שוטף שמביא לתוצאות — המסלול שהכי מקדם שחקנים</p>
+              </div>
+
+              <div className="mb-8">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-5xl font-black text-accent">₪349</span>
+                  <span className="text-muted-foreground text-sm">/ חודש</span>
+                </div>
+              </div>
+
+              <ul className="space-y-3 mb-8 flex-1">
+                {[
+                  'ניתוח של עד 4 משחקים בחודש',
+                  'סטטיסטיקות מתקדמות + גרפי התקדמות',
+                  'פגישות וידאו שבועיות עם מאמן (45 דק׳)',
+                  'הגדרת יעדים אישיים + מעקב התקדמות',
+                  'דירוגים תקופתיים מפורטים',
+                  'תוכנית אימון מותאמת אישית',
+                  'גישה מלאה לכל הכלים באפליקציה',
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm">
+                    <Check className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                    <span className="text-foreground">{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Button
+                onClick={() => setShowLogin(true)}
+                className="w-full bg-accent text-accent-foreground hover:bg-accent/90 py-5 text-base font-bold shadow-lg shadow-accent/25 transition-all"
+              >
+                התחל מנוי חודשי
+              </Button>
+            </div>
+
+            {/* Premium */}
+            <div className="relative rounded-2xl border border-border bg-gradient-to-b from-card to-secondary/30 p-8 flex flex-col hover:border-muted-foreground/30 transition-all duration-300 group">
+              <div className="space-y-4 mb-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/20 text-warning">
+                  <Crown className="h-6 w-6" />
+                </div>
+                <h3 className="text-2xl font-bold">פרימיום</h3>
+                <p className="text-muted-foreground text-sm">חבילה אינטנסיבית לשחקנים שרוצים להגיע לרמה הגבוהה ביותר</p>
+              </div>
+
+              <div className="mb-8">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-5xl font-black text-foreground">₪599</span>
+                  <span className="text-muted-foreground text-sm">/ חודש</span>
+                </div>
+              </div>
+
+              <ul className="space-y-3 mb-8 flex-1">
+                {[
+                  'ניתוח ללא הגבלה של משחקים',
+                  'סטטיסטיקות מתקדמות + השוואה עונתית',
+                  'פגישות וידאו ללא הגבלה עם מאמן',
+                  'יעדים + תוכנית פיתוח רבעונית',
+                  'דירוגים שבועיים מפורטים',
+                  'ניתוח וידאו מתקדם עם סימון פעולות',
+                  'עדיפות בתמיכה ובתזמון פגישות',
+                  'דוחות התקדמות חודשיים להורים',
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm">
+                    <Check className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground">{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Button
+                onClick={() => setShowLogin(true)}
+                variant="outline"
+                className="w-full border-warning/50 text-warning hover:bg-warning hover:text-warning-foreground py-5 text-base font-semibold transition-all"
+              >
+                הצטרף לפרימיום
+              </Button>
+            </div>
+          </div>
+
+          {/* Trust note */}
+          <p className="text-center text-muted-foreground text-sm mt-10">
+            ✦ ניתן לבטל מנוי בכל עת ללא התחייבות &nbsp;·&nbsp; ✦ תשלום מאובטח &nbsp;·&nbsp; ✦ החזר כספי מלא ב-7 הימים הראשונים
+          </p>
+        </div>
+      </section>
+
       <section className="py-24 px-6 md:px-12">
         <div className="max-w-3xl mx-auto text-center space-y-8">
           <h2 className="text-3xl md:text-5xl font-black">
