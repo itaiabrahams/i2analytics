@@ -276,6 +276,11 @@ const ShotTracker = () => {
                   <ShotStats zoneStats={allTimeStats} />
                 </div>
               )}
+
+              {/* Progress chart */}
+              {sessions.length > 1 && (
+                <ShotProgressChart sessions={sessions} allShots={allShots} />
+              )}
             </div>
           </div>
 
