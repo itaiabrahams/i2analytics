@@ -173,7 +173,10 @@ const PlayerProfile = () => {
           </div>
         </div>
         {auth.role === 'coach' && (
-          <PlayerFormDialog open={editOpen} onOpenChange={setEditOpen} player={player} onSaved={forceRefresh} />
+          <>
+            <PlayerFormDialog open={editOpen} onOpenChange={setEditOpen} player={player} onSaved={forceRefresh} />
+            <ScheduleMeetingDialog open={meetingOpen} onOpenChange={setMeetingOpen} playerId={id} playerName={player.name} />
+          </>
         )}
       </div>
     </div>
