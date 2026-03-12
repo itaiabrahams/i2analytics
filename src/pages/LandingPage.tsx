@@ -145,9 +145,9 @@ const LandingPage = () => {
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { step: '01', title: 'הירשם', desc: 'צור חשבון כמאמן או שחקן תוך שניות' },
-              { step: '02', title: 'הוסף משחקים', desc: 'תעד את הפעולות במשחק בזמן אמת' },
-              { step: '03', title: 'התקדם', desc: 'עקוב אחרי ההתפתחות והגדר יעדים חדשים' },
+              { step: '01', title: 'הירשם', desc: 'צור חשבון תוך שניות — לאחר ההרשמה תעבור אישור מהמאמן שלך' },
+              { step: '02', title: 'קבל ליווי אישי', desc: 'מאמן אמיתי מלווה אותך לאורך כל הדרך — ניתוח משחקים, משוב ויעדים' },
+              { step: '03', title: 'התקדם', desc: 'עקוב אחרי ההתפתחות שלך עם סטטיסטיקות, דירוגים ותוכנית אימון מותאמת' },
             ].map((item, i) => (
               <div key={i} className="space-y-4">
                 <span className="text-5xl font-black text-accent/20">{item.step}</span>
