@@ -59,13 +59,20 @@ const PlayerProfile = () => {
               <ArrowRight className="mr-2 h-4 w-4" />
             </Button>
           ) : (
-            <Button variant="ghost" onClick={logout} className="text-muted-foreground">
-              <LogOut className="ml-2 h-4 w-4" />
-              יציאה
-            </Button>
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+              <Button variant="ghost" onClick={logout} className="text-muted-foreground">
+                <LogOut className="ml-2 h-4 w-4" />
+                יציאה
+              </Button>
+            </div>
           )}
           {auth.role === 'coach' && (
             <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setMeetingOpen(true)} className="text-muted-foreground">
+                <Video className="ml-2 h-4 w-4" />
+                תזמן פגישה
+              </Button>
               <Button variant="outline" onClick={() => setEditOpen(true)} className="text-muted-foreground">
                 <Pencil className="ml-2 h-4 w-4" />
                 ערוך שחקן
