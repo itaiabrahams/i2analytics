@@ -149,6 +149,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          is_approved: boolean
           position: string | null
           role: Database["public"]["Enums"]["app_role"]
           team: string | null
@@ -160,6 +161,7 @@ export type Database = {
           created_at?: string
           display_name: string
           id?: string
+          is_approved?: boolean
           position?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           team?: string | null
@@ -171,6 +173,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          is_approved?: boolean
           position?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           team?: string | null
@@ -248,6 +251,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_head_coach: { Args: { _user_id: string }; Returns: boolean }
+      is_user_approved: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "coach" | "player"
