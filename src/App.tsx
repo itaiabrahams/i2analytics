@@ -13,6 +13,7 @@ import NewSession from "./pages/NewSession";
 import UserManagement from "./pages/UserManagement";
 import ShotTracker from "./pages/ShotTracker";
 import ChallengesPage from "./pages/ChallengesPage";
+import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ const AppRoutes = () => {
         <Route path="/manage-users" element={<UserManagement />} />
         <Route path="/challenges" element={<ChallengesPage />} />
         <Route path="/player/:playerId/challenges" element={<ChallengesPage />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
