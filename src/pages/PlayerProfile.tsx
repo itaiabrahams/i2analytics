@@ -158,6 +158,9 @@ const PlayerProfile = () => {
             ))}
           </div>
         </div>
+        {auth.role === 'coach' && (
+          <PlayerFormDialog open={editOpen} onOpenChange={setEditOpen} player={player} onSaved={forceRefresh} />
+        )}
       </div>
     </div>
   );
