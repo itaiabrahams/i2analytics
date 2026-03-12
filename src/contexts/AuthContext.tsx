@@ -8,7 +8,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: UserRole | null;
-  profile: { display_name: string; team?: string; position?: string; age?: number } | null;
+  profile: { display_name: string; team?: string; position?: string; age?: number; is_approved?: boolean } | null;
+  isApproved: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
   signup: (email: string, password: string, displayName: string, role: UserRole) => Promise<{ error?: string }>;
@@ -24,17 +25,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
   const [profile, setProfile] = useState<AuthContextType['profile']>(null);
+  const [isApproved, setIsApproved] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
       .from('profiles')
-      .select('display_name, role, team, position, age')
+      .select('display_name, role, team, position, age, is_approved')
       .eq('user_id', userId)
       .single();
     if (data) {
       setRole(data.role as UserRole);
-      setProfile({ display_name: data.display_name, team: data.team ?? undefined, position: data.position ?? undefined, age: data.age ?? undefined });
+      setIsApproved(data.is_approved ?? false);
+      setProfile({
+        display_name: data.display_name,
+        team: data.team ?? undefined,
+        position: data.position ?? undefined,
+        age: data.age ?? undefined,
+        is_approved: data.is_approved ?? false,
+      });
     }
   };
 
@@ -43,11 +52,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) {
-        // Use setTimeout to avoid Supabase deadlock
         setTimeout(() => fetchProfile(sess.user.id), 0);
       } else {
         setRole(null);
         setProfile(null);
+        setIsApproved(false);
       }
       setLoading(false);
     });
@@ -89,13 +98,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setSession(null);
     setRole(null);
     setProfile(null);
+    setIsApproved(false);
   };
 
-  // Legacy compat
   const auth = { role, playerId: user?.id ?? null };
 
   return (
-    <AuthContext.Provider value={{ user, session, role, profile, loading, login, signup, logout, auth }}>
+    <AuthContext.Provider value={{ user, session, role, profile, isApproved, loading, login, signup, logout, auth }}>
       {children}
     </AuthContext.Provider>
   );
