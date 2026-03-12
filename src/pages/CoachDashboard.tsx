@@ -44,6 +44,7 @@ const CoachDashboard = () => {
               <Users className="h-5 w-5 text-accent" />
               <span className="font-semibold text-foreground">{players.length} שחקנים</span>
             </div>
+            <NotificationBell />
             <Button variant="ghost" onClick={logout} className="text-muted-foreground hover:text-foreground">
               <LogOut className="ml-2 h-4 w-4" />
               יציאה
