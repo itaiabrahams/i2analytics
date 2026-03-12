@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Trophy, BarChart3 } from 'lucide-react';
+import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
 import AddPlayerDialog from '@/components/AddPlayerDialog';
