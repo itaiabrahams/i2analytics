@@ -11,6 +11,7 @@ import PlayerProfile from "./pages/PlayerProfile";
 import SessionDetail from "./pages/SessionDetail";
 import NewSession from "./pages/NewSession";
 import UserManagement from "./pages/UserManagement";
+import ShotTracker from "./pages/ShotTracker";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
