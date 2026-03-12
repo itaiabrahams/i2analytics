@@ -23,7 +23,7 @@ const AppRoutes = () => {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl gradient-accent animate-pulse">
-            <span className="text-2xl font-black text-accent-foreground">I&I</span>
+            <span className="text-2xl font-black text-accent-foreground">I²</span>
           </div>
           <p className="text-muted-foreground">טוען...</p>
         </div>

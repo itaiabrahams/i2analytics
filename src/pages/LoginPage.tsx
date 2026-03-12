@@ -65,9 +65,9 @@ const LoginPage = () => {
         {/* Logo */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl gradient-accent">
-            <span className="text-3xl font-black text-accent-foreground">I&I</span>
+            <span className="text-3xl font-black text-accent-foreground">I²</span>
           </div>
-          <h1 className="text-3xl font-bold text-foreground">I&I Analytics & Video</h1>
+          <h1 className="text-3xl font-bold text-foreground">I² Analytics & Video</h1>
           <p className="mt-2 text-muted-foreground">ניתוח וידאו מקצועי לשחקני כדורסל</p>
         </div>
 
