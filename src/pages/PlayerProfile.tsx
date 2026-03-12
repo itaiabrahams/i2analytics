@@ -1,54 +1,51 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { store } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Plus, LogOut, Pencil, Video } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import PlayerFormDialog from '@/components/PlayerFormDialog';
 import ScheduleMeetingDialog from '@/components/ScheduleMeetingDialog';
 import NotificationBell from '@/components/NotificationBell';
 import UpcomingMeetings from '@/components/UpcomingMeetings';
 import PlayerRatings from '@/components/PlayerRatings';
 import PlayerGoals from '@/components/PlayerGoals';
+import { usePlayer, usePlayerSessions, usePlayerAvgScore } from '@/hooks/useSupabaseData';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
-  const [editOpen, setEditOpen] = useState(false);
   const [meetingOpen, setMeetingOpen] = useState(false);
-  const [, setRefresh] = useState(0);
-  const forceRefresh = useCallback(() => setRefresh(n => n + 1), []);
 
   const id = auth.role === 'player' ? auth.playerId! : playerId!;
-  const player = store.getPlayer(id);
-  const sessions = store.getPlayerSessions(id).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const { player, loading: playerLoading } = usePlayer(id);
+  const { sessions, loading: sessionsLoading } = usePlayerSessions(id);
+  const avgScore = usePlayerAvgScore(id);
+
+  if (playerLoading || sessionsLoading) {
+    return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
+  }
 
   if (!player) return <div className="p-8 text-center text-foreground">שחקן לא נמצא</div>;
 
   // Aggregate stats
-  const totalActions = sessions.reduce((s, ses) => s + ses.actions.length, 0);
-  const positiveActions = sessions.reduce((s, ses) => s + ses.actions.filter(a => a.score === 1).length, 0);
-  const negativeActions = sessions.reduce((s, ses) => s + ses.actions.filter(a => a.score === -1).length, 0);
-  const improvementPct = sessions.length >= 2
-    ? (((sessions[sessions.length - 1].overallScore - sessions[0].overallScore) / Math.abs(sessions[0].overallScore || 1)) * 100).toFixed(0)
-    : '0';
+  const totalSessions = sessions.length;
+  const avgPoints = totalSessions > 0 ? (sessions.reduce((s, ses) => s + ses.points, 0) / totalSessions).toFixed(1) : '0';
+  const avgAssists = totalSessions > 0 ? (sessions.reduce((s, ses) => s + ses.assists, 0) / totalSessions).toFixed(1) : '0';
+  const avgRebounds = totalSessions > 0 ? (sessions.reduce((s, ses) => s + ses.rebounds, 0) / totalSessions).toFixed(1) : '0';
 
   const progressData = sessions.map(s => ({
     date: new Date(s.date).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit' }),
-    score: parseFloat(s.overallScore.toFixed(2)),
+    score: Number(s.overall_score),
   }));
 
   const statsData = sessions.map(s => ({
     date: new Date(s.date).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit' }),
-    נקודות: s.gameStats.points,
-    אסיסטים: s.gameStats.assists,
-    ריבאונדים: s.gameStats.rebounds,
-    טורנוברים: s.gameStats.turnovers,
+    נקודות: s.points,
+    אסיסטים: s.assists,
+    ריבאונדים: s.rebounds,
+    טורנוברים: s.turnovers,
   }));
-
-  const avgScore = store.getPlayerAvgScore(id);
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -75,10 +72,6 @@ const PlayerProfile = () => {
                 <Video className="ml-2 h-4 w-4" />
                 תזמן פגישה
               </Button>
-              <Button variant="outline" onClick={() => setEditOpen(true)} className="text-muted-foreground">
-                <Pencil className="ml-2 h-4 w-4" />
-                ערוך שחקן
-              </Button>
               <Button onClick={() => navigate(`/player/${id}/new-session`)} className="gradient-accent text-accent-foreground">
                 <Plus className="ml-2 h-4 w-4" />
                 סשן חדש
@@ -95,7 +88,7 @@ const PlayerProfile = () => {
               <p className="text-xs text-muted-foreground">ציון ממוצע</p>
             </div>
             <div className="text-right">
-              <h1 className="text-3xl font-bold text-foreground">{player.name}</h1>
+              <h1 className="text-3xl font-bold text-foreground">{player.display_name}</h1>
               <p className="text-muted-foreground">{player.position} · גיל {player.age} · {player.team}</p>
             </div>
           </div>
@@ -107,10 +100,10 @@ const PlayerProfile = () => {
         {/* Aggregate stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'סה"כ פעולות', value: totalActions, color: 'text-foreground' },
-            { label: 'פעולות חיוביות', value: positiveActions, color: 'text-success' },
-            { label: 'פעולות שליליות', value: negativeActions, color: 'text-destructive' },
-            { label: '% שיפור', value: `${improvementPct}%`, color: 'text-accent' },
+            { label: 'סה"כ סשנים', value: totalSessions, color: 'text-foreground' },
+            { label: 'ממוצע נקודות', value: avgPoints, color: 'text-success' },
+            { label: 'ממוצע אסיסטים', value: avgAssists, color: 'text-accent' },
+            { label: 'ממוצע ריבאונדים', value: avgRebounds, color: 'text-accent' },
           ].map((stat, i) => (
             <div key={i} className="gradient-card rounded-xl p-4 text-center animate-fade-in" style={{ animationDelay: `${i * 80}ms` }}>
               <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
@@ -162,29 +155,30 @@ const PlayerProfile = () => {
         <div className="gradient-card rounded-xl p-4">
           <h3 className="mb-4 text-right font-semibold text-foreground">היסטוריית סשנים</h3>
           <div className="space-y-2">
-            {[...sessions].reverse().map((s, i) => (
-              <button
-                key={s.id}
-                onClick={() => navigate(`/session/${s.id}`)}
-                className="w-full rounded-lg bg-secondary p-4 text-right transition-colors hover:bg-muted animate-fade-in flex items-center justify-between"
-                style={{ animationDelay: `${i * 50}ms` }}
-              >
-                <span className={`text-xl font-bold ${s.overallScore > 0 ? 'text-success' : s.overallScore < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                  {s.overallScore.toFixed(2)}
-                </span>
-                <div>
-                  <p className="font-medium text-foreground">נגד {s.opponent}</p>
-                  <p className="text-sm text-muted-foreground">{new Date(s.date).toLocaleDateString('he-IL')} · {s.actions.length} פעולות</p>
-                </div>
-              </button>
-            ))}
+            {sessions.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">אין סשנים עדיין</p>
+            ) : (
+              [...sessions].reverse().map((s, i) => (
+                <button
+                  key={s.id}
+                  onClick={() => navigate(`/session/${s.id}`)}
+                  className="w-full rounded-lg bg-secondary p-4 text-right transition-colors hover:bg-muted animate-fade-in flex items-center justify-between"
+                  style={{ animationDelay: `${i * 50}ms` }}
+                >
+                  <span className={`text-xl font-bold ${Number(s.overall_score) > 0 ? 'text-success' : Number(s.overall_score) < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                    {Number(s.overall_score).toFixed(2)}
+                  </span>
+                  <div>
+                    <p className="font-medium text-foreground">נגד {s.opponent}</p>
+                    <p className="text-sm text-muted-foreground">{new Date(s.date).toLocaleDateString('he-IL')}</p>
+                  </div>
+                </button>
+              ))
+            )}
           </div>
         </div>
         {auth.role === 'coach' && (
-          <>
-            <PlayerFormDialog open={editOpen} onOpenChange={setEditOpen} player={player} onSaved={forceRefresh} />
-            <ScheduleMeetingDialog open={meetingOpen} onOpenChange={setMeetingOpen} playerId={id} playerName={player.name} />
-          </>
+          <ScheduleMeetingDialog open={meetingOpen} onOpenChange={setMeetingOpen} playerId={id} playerName={player.display_name} />
         )}
       </div>
     </div>
