@@ -1,7 +1,36 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { BarChart3, Video, Target, Users, TrendingUp, Shield, ChevronDown, Check, Star, Zap, Crown } from 'lucide-react';
 import LoginPage from './LoginPage';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+  }),
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: (i: number = 0) => ({
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.5, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+  }),
+};
+
+function AnimatedSection({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-80px' });
+  return (
+    <div ref={ref} className={className}>
+      {isInView ? children : <div style={{ opacity: 0 }}>{children}</div>}
+    </div>
+  );
+}
 
 const LandingPage = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -15,7 +44,12 @@ const LandingPage = () => {
       {/* Hero Section */}
       <header className="relative min-h-screen flex flex-col">
         {/* Nav */}
-        <nav className="flex items-center justify-between px-6 py-4 md:px-12">
+        <motion.nav
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center justify-between px-6 py-4 md:px-12"
+        >
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
               <span className="text-lg font-black text-accent-foreground">I²</span>
@@ -29,28 +63,52 @@ const LandingPage = () => {
           >
             התחברות
           </Button>
-        </nav>
+        </motion.nav>
 
         {/* Hero Content */}
         <div className="flex-1 flex items-center justify-center px-6 md:px-12">
           <div className="max-w-4xl text-center space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/50 px-4 py-1.5 text-sm text-muted-foreground">
+            <motion.div
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+              custom={0}
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/50 px-4 py-1.5 text-sm text-muted-foreground"
+            >
               <TrendingUp className="h-4 w-4 text-accent" />
               פלטפורמת ניתוח ביצועים לכדורסל
-            </div>
+            </motion.div>
 
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-tight">
+            <motion.h1
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+              custom={1}
+              className="text-4xl md:text-6xl lg:text-7xl font-black leading-tight"
+            >
               קח את המשחק שלך
               <br />
               <span className="text-accent">לרמה הבאה</span>
-            </h1>
+            </motion.h1>
 
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <motion.p
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+              custom={2}
+              className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+            >
               I² Analytics היא פלטפורמה מקצועית לניתוח משחקי כדורסל, מעקב ביצועים והגדרת יעדים — 
               מותאמת במיוחד לשחקנים צעירים ומאמנים שרוצים להתפתח.
-            </p>
+            </motion.p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <motion.div
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+              custom={3}
+              className="flex flex-col sm:flex-row gap-4 justify-center"
+            >
               <Button
                 size="lg"
                 onClick={() => setShowLogin(true)}
@@ -67,7 +125,7 @@ const LandingPage = () => {
                 גלה עוד
                 <ChevronDown className="h-5 w-5 mr-2" />
               </Button>
-            </div>
+            </motion.div>
           </div>
         </div>
 
@@ -79,69 +137,88 @@ const LandingPage = () => {
 
       {/* Features Section */}
       <section id="features" className="py-24 px-6 md:px-12">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-3xl md:text-4xl font-black">הכל במקום אחד</h2>
-            <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-              כלים מקצועיים שעוזרים למאמנים ולשחקנים להתקדם ביחד
-            </p>
-          </div>
+        <AnimatedSection>
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-center mb-16 space-y-4"
+            >
+              <h2 className="text-3xl md:text-4xl font-black">הכל במקום אחד</h2>
+              <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+                כלים מקצועיים שעוזרים למאמנים ולשחקנים להתקדם ביחד
+              </p>
+            </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                icon: Video,
-                title: 'ניתוח משחקים',
-                desc: 'תיעוד פעולות בזמן אמת — נקודות, ריבאונדים, אסיסטים, חטיפות ועוד. כל משחק מתועד בפירוט מלא.',
-              },
-              {
-                icon: BarChart3,
-                title: 'סטטיסטיקות מתקדמות',
-                desc: 'גרפים ותרשימים שמציגים את ההתפתחות לאורך זמן — אחוזי קליעה, מגמות ביצועים וניקוד כולל.',
-              },
-              {
-                icon: Target,
-                title: 'יעדים אישיים',
-                desc: 'הגדרת מטרות בקטגוריות שונות — התקפה, הגנה, כושר גופני — עם מעקב התקדמות בזמן אמת.',
-              },
-              {
-                icon: Users,
-                title: 'ניהול שחקנים',
-                desc: 'פאנל ניהול מלא למאמנים — צפייה בכל השחקנים, אישור משתמשים חדשים ומעקב צוותי.',
-              },
-              {
-                icon: TrendingUp,
-                title: 'דירוגים תקופתיים',
-                desc: 'דירוג שחקנים בקטגוריות שונות — התקפה, הגנה, מאמץ ועבודת צוות — עם הערות מאמן.',
-              },
-              {
-                icon: Shield,
-                title: 'פגישות וידאו',
-                desc: 'תיאום פגישות וידאו בין מאמנים לשחקנים ישירות מהאפליקציה — לתחקור, משוב ותכנון.',
-              },
-            ].map((feature, i) => (
-              <div
-                key={i}
-                className="group rounded-2xl border border-border bg-card p-6 space-y-4 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/5 transition-all duration-300"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
-                  <feature.icon className="h-6 w-6" />
-                </div>
-                <h3 className="text-xl font-bold">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{feature.desc}</p>
-              </div>
-            ))}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: Video,
+                  title: 'ניתוח משחקים',
+                  desc: 'תיעוד פעולות בזמן אמת — נקודות, ריבאונדים, אסיסטים, חטיפות ועוד. כל משחק מתועד בפירוט מלא.',
+                },
+                {
+                  icon: BarChart3,
+                  title: 'סטטיסטיקות מתקדמות',
+                  desc: 'גרפים ותרשימים שמציגים את ההתפתחות לאורך זמן — אחוזי קליעה, מגמות ביצועים וניקוד כולל.',
+                },
+                {
+                  icon: Target,
+                  title: 'יעדים אישיים',
+                  desc: 'הגדרת מטרות בקטגוריות שונות — התקפה, הגנה, כושר גופני — עם מעקב התקדמות בזמן אמת.',
+                },
+                {
+                  icon: Users,
+                  title: 'ניהול שחקנים',
+                  desc: 'פאנל ניהול מלא למאמנים — צפייה בכל השחקנים, אישור משתמשים חדשים ומעקב צוותי.',
+                },
+                {
+                  icon: TrendingUp,
+                  title: 'דירוגים תקופתיים',
+                  desc: 'דירוג שחקנים בקטגוריות שונות — התקפה, הגנה, מאמץ ועבודת צוות — עם הערות מאמן.',
+                },
+                {
+                  icon: Shield,
+                  title: 'פגישות וידאו',
+                  desc: 'תיאום פגישות וידאו בין מאמנים לשחקנים ישירות מהאפליקציה — לתחקור, משוב ותכנון.',
+                },
+              ].map((feature, i) => (
+                <motion.div
+                  key={i}
+                  variants={scaleIn}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  custom={i}
+                  className="group rounded-2xl border border-border bg-card p-6 space-y-4 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/5 transition-all duration-300"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
+                    <feature.icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-xl font-bold">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{feature.desc}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
+        </AnimatedSection>
       </section>
 
       {/* How it works */}
       <section className="py-24 px-6 md:px-12 bg-secondary/30">
         <div className="max-w-4xl mx-auto text-center space-y-16">
-          <div className="space-y-4">
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="space-y-4"
+          >
             <h2 className="text-3xl md:text-4xl font-black">איך זה עובד?</h2>
             <p className="text-muted-foreground text-lg">שלושה צעדים פשוטים להתחלה</p>
-          </div>
+          </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
@@ -149,11 +226,19 @@ const LandingPage = () => {
               { step: '02', title: 'קבל ליווי אישי', desc: 'מאמן אמיתי מלווה אותך לאורך כל הדרך — ניתוח משחקים, משוב ויעדים' },
               { step: '03', title: 'התקדם', desc: 'עקוב אחרי ההתפתחות שלך עם סטטיסטיקות, דירוגים ותוכנית אימון מותאמת' },
             ].map((item, i) => (
-              <div key={i} className="space-y-4">
+              <motion.div
+                key={i}
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                custom={i}
+                className="space-y-4"
+              >
                 <span className="text-5xl font-black text-accent/20">{item.step}</span>
                 <h3 className="text-xl font-bold">{item.title}</h3>
                 <p className="text-muted-foreground">{item.desc}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -162,7 +247,13 @@ const LandingPage = () => {
       {/* Pricing Section */}
       <section className="py-24 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16 space-y-4">
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="text-center mb-16 space-y-4"
+          >
             <div className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-sm text-accent font-medium">
               <Star className="h-4 w-4" />
               מחירון
@@ -171,11 +262,18 @@ const LandingPage = () => {
             <p className="text-muted-foreground text-lg max-w-xl mx-auto">
               כל מסלול כולל ליווי מאמן מקצועי — ההבדל הוא בעומק הניתוח והתדירות
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6 items-stretch">
             {/* Single Session */}
-            <div className="relative rounded-2xl border border-border bg-card p-8 flex flex-col hover:border-muted-foreground/30 transition-all duration-300 group">
+            <motion.div
+              variants={scaleIn}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              custom={0}
+              className="relative rounded-2xl border border-border bg-card p-8 flex flex-col hover:border-muted-foreground/30 transition-all duration-300 group"
+            >
               <div className="space-y-4 mb-8">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20 text-primary-foreground">
                   <Zap className="h-6 w-6" />
@@ -213,10 +311,17 @@ const LandingPage = () => {
               >
                 נסה סשן אחד
               </Button>
-            </div>
+            </motion.div>
 
             {/* Monthly - Featured */}
-            <div className="relative rounded-2xl border-2 border-accent bg-card p-8 flex flex-col shadow-2xl shadow-accent/10 scale-[1.02] md:scale-105">
+            <motion.div
+              variants={scaleIn}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              custom={1}
+              className="relative rounded-2xl border-2 border-accent bg-card p-8 flex flex-col shadow-2xl shadow-accent/10 scale-[1.02] md:scale-105"
+            >
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground text-sm font-bold px-5 py-1.5 rounded-full shadow-lg">
                 הכי פופולרי ⭐
               </div>
@@ -260,10 +365,17 @@ const LandingPage = () => {
               >
                 התחל מנוי חודשי
               </Button>
-            </div>
+            </motion.div>
 
-            {/* Premium */}
-            <div className="relative rounded-2xl border border-border bg-gradient-to-b from-card to-secondary/30 p-8 flex flex-col hover:border-muted-foreground/30 transition-all duration-300 group">
+            {/* Seasonal */}
+            <motion.div
+              variants={scaleIn}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              custom={2}
+              className="relative rounded-2xl border border-border bg-gradient-to-b from-card to-secondary/30 p-8 flex flex-col hover:border-muted-foreground/30 transition-all duration-300 group"
+            >
               <div className="space-y-4 mb-8">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/20 text-warning">
                   <Crown className="h-6 w-6" />
@@ -306,17 +418,30 @@ const LandingPage = () => {
               >
                 הצטרף למנוי עונתי
               </Button>
-            </div>
+            </motion.div>
           </div>
 
           {/* Trust note */}
-          <p className="text-center text-muted-foreground text-sm mt-10">
+          <motion.p
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="text-center text-muted-foreground text-sm mt-10"
+          >
             ✦ ניתן לבטל מנוי בכל עת ללא התחייבות &nbsp;·&nbsp; ✦ תשלום מאובטח &nbsp;·&nbsp; ✦ החזר כספי מלא ב-7 הימים הראשונים
-          </p>
+          </motion.p>
         </div>
       </section>
 
-      <section className="py-24 px-6 md:px-12">
+      {/* CTA */}
+      <motion.section
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        className="py-24 px-6 md:px-12"
+      >
         <div className="max-w-3xl mx-auto text-center space-y-8">
           <h2 className="text-3xl md:text-5xl font-black">
             מוכן להתחיל?
@@ -332,7 +457,7 @@ const LandingPage = () => {
             הצטרף עכשיו
           </Button>
         </div>
-      </section>
+      </motion.section>
 
       {/* Footer */}
       <footer className="border-t border-border py-8 px-6 md:px-12">
