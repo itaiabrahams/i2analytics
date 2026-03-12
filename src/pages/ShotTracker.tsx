@@ -133,6 +133,15 @@ const ShotTracker = () => {
               </SheetContent>
             </Sheet>
             <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/leaderboard')}
+              className="text-accent border-accent/30"
+            >
+              <BarChart3 className="ml-1 h-4 w-4" />
+              דירוג
+            </Button>
+            <Button
               variant={showHeatMap ? 'default' : 'outline'}
               size="sm"
               onClick={() => setShowHeatMap(!showHeatMap)}
