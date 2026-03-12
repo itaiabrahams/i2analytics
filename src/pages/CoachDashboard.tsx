@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { store } from '@/lib/store';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus } from 'lucide-react';
+import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield } from 'lucide-react';
 import PlayerFormDialog from '@/components/PlayerFormDialog';
 import NotificationBell from '@/components/NotificationBell';
 
@@ -35,10 +35,14 @@ const CoachDashboard = () => {
             <h1 className="text-3xl font-bold text-foreground">לוח בקרה</h1>
             <p className="text-muted-foreground">ניהול שחקנים וסשנים</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
             <Button onClick={() => setDialogOpen(true)} className="gradient-accent text-accent-foreground">
               <Plus className="ml-2 h-4 w-4" />
               שחקן חדש
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/manage-users')} className="text-muted-foreground">
+              <Shield className="ml-2 h-4 w-4" />
+              ניהול משתמשים
             </Button>
             <div className="flex items-center gap-2 rounded-lg bg-card px-4 py-2">
               <Users className="h-5 w-5 text-accent" />
