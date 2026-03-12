@@ -225,6 +225,20 @@ const ShotTracker = () => {
           </div>
         )}
 
+        {/* Video upload for active session */}
+        {activeSessionId && (
+          <div className="mb-6">
+            <VideoUpload
+              sessionId={activeSessionId}
+              currentUrl={activeSession?.video_url || null}
+              playerId={id}
+              onUploaded={(url) => {
+                setSessions(prev => prev.map(s => s.id === activeSessionId ? { ...s, video_url: url } : s));
+              }}
+            />
+          </div>
+        )}
+
         {/* Session selector */}
         {sessions.length > 0 && (
           <div className="flex gap-2 mb-6 overflow-x-auto pb-2 justify-end">
