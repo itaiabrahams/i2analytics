@@ -63,6 +63,12 @@ const PlayerProfile = () => {
                 <Target className="ml-2 h-4 w-4" />
                 מעקב קליעות
               </Button>
+              <Button variant="outline" onClick={() => navigate('/challenges')} className="text-muted-foreground">
+                <Trophy className="ml-2 h-4 w-4" />
+                אתגרים
+              </Button>
+                מעקב קליעות
+              </Button>
               <NotificationBell />
               <Button variant="ghost" onClick={logout} className="text-muted-foreground">
                 <LogOut className="ml-2 h-4 w-4" />
