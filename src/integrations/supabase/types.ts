@@ -47,6 +47,102 @@ export type Database = {
         }
         Relationships: []
       }
+      player_goals: {
+        Row: {
+          category: string
+          coach_id: string
+          created_at: string
+          description: string | null
+          id: string
+          player_id: string
+          progress: number
+          progress_notes: string | null
+          status: string
+          target_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          coach_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          player_id: string
+          progress?: number
+          progress_notes?: string | null
+          status?: string
+          target_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          coach_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          player_id?: string
+          progress?: number
+          progress_notes?: string | null
+          status?: string
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      player_ratings: {
+        Row: {
+          coach_id: string
+          created_at: string
+          defense_rating: number
+          effort_rating: number
+          id: string
+          notes: string | null
+          offense_rating: number
+          overall_rating: number
+          period_end: string
+          period_start: string
+          period_type: string
+          player_id: string
+          teamwork_rating: number
+          updated_at: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          defense_rating?: number
+          effort_rating?: number
+          id?: string
+          notes?: string | null
+          offense_rating?: number
+          overall_rating?: number
+          period_end: string
+          period_start: string
+          period_type?: string
+          player_id: string
+          teamwork_rating?: number
+          updated_at?: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          defense_rating?: number
+          effort_rating?: number
+          id?: string
+          notes?: string | null
+          offense_rating?: number
+          overall_rating?: number
+          period_end?: string
+          period_start?: string
+          period_type?: string
+          player_id?: string
+          teamwork_rating?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
