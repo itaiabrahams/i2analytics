@@ -152,6 +152,12 @@ const PlayerProfile = () => {
           </div>
         )}
 
+        {/* Ratings & Goals */}
+        <div className="grid gap-4 md:grid-cols-2 mb-6">
+          <PlayerGoals playerId={id} isCoach={auth.role === 'coach'} />
+          <PlayerRatings playerId={id} isCoach={auth.role === 'coach'} />
+        </div>
+
         {/* Session history */}
         <div className="gradient-card rounded-xl p-4">
           <h3 className="mb-4 text-right font-semibold text-foreground">היסטוריית סשנים</h3>
