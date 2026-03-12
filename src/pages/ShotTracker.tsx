@@ -118,6 +118,20 @@ const ShotTracker = () => {
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="text-accent border-accent/30">
+                  <Trophy className="ml-1 h-4 w-4" />
+                  אתגרים
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-full sm:w-[420px] overflow-y-auto p-4">
+                <div className="space-y-6 mt-6">
+                  <WeeklyChallenges />
+                  {id && <PlayerChallenges playerId={id} />}
+                </div>
+              </SheetContent>
+            </Sheet>
             <Button
               variant={showHeatMap ? 'default' : 'outline'}
               size="sm"
