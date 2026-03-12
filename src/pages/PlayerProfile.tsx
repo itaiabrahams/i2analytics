@@ -59,6 +59,10 @@ const PlayerProfile = () => {
             </Button>
           ) : (
             <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={() => navigate('/shots')} className="text-muted-foreground">
+                <Target className="ml-2 h-4 w-4" />
+                מעקב קליעות
+              </Button>
               <NotificationBell />
               <Button variant="ghost" onClick={logout} className="text-muted-foreground">
                 <LogOut className="ml-2 h-4 w-4" />
