@@ -31,6 +31,7 @@ export interface Session {
   date: string;
   opponent: string;
   videoUrl: string;
+  meetingUrl: string;
   coachNotes: string;
   actions: GameAction[];
   gameStats: GameStats;
