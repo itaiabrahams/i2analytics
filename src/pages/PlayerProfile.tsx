@@ -61,10 +61,16 @@ const PlayerProfile = () => {
             </Button>
           )}
           {auth.role === 'coach' && (
-            <Button onClick={() => navigate(`/player/${id}/new-session`)} className="gradient-accent text-accent-foreground">
-              <Plus className="ml-2 h-4 w-4" />
-              סשן חדש
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setEditOpen(true)} className="text-muted-foreground">
+                <Pencil className="ml-2 h-4 w-4" />
+                ערוך שחקן
+              </Button>
+              <Button onClick={() => navigate(`/player/${id}/new-session`)} className="gradient-accent text-accent-foreground">
+                <Plus className="ml-2 h-4 w-4" />
+                סשן חדש
+              </Button>
+            </div>
           )}
         </div>
 
