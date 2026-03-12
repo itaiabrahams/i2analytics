@@ -84,11 +84,11 @@ Deno.serve(async (req) => {
       await adminClient.from("game_actions").insert(actions);
     }
 
-    // Insert demo shot sessions with shots data
+    // Insert demo shot sessions with different dates
     const shotSessions = [
-      { player_id: demoUserId, coach_id: demoUserId, title: "אימון קליעות 1/12" },
-      { player_id: demoUserId, coach_id: demoUserId, title: "אימון קליעות 8/12" },
-      { player_id: demoUserId, coach_id: demoUserId, title: "משחק מכבי חיפה" },
+      { player_id: demoUserId, coach_id: demoUserId, title: "אימון קליעות בוקר", date: "2026-03-01", video_url: "https://www.w3schools.com/html/mov_bbb.mp4" },
+      { player_id: demoUserId, coach_id: demoUserId, title: "אימון קליעות אחה\"צ", date: "2026-03-04", video_url: "https://www.w3schools.com/html/mov_bbb.mp4" },
+      { player_id: demoUserId, coach_id: demoUserId, title: "משחק מכבי חיפה", date: "2026-03-08", video_url: "https://www.w3schools.com/html/mov_bbb.mp4" },
     ];
 
     const { data: insertedShotSessions } = await adminClient
@@ -135,6 +135,57 @@ Deno.serve(async (req) => {
       ];
 
       await adminClient.from("shots").insert(shotData);
+    }
+
+    // Insert demo weekly challenges
+    const weeklyChallenges = [
+      {
+        created_by: demoUserId,
+        title: "אתגר שלשות שבועי",
+        description: "קלעו לפחות 50 שלשות מ-100 ניסיונות השבוע!",
+        period_type: "weekly",
+        zone: "top_3",
+        target_attempts: 100,
+        target_percentage: 50,
+        week_start: "2026-03-09",
+        week_end: "2026-03-15",
+      },
+      {
+        created_by: demoUserId,
+        title: "אתגר חודשי - קליעה חופשית",
+        description: "השיגו 85% קליעה חופשית במהלך חודש מרץ",
+        period_type: "monthly",
+        zone: "free_throw",
+        target_attempts: 200,
+        target_percentage: 85,
+        week_start: "2026-03-01",
+        week_end: "2026-03-31",
+      },
+    ];
+
+    const { data: insertedChallenges } = await adminClient
+      .from("weekly_challenges")
+      .insert(weeklyChallenges)
+      .select("id");
+
+    // Insert demo challenge entries
+    if (insertedChallenges) {
+      await adminClient.from("challenge_entries").insert([
+        {
+          challenge_id: insertedChallenges[0].id,
+          player_id: demoUserId,
+          attempts: 80,
+          made: 42,
+          percentage: 52.5,
+        },
+        {
+          challenge_id: insertedChallenges[1].id,
+          player_id: demoUserId,
+          attempts: 120,
+          made: 104,
+          percentage: 86.7,
+        },
+      ]);
     }
 
     return new Response(JSON.stringify({ success: true, demoUserId }), {

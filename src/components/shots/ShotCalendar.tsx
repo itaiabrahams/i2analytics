@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, CalendarDays } from 'lucide-react';
+import { Plus, CalendarDays, Upload, Loader2, Video } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -38,6 +38,9 @@ const ShotCalendar = ({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [newTitle, setNewTitle] = useState('');
   const [creating, setCreating] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   // Map dates to sessions
   const sessionsByDate = useMemo(() => {
@@ -58,29 +61,70 @@ const ShotCalendar = ({
   const selectedDateKey = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
   const sessionsForDate = selectedDateKey ? (sessionsByDate[selectedDateKey] || []) : [];
 
+  const handleFileSelect = (file: File) => {
+    if (!file.type.startsWith('video/')) {
+      toast.error('יש להעלות קובץ וידאו בלבד');
+      return;
+    }
+    if (file.size > 100 * 1024 * 1024) {
+      toast.error('גודל קובץ מקסימלי: 100MB');
+      return;
+    }
+    setVideoFile(file);
+  };
+
   const handleCreateSession = async () => {
     if (!newTitle.trim()) {
       toast.error('יש להזין כותרת לאימון');
       return;
     }
+    if (!videoFile) {
+      toast.error('יש להעלות סרטון וידאו כהוכחה לאימון');
+      return;
+    }
     if (!selectedDate) return;
 
     setCreating(true);
+    setUploading(true);
+
+    // Upload video first
+    const ext = videoFile.name.split('.').pop();
+    const path = `${playerId}/${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage.from('shot-videos').upload(path, videoFile, {
+      cacheControl: '3600',
+      upsert: true,
+    });
+
+    if (uploadError) {
+      toast.error('שגיאה בהעלאת הסרטון');
+      setCreating(false);
+      setUploading(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from('shot-videos').getPublicUrl(path);
+    const videoUrl = urlData.publicUrl;
+
+    // Create session with video URL
     const { error } = await supabase.from('shot_sessions').insert({
       player_id: playerId,
       coach_id: coachId || null,
       title: newTitle.trim(),
       date: format(selectedDate, 'yyyy-MM-dd'),
+      video_url: videoUrl,
     });
 
     if (error) {
       toast.error('שגיאה ביצירת אימון');
     } else {
-      toast.success('אימון חדש נוצר!');
+      toast.success('אימון חדש נוצר עם סרטון!');
       setNewTitle('');
+      setVideoFile(null);
       onSessionCreated();
     }
     setCreating(false);
+    setUploading(false);
   };
 
   return (
@@ -89,6 +133,15 @@ const ShotCalendar = ({
         <h3 className="font-semibold text-foreground">לוח אימונים</h3>
         <CalendarDays className="h-5 w-5 text-accent" />
       </div>
+
+      {/* Hidden file input */}
+      <input
+        ref={fileRef}
+        type="file"
+        accept="video/*"
+        className="hidden"
+        onChange={e => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); }}
+      />
 
       {/* Calendar */}
       <div className="flex justify-center">
@@ -137,17 +190,8 @@ const ShotCalendar = ({
 
           {/* Create new session for this date */}
           {canCreate && (
-            <div className="flex gap-2 items-end pt-2 border-t border-border">
-              <Button
-                size="sm"
-                onClick={handleCreateSession}
-                disabled={creating}
-                className="gradient-accent text-accent-foreground shrink-0"
-              >
-                <Plus className="ml-1 h-4 w-4" />
-                {creating ? 'יוצר...' : 'הוסף'}
-              </Button>
-              <div className="flex-1 space-y-1">
+            <div className="space-y-3 pt-2 border-t border-border">
+              <div className="space-y-1">
                 <Label className="text-xs text-right block">כותרת אימון</Label>
                 <Input
                   value={newTitle}
@@ -157,6 +201,52 @@ const ShotCalendar = ({
                   className="text-right h-8 text-sm"
                 />
               </div>
+
+              {/* Video upload - required */}
+              <div className="space-y-1">
+                <Label className="text-xs text-right block">
+                  סרטון אימון <span className="text-destructive">*</span>
+                </Label>
+                {videoFile ? (
+                  <div className="flex items-center justify-between rounded-lg bg-secondary p-2 text-sm">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setVideoFile(null)}
+                      className="text-muted-foreground h-6 px-2 text-xs"
+                    >
+                      הסר
+                    </Button>
+                    <div className="flex items-center gap-1 text-success">
+                      <Video className="h-3 w-3" />
+                      <span className="text-xs truncate max-w-[150px]">{videoFile.name}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileRef.current?.click()}
+                    className="w-full border-dashed border-2 border-muted-foreground/30 text-muted-foreground h-10"
+                  >
+                    <Upload className="ml-2 h-4 w-4" />
+                    העלה סרטון (חובה)
+                  </Button>
+                )}
+              </div>
+
+              <Button
+                size="sm"
+                onClick={handleCreateSession}
+                disabled={creating || !videoFile}
+                className="w-full gradient-accent text-accent-foreground"
+              >
+                {uploading ? (
+                  <><Loader2 className="ml-1 h-4 w-4 animate-spin" />מעלה סרטון ויוצר אימון...</>
+                ) : (
+                  <><Plus className="ml-1 h-4 w-4" />{creating ? 'יוצר...' : 'הוסף אימון'}</>
+                )}
+              </Button>
             </div>
           )}
         </div>

@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -6,10 +6,13 @@ import WeeklyChallenges from '@/components/challenges/WeeklyChallenges';
 import PlayerChallenges from '@/components/challenges/PlayerChallenges';
 
 const ChallengesPage = () => {
+  const { playerId } = useParams();
   const { auth, user } = useAuth();
   const navigate = useNavigate();
   const isCoach = auth.role === 'coach';
-  const playerId = auth.playerId!;
+
+  // If coach is viewing a specific player's challenges, use that playerId
+  const viewingPlayerId = isCoach && playerId ? playerId : auth.playerId;
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -30,9 +33,9 @@ const ChallengesPage = () => {
           {/* Weekly challenges */}
           <WeeklyChallenges />
 
-          {/* Player-vs-player challenges (only for players) */}
-          {!isCoach && playerId && (
-            <PlayerChallenges playerId={playerId} />
+          {/* Player-vs-player challenges */}
+          {viewingPlayerId && (
+            <PlayerChallenges playerId={viewingPlayerId} />
           )}
         </div>
       </div>
