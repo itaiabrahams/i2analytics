@@ -80,6 +80,10 @@ const PlayerProfile = () => {
                 <Target className="ml-2 h-4 w-4" />
                 מעקב קליעות
               </Button>
+              <Button variant="outline" onClick={() => navigate(`/player/${id}/challenges`)} className="text-muted-foreground">
+                <Trophy className="ml-2 h-4 w-4" />
+                אתגרים
+              </Button>
               <Button variant="outline" onClick={() => setMeetingOpen(true)} className="text-muted-foreground">
                 <Video className="ml-2 h-4 w-4" />
                 תזמן פגישה

@@ -9,7 +9,6 @@ import BasketballCourt from '@/components/shots/BasketballCourt';
 import ShotInputDialog from '@/components/shots/ShotInputDialog';
 import ShotStats from '@/components/shots/ShotStats';
 import ShotProgressChart from '@/components/shots/ShotProgressChart';
-import VideoUpload from '@/components/shots/VideoUpload';
 import ShotCalendar from '@/components/shots/ShotCalendar';
 import { ZoneId, ZoneStats, ZONES, ShotType, Element, FinishType } from '@/lib/shotZones';
 import { usePlayer } from '@/hooks/useSupabaseData';
@@ -156,16 +155,17 @@ const ShotTracker = () => {
               canCreate={true}
             />
 
-            {/* Video upload */}
-            {activeSessionId && (
-              <VideoUpload
-                sessionId={activeSessionId}
-                currentUrl={activeSession?.video_url || null}
-                playerId={id}
-                onUploaded={(url) => {
-                  setSessions(prev => prev.map(s => s.id === activeSessionId ? { ...s, video_url: url } : s));
-                }}
-              />
+            {/* Active session video */}
+            {activeSession?.video_url && (
+              <div className="gradient-card rounded-xl p-4">
+                <h3 className="text-sm font-medium text-muted-foreground mb-2 text-right">סרטון אימון 🎥</h3>
+                <video
+                  src={activeSession.video_url}
+                  controls
+                  className="w-full rounded-lg max-h-48"
+                  preload="metadata"
+                />
+              </div>
             )}
 
             {/* Stats */}
