@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { store } from '@/lib/store';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus } from 'lucide-react';
+import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield } from 'lucide-react';
 import PlayerFormDialog from '@/components/PlayerFormDialog';
 import NotificationBell from '@/components/NotificationBell';
 
