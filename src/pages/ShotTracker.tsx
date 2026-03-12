@@ -3,13 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Flame, BarChart3 } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ArrowRight, Flame, BarChart3, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import BasketballCourt from '@/components/shots/BasketballCourt';
 import ShotInputDialog from '@/components/shots/ShotInputDialog';
 import ShotStats from '@/components/shots/ShotStats';
 import ShotProgressChart from '@/components/shots/ShotProgressChart';
 import ShotCalendar from '@/components/shots/ShotCalendar';
+import WeeklyChallenges from '@/components/challenges/WeeklyChallenges';
+import PlayerChallenges from '@/components/challenges/PlayerChallenges';
 import { ZoneId, ZoneStats, ZONES, ShotType, Element, FinishType } from '@/lib/shotZones';
 import { usePlayer } from '@/hooks/useSupabaseData';
 
@@ -115,6 +118,20 @@ const ShotTracker = () => {
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="text-accent border-accent/30">
+                  <Trophy className="ml-1 h-4 w-4" />
+                  אתגרים
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-full sm:w-[420px] overflow-y-auto p-4">
+                <div className="space-y-6 mt-6">
+                  <WeeklyChallenges />
+                  {id && <PlayerChallenges playerId={id} />}
+                </div>
+              </SheetContent>
+            </Sheet>
             <Button
               variant={showHeatMap ? 'default' : 'outline'}
               size="sm"
