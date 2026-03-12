@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { BarChart3, Video, Target, Users, TrendingUp, Shield, ChevronDown } from 'lucide-react';
+import { BarChart3, Video, Target, Users, TrendingUp, Shield, ChevronDown, Check, Star, Zap, Crown } from 'lucide-react';
 import LoginPage from './LoginPage';
 
 const LandingPage = () => {
