@@ -226,19 +226,20 @@ const LandingPage = () => {
                   <Star className="h-6 w-6" />
                 </div>
                 <h3 className="text-2xl font-bold">מנוי חודשי</h3>
-                <p className="text-muted-foreground text-sm">ליווי שוטף שמביא לתוצאות — המסלול שהכי מקדם שחקנים</p>
+                <p className="text-muted-foreground text-sm">ליווי מלא עם 4-5 סשנים בחודש — המסלול שהכי מקדם שחקנים</p>
               </div>
 
               <div className="mb-8">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-accent">₪349</span>
+                  <span className="text-5xl font-black text-accent">₪1,500</span>
                   <span className="text-muted-foreground text-sm">/ חודש</span>
                 </div>
               </div>
 
               <ul className="space-y-3 mb-8 flex-1">
                 {[
-                  'ניתוח של עד 4 משחקים בחודש',
+                  '4-5 סשנים מלאים בחודש',
+                  'ליווי מאמן מלא ושוטף',
                   'סטטיסטיקות מתקדמות + גרפי התקדמות',
                   'פגישות וידאו שבועיות עם מאמן (45 דק׳)',
                   'הגדרת יעדים אישיים + מעקב התקדמות',
