@@ -304,7 +304,7 @@ const LandingPage = () => {
                 variant="outline"
                 className="w-full border-warning/50 text-warning hover:bg-warning hover:text-warning-foreground py-5 text-base font-semibold transition-all"
               >
-                הצטרף לפרימיום
+                הצטרף למנוי עונתי
               </Button>
             </div>
           </div>
