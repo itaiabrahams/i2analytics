@@ -268,20 +268,22 @@ const LandingPage = () => {
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/20 text-warning">
                   <Crown className="h-6 w-6" />
                 </div>
-                <h3 className="text-2xl font-bold">פרימיום</h3>
-                <p className="text-muted-foreground text-sm">חבילה אינטנסיבית לשחקנים שרוצים להגיע לרמה הגבוהה ביותר</p>
+                <h3 className="text-2xl font-bold">מנוי עונתי</h3>
+                <p className="text-muted-foreground text-sm">מנוי לעונה שלמה במחיר מוזל — לשחקנים שמחויבים להתפתחות מקסימלית</p>
               </div>
 
               <div className="mb-8">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-foreground">₪599</span>
+                  <span className="text-5xl font-black text-foreground">₪1,250</span>
                   <span className="text-muted-foreground text-sm">/ חודש</span>
                 </div>
+                <p className="text-sm text-warning font-medium mt-2">חיסכון של ₪250 בחודש לעומת מנוי חודשי!</p>
               </div>
 
               <ul className="space-y-3 mb-8 flex-1">
                 {[
-                  'ניתוח ללא הגבלה של משחקים',
+                  'כל מה שכלול במנוי החודשי',
+                  'התחייבות לעונה שלמה = מחיר מוזל',
                   'סטטיסטיקות מתקדמות + השוואה עונתית',
                   'פגישות וידאו ללא הגבלה עם מאמן',
                   'יעדים + תוכנית פיתוח רבעונית',
