@@ -94,6 +94,7 @@ const NewSession = () => {
             <Input placeholder="יריב" value={opponent} onChange={e => setOpponent(e.target.value)} className="bg-secondary border-border text-foreground text-right" />
           </div>
           <Input placeholder="קישור וידאו (YouTube / Google Drive)" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} className="bg-secondary border-border text-foreground text-right" />
+          <Input placeholder="קישור פגישת וידאו (Google Meet / Zoom)" value={meetingUrl} onChange={e => setMeetingUrl(e.target.value)} className="bg-secondary border-border text-foreground text-right" />
           <textarea
             placeholder="הערות מאמן"
             value={coachNotes}
