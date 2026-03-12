@@ -12,7 +12,7 @@ interface AuthContextType {
   isApproved: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
-  signup: (email: string, password: string, displayName: string, role: UserRole) => Promise<{ error?: string }>;
+  signup: (email: string, password: string, displayName: string, role: UserRole, coachId?: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   // Legacy compat for in-memory store
   auth: { role: UserRole | null; playerId: string | null };
@@ -79,12 +79,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return {};
   };
 
-  const signup = async (email: string, password: string, displayName: string, signupRole: UserRole) => {
+  const signup = async (email: string, password: string, displayName: string, signupRole: UserRole, coachId?: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: displayName, role: signupRole },
+        data: { display_name: displayName, role: signupRole, coach_id: coachId || null },
         emailRedirectTo: window.location.origin,
       },
     });

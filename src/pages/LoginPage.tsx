@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
 
 type Mode = 'select' | 'login' | 'signup';
 
@@ -14,15 +15,31 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [role, setRole] = useState<'coach' | 'player'>('player');
+  const [coachId, setCoachId] = useState('');
+  const [coaches, setCoaches] = useState<{ user_id: string; display_name: string }[]>([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch coaches for the dropdown
+  useEffect(() => {
+    supabase
+      .from('profiles')
+      .select('user_id, display_name')
+      .eq('role', 'coach')
+      .eq('is_approved', true)
+      .order('display_name')
+      .then(({ data }) => {
+        if (data) setCoaches(data);
+      });
+  }, []);
 
   const resetFields = () => {
     setEmail('');
     setPassword('');
     setDisplayName('');
     setRole('player');
+    setCoachId('');
     setError('');
     setSuccess('');
   };
@@ -48,13 +65,17 @@ const LoginPage = () => {
       setError('סיסמה חייבת להכיל לפחות 6 תווים');
       return;
     }
+    if (role === 'player' && !coachId && coaches.length > 0) {
+      setError('יש לבחור מאמן מלווה');
+      return;
+    }
     setIsLoading(true);
     setError('');
-    const result = await signup(email.trim(), password, displayName.trim(), role);
+    const result = await signup(email.trim(), password, displayName.trim(), role, role === 'player' ? coachId : undefined);
     if (result.error) {
       setError(result.error);
     } else {
-      setSuccess('ההרשמה הצליחה! חשבונך ממתין לאישור המאמן הראשי.');
+      setSuccess('ההרשמה הצליחה! חשבונך ממתין לאישור המאמן.');
     }
     setIsLoading(false);
   };
@@ -163,7 +184,7 @@ const LoginPage = () => {
               </div>
               <div className="space-y-2">
                 <Label>תפקיד</Label>
-                <Select value={role} onValueChange={v => setRole(v as 'coach' | 'player')}>
+                <Select value={role} onValueChange={v => { setRole(v as 'coach' | 'player'); setError(''); }}>
                   <SelectTrigger className="h-12 bg-secondary border-border text-foreground">
                     <SelectValue />
                   </SelectTrigger>
@@ -173,6 +194,21 @@ const LoginPage = () => {
                   </SelectContent>
                 </Select>
               </div>
+              {role === 'player' && coaches.length > 0 && (
+                <div className="space-y-2">
+                  <Label>מאמן מלווה</Label>
+                  <Select value={coachId} onValueChange={v => { setCoachId(v); setError(''); }}>
+                    <SelectTrigger className="h-12 bg-secondary border-border text-foreground">
+                      <SelectValue placeholder="בחר את המאמן שלך" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border-border">
+                      {coaches.map(c => (
+                        <SelectItem key={c.user_id} value={c.user_id}>{c.display_name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               {error && <p className="text-sm text-destructive">{error}</p>}
               {success && <p className="text-sm text-success">{success}</p>}
               <Button onClick={handleSignup} disabled={isLoading} className="w-full gradient-accent text-accent-foreground h-12 text-lg font-semibold">

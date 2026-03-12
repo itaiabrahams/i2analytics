@@ -187,10 +187,12 @@ export type Database = {
       profiles: {
         Row: {
           age: number | null
+          coach_id: string | null
           created_at: string
           display_name: string
           id: string
           is_approved: boolean
+          is_demo: boolean
           position: string | null
           role: Database["public"]["Enums"]["app_role"]
           team: string | null
@@ -199,10 +201,12 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          coach_id?: string | null
           created_at?: string
           display_name: string
           id?: string
           is_approved?: boolean
+          is_demo?: boolean
           position?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           team?: string | null
@@ -211,10 +215,12 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          coach_id?: string | null
           created_at?: string
           display_name?: string
           id?: string
           is_approved?: boolean
+          is_demo?: boolean
           position?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           team?: string | null
