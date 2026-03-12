@@ -138,6 +138,7 @@ export type Database = {
           challenger_id: string
           challenger_made: number | null
           created_at: string
+          description: string | null
           expires_at: string
           id: string
           status: string
@@ -153,6 +154,7 @@ export type Database = {
           challenger_id: string
           challenger_made?: number | null
           created_at?: string
+          description?: string | null
           expires_at?: string
           id?: string
           status?: string
@@ -168,6 +170,7 @@ export type Database = {
           challenger_id?: string
           challenger_made?: number | null
           created_at?: string
+          description?: string | null
           expires_at?: string
           id?: string
           status?: string
@@ -521,6 +524,7 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
+          period_type: string
           target_attempts: number | null
           target_percentage: number | null
           title: string
@@ -533,6 +537,7 @@ export type Database = {
           created_by: string
           description?: string | null
           id?: string
+          period_type?: string
           target_attempts?: number | null
           target_percentage?: number | null
           title: string
@@ -545,6 +550,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           id?: string
+          period_type?: string
           target_attempts?: number | null
           target_percentage?: number | null
           title?: string
