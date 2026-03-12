@@ -49,6 +49,7 @@ const createSession = (id: string, playerId: string, date: string, opponent: str
     date,
     opponent,
     videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    meetingUrl: '',
     coachNotes: 'ביצועים טובים באופן כללי. צריך לשפר הגנה 1 על 1.',
     actions,
     gameStats: {

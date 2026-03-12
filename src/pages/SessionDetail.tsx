@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { ACTION_TYPES } from '@/lib/types';
+import VideoMeeting from '@/components/VideoMeeting';
 
 const SessionDetail = () => {
   const { sessionId } = useParams();
@@ -92,6 +93,9 @@ const SessionDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Video meeting */}
+        <VideoMeeting meetingUrl={session.meetingUrl} />
 
         {/* Coach notes */}
         {session.coachNotes && (

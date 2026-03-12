@@ -15,6 +15,7 @@ const NewSession = () => {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [opponent, setOpponent] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
+  const [meetingUrl, setMeetingUrl] = useState('');
   const [coachNotes, setCoachNotes] = useState('');
   const [gameStats, setGameStats] = useState<GameStats>({
     points: 0, assists: 0, rebounds: 0, steals: 0, turnovers: 0, fgPercentage: 0,
@@ -61,6 +62,7 @@ const NewSession = () => {
       date,
       opponent,
       videoUrl,
+      meetingUrl,
       coachNotes,
       actions,
       gameStats,
@@ -92,6 +94,7 @@ const NewSession = () => {
             <Input placeholder="יריב" value={opponent} onChange={e => setOpponent(e.target.value)} className="bg-secondary border-border text-foreground text-right" />
           </div>
           <Input placeholder="קישור וידאו (YouTube / Google Drive)" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} className="bg-secondary border-border text-foreground text-right" />
+          <Input placeholder="קישור פגישת וידאו (Google Meet / Zoom)" value={meetingUrl} onChange={e => setMeetingUrl(e.target.value)} className="bg-secondary border-border text-foreground text-right" />
           <textarea
             placeholder="הערות מאמן"
             value={coachNotes}
