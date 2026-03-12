@@ -56,7 +56,7 @@ const LandingPage = () => {
                 onClick={() => setShowLogin(true)}
                 className="bg-accent text-accent-foreground hover:bg-accent/90 text-lg px-8 py-6 font-bold shadow-lg shadow-accent/25"
               >
-                התחל עכשיו — בחינם
+                התחל עכשיו
               </Button>
               <Button
                 size="lg"
@@ -173,7 +173,7 @@ const LandingPage = () => {
             onClick={() => setShowLogin(true)}
             className="bg-accent text-accent-foreground hover:bg-accent/90 text-lg px-10 py-6 font-bold shadow-lg shadow-accent/25"
           >
-            הרשמה בחינם
+            הצטרף עכשיו
           </Button>
         </div>
       </section>
