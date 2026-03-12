@@ -94,6 +94,9 @@ const SessionDetail = () => {
           </div>
         </div>
 
+        {/* Video meeting */}
+        <VideoMeeting meetingUrl={session.meetingUrl} />
+
         {/* Coach notes */}
         {session.coachNotes && (
           <div className="gradient-card rounded-xl p-4 mb-6">
