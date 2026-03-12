@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trophy, Plus, Medal, Target } from 'lucide-react';
+import { Trophy, Plus, Medal, Target, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { ZONES } from '@/lib/shotZones';
 
@@ -19,6 +19,7 @@ interface Challenge {
   week_start: string;
   week_end: string;
   created_by: string;
+  period_type: string;
 }
 
 interface Entry {
@@ -31,6 +32,12 @@ interface Entry {
   player_name?: string;
 }
 
+const PERIOD_LABELS: Record<string, string> = {
+  weekly: 'שבועי',
+  monthly: 'חודשי',
+  custom: 'מותאם אישית',
+};
+
 const WeeklyChallenges = () => {
   const { user, auth } = useAuth();
   const isCoach = auth.role === 'coach';
@@ -38,7 +45,11 @@ const WeeklyChallenges = () => {
   const [entries, setEntries] = useState<Record<string, Entry[]>>({});
   const [creating, setCreating] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: '', description: '', zone: 'all', target_percentage: 50, target_attempts: 20 });
+  const [form, setForm] = useState({
+    title: '', description: '', zone: 'all',
+    target_percentage: 50, target_attempts: 20,
+    period_type: 'weekly',
+  });
 
   const fetchChallenges = async () => {
     const { data } = await supabase
@@ -48,7 +59,6 @@ const WeeklyChallenges = () => {
       .limit(10);
     if (data) {
       setChallenges(data as unknown as Challenge[]);
-      // Fetch entries for each challenge
       const ids = data.map((c: any) => c.id);
       if (ids.length > 0) {
         const { data: entriesData } = await supabase
@@ -58,7 +68,6 @@ const WeeklyChallenges = () => {
           .order('percentage', { ascending: false });
 
         if (entriesData) {
-          // Fetch player names
           const playerIds = [...new Set(entriesData.map((e: any) => e.player_id))];
           const { data: profiles } = await supabase
             .from('profiles')
@@ -80,9 +89,26 @@ const WeeklyChallenges = () => {
 
   useEffect(() => { fetchChallenges(); }, []);
 
+  const getDateRange = () => {
+    const now = new Date();
+    if (form.period_type === 'monthly') {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      return { week_start: start.toISOString().split('T')[0], week_end: end.toISOString().split('T')[0] };
+    }
+    // weekly default
+    const dayOfWeek = now.getDay();
+    const start = new Date(now);
+    start.setDate(now.getDate() - dayOfWeek);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    return { week_start: start.toISOString().split('T')[0], week_end: end.toISOString().split('T')[0] };
+  };
+
   const handleCreate = async () => {
     if (!form.title.trim()) { toast.error('יש להזין כותרת'); return; }
     setCreating(true);
+    const dateRange = getDateRange();
     const { error } = await supabase.from('weekly_challenges').insert({
       title: form.title,
       description: form.description,
@@ -90,9 +116,16 @@ const WeeklyChallenges = () => {
       target_percentage: form.target_percentage,
       target_attempts: form.target_attempts,
       created_by: user?.id,
+      period_type: form.period_type,
+      ...dateRange,
     });
     if (error) { toast.error('שגיאה ביצירת אתגר'); }
-    else { toast.success('אתגר חדש נוצר!'); setShowForm(false); setForm({ title: '', description: '', zone: 'all', target_percentage: 50, target_attempts: 20 }); fetchChallenges(); }
+    else {
+      toast.success('אתגר חדש נוצר!');
+      setShowForm(false);
+      setForm({ title: '', description: '', zone: 'all', target_percentage: 50, target_attempts: 20, period_type: 'weekly' });
+      fetchChallenges();
+    }
     setCreating(false);
   };
 
@@ -133,7 +166,7 @@ const WeeklyChallenges = () => {
           )}
         </div>
         <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-          <span>אתגרים שבועיים</span>
+          <span>אתגרי המערכת</span>
           <Trophy className="h-5 w-5 text-accent" />
         </h2>
       </div>
@@ -144,11 +177,21 @@ const WeeklyChallenges = () => {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1 col-span-2">
               <Label className="text-right block">כותרת האתגר</Label>
-              <Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder='לדוגמה: "אתגר שלשות השבוע"' className="text-right" />
+              <Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder='לדוגמה: "אתגר שלשות החודש"' className="text-right" />
             </div>
             <div className="space-y-1 col-span-2">
               <Label className="text-right block">תיאור</Label>
               <Input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="תיאור קצר של האתגר" className="text-right" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-right block">סוג אתגר</Label>
+              <Select value={form.period_type} onValueChange={v => setForm({ ...form, period_type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="weekly">שבועי</SelectItem>
+                  <SelectItem value="monthly">חודשי</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1">
               <Label className="text-right block">אזור</Label>
@@ -163,6 +206,10 @@ const WeeklyChallenges = () => {
             <div className="space-y-1">
               <Label className="text-right block">יעד אחוז קליעה</Label>
               <Input type="number" value={form.target_percentage} onChange={e => setForm({ ...form, target_percentage: Number(e.target.value) })} min={1} max={100} />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-right block">מינימום ניסיונות</Label>
+              <Input type="number" value={form.target_attempts} onChange={e => setForm({ ...form, target_attempts: Number(e.target.value) })} min={5} />
             </div>
           </div>
           <Button onClick={handleCreate} disabled={creating} className="w-full gradient-accent text-accent-foreground">
@@ -195,11 +242,10 @@ const WeeklyChallenges = () => {
   );
 };
 
-// Individual challenge card component
 const ChallengeCard = ({
   challenge, entries, isCoach, userId, getZoneLabel, getMedalIcon, onSubmitEntry
 }: {
-  challenge: any; entries: Entry[]; isCoach: boolean; userId?: string;
+  challenge: Challenge; entries: Entry[]; isCoach: boolean; userId?: string;
   getZoneLabel: (z: string | null) => string; getMedalIcon: (i: number) => JSX.Element;
   onSubmitEntry: (id: string, attempts: number, made: number) => void;
 }) => {
@@ -210,9 +256,15 @@ const ChallengeCard = ({
   return (
     <div className="gradient-card rounded-xl p-4">
       <div className="flex items-start justify-between mb-3">
-        <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent">
-          {getZoneLabel(challenge.zone)}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent">
+            {getZoneLabel(challenge.zone)}
+          </span>
+          <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            {PERIOD_LABELS[challenge.period_type] || challenge.period_type}
+          </span>
+        </div>
         <div className="text-right">
           <h3 className="font-semibold text-foreground">{challenge.title}</h3>
           {challenge.description && <p className="text-xs text-muted-foreground">{challenge.description}</p>}

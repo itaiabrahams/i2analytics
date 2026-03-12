@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Swords, Send, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -23,6 +24,7 @@ interface PlayerChallenge {
   winner_id: string | null;
   created_at: string;
   expires_at: string;
+  description: string;
   challenger_name?: string;
   challenged_name?: string;
 }
@@ -36,7 +38,7 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
   const [challenges, setChallenges] = useState<PlayerChallenge[]>([]);
   const [players, setPlayers] = useState<{ user_id: string; display_name: string }[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ challenged_id: '', zone: 'all', target_attempts: 20 });
+  const [form, setForm] = useState({ challenged_id: '', zone: 'all', target_attempts: 20, description: '' });
   const [submitting, setSubmitting] = useState(false);
 
   const fetchChallenges = async () => {
@@ -79,15 +81,17 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
 
   const handleCreate = async () => {
     if (!form.challenged_id) { toast.error('יש לבחור שחקן'); return; }
+    if (!form.description.trim()) { toast.error('יש להוסיף הסבר לאתגר'); return; }
     setSubmitting(true);
     const { error } = await supabase.from('player_challenges').insert({
       challenger_id: playerId,
       challenged_id: form.challenged_id,
       zone: form.zone === 'all' ? null : form.zone,
       target_attempts: form.target_attempts,
+      description: form.description.trim(),
     });
     if (error) toast.error('שגיאה ביצירת אתגר');
-    else { toast.success('אתגר נשלח!'); setShowForm(false); fetchChallenges(); }
+    else { toast.success('אתגר נשלח!'); setShowForm(false); setForm({ challenged_id: '', zone: 'all', target_attempts: 20, description: '' }); fetchChallenges(); }
     setSubmitting(false);
   };
 
@@ -100,7 +104,6 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
       ? { challenger_attempts: attempts, challenger_made: made }
       : { challenged_attempts: attempts, challenged_made: made };
 
-    // Check if both sides have submitted to determine winner
     const otherAttempts = isChallenger ? challenge.challenged_attempts : challenge.challenger_attempts;
     const otherMade = isChallenger ? challenge.challenged_made : challenge.challenger_made;
     let finalUpdate: any = { ...updateData };
@@ -111,7 +114,7 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
       finalUpdate.status = 'completed';
       if (myPct > otherPct) finalUpdate.winner_id = playerId;
       else if (otherPct > myPct) finalUpdate.winner_id = isChallenger ? challenge.challenged_id : challenge.challenger_id;
-      else finalUpdate.winner_id = null; // tie
+      else finalUpdate.winner_id = null;
     } else {
       finalUpdate.status = 'active';
     }
@@ -150,7 +153,7 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
       <div className="flex items-center justify-between">
         <Button size="sm" onClick={() => setShowForm(!showForm)} variant="outline" className="text-accent border-accent/30">
           <Swords className="ml-1 h-4 w-4" />
-          אתגר שחקן
+          אתגר חבר
         </Button>
         <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
           <span>אתגרים אישיים</span>
@@ -163,13 +166,23 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
         <div className="gradient-card rounded-xl p-4 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1 col-span-2">
-              <Label className="text-right block">בחר שחקן לאתגר</Label>
+              <Label className="text-right block">בחר חבר לאתגר</Label>
               <Select value={form.challenged_id} onValueChange={v => setForm({ ...form, challenged_id: v })}>
                 <SelectTrigger><SelectValue placeholder="בחר שחקן" /></SelectTrigger>
                 <SelectContent>
                   {players.map(p => <SelectItem key={p.user_id} value={p.user_id}>{p.display_name}</SelectItem>)}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1 col-span-2">
+              <Label className="text-right block">הסבר האתגר *</Label>
+              <Textarea
+                value={form.description}
+                onChange={e => setForm({ ...form, description: e.target.value })}
+                placeholder='לדוגמה: "מי שקולע יותר שלשות מהפינה הימנית מתוך 20 ניסיונות מנצח!"'
+                className="text-right min-h-[80px]"
+                maxLength={300}
+              />
             </div>
             <div className="space-y-1">
               <Label className="text-right block">אזור</Label>
@@ -197,7 +210,7 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
       {challenges.length === 0 ? (
         <div className="gradient-card rounded-xl p-6 text-center">
           <Swords className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">אין אתגרים פעילים. אתגר שחקן אחר!</p>
+          <p className="text-sm text-muted-foreground">אין אתגרים פעילים. אתגר חבר!</p>
         </div>
       ) : (
         challenges.map(c => (
@@ -231,7 +244,6 @@ const ChallengeMatchCard = ({
   const isChallenger = challenge.challenger_id === playerId;
   const isChallenged = challenge.challenged_id === playerId;
   const myAttempts = isChallenger ? challenge.challenger_attempts : challenge.challenged_attempts;
-  const myMade = isChallenger ? challenge.challenger_made : challenge.challenged_made;
 
   const challengerPct = challenge.challenger_attempts > 0 ? Math.round((challenge.challenger_made / challenge.challenger_attempts) * 100) : 0;
   const challengedPct = challenge.challenged_attempts > 0 ? Math.round((challenge.challenged_made / challenge.challenged_attempts) * 100) : 0;
@@ -244,6 +256,13 @@ const ChallengeMatchCard = ({
           <p className="text-xs text-muted-foreground">{getZoneLabel(challenge.zone)} · מינימום {challenge.target_attempts} ניסיונות</p>
         </div>
       </div>
+
+      {/* Challenge description */}
+      {challenge.description && (
+        <div className="rounded-lg bg-secondary/50 p-3 mb-3 border border-border/50">
+          <p className="text-sm text-foreground text-right leading-relaxed">{challenge.description}</p>
+        </div>
+      )}
 
       {/* VS display */}
       <div className="flex items-center justify-between rounded-lg bg-secondary p-3 mb-3">
@@ -268,7 +287,7 @@ const ChallengeMatchCard = ({
         </div>
       </div>
 
-      {/* Winner announcement */}
+      {/* Winner */}
       {challenge.status === 'completed' && challenge.winner_id && (
         <div className="text-center mb-2">
           <span className="text-sm font-medium text-success">
@@ -282,24 +301,18 @@ const ChallengeMatchCard = ({
         </div>
       )}
 
-      {/* Accept/Decline for challenged player */}
+      {/* Accept/Decline */}
       {challenge.status === 'pending' && isChallenged && (
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={() => onDecline(challenge.id)} className="flex-1 text-destructive border-destructive/30">
-            דחה
-          </Button>
-          <Button size="sm" onClick={() => onAccept(challenge.id)} className="flex-1 gradient-accent text-accent-foreground">
-            קבל אתגר
-          </Button>
+          <Button size="sm" variant="outline" onClick={() => onDecline(challenge.id)} className="flex-1 text-destructive border-destructive/30">דחה</Button>
+          <Button size="sm" onClick={() => onAccept(challenge.id)} className="flex-1 gradient-accent text-accent-foreground">קבל אתגר</Button>
         </div>
       )}
 
       {/* Submit score */}
       {challenge.status === 'active' && myAttempts === 0 && (
         <div className="flex gap-2 items-end">
-          <Button size="sm" onClick={() => onSubmitScore(challenge.id, Number(attempts), Number(made))} disabled={!attempts || !made} className="gradient-accent text-accent-foreground shrink-0">
-            שלח תוצאות
-          </Button>
+          <Button size="sm" onClick={() => onSubmitScore(challenge.id, Number(attempts), Number(made))} disabled={!attempts || !made} className="gradient-accent text-accent-foreground shrink-0">שלח תוצאות</Button>
           <div className="flex-1 space-y-1">
             <Label className="text-xs text-right block">קלועות</Label>
             <Input type="number" min={0} value={made} onChange={e => setMade(e.target.value)} className="h-8 text-right" />
