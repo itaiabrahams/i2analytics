@@ -84,6 +84,59 @@ Deno.serve(async (req) => {
       await adminClient.from("game_actions").insert(actions);
     }
 
+    // Insert demo shot sessions with shots data
+    const shotSessions = [
+      { player_id: demoUserId, coach_id: demoUserId, title: "אימון קליעות 1/12" },
+      { player_id: demoUserId, coach_id: demoUserId, title: "אימון קליעות 8/12" },
+      { player_id: demoUserId, coach_id: demoUserId, title: "משחק מכבי חיפה" },
+    ];
+
+    const { data: insertedShotSessions } = await adminClient
+      .from("shot_sessions")
+      .insert(shotSessions)
+      .select("id");
+
+    if (insertedShotSessions) {
+      const shotData = [
+        // Session 1
+        { session_id: insertedShotSessions[0].id, zone: "corner_r_3", attempts: 10, made: 4, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[0].id, zone: "wing_r_3", attempts: 8, made: 3, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[0].id, zone: "top_3", attempts: 12, made: 5, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[0].id, zone: "wing_l_3", attempts: 7, made: 2, shot_type: "attack_off_dribble", element: "jab_step", finish_type: "jump_shot" },
+        { session_id: insertedShotSessions[0].id, zone: "corner_l_3", attempts: 6, made: 3, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[0].id, zone: "corner_r_mid", attempts: 5, made: 3, shot_type: "attack_off_dribble", element: "shot_fake", finish_type: "jump_shot" },
+        { session_id: insertedShotSessions[0].id, zone: "wing_r_mid", attempts: 8, made: 5, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[0].id, zone: "top_mid", attempts: 6, made: 4, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[0].id, zone: "wing_l_mid", attempts: 7, made: 3, shot_type: "attack_off_dribble", element: "jab_cross", finish_type: "jump_shot" },
+        { session_id: insertedShotSessions[0].id, zone: "corner_l_mid", attempts: 4, made: 1, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[0].id, zone: "free_throw", attempts: 10, made: 8, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[0].id, zone: "under_basket", attempts: 12, made: 9, shot_type: "attack_off_dribble", element: "jab_step", finish_type: "layup" },
+        // Session 2
+        { session_id: insertedShotSessions[1].id, zone: "corner_r_3", attempts: 8, made: 5, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[1].id, zone: "wing_r_3", attempts: 10, made: 4, shot_type: "attack_off_dribble", element: "jab_step", finish_type: "jump_shot" },
+        { session_id: insertedShotSessions[1].id, zone: "top_3", attempts: 15, made: 6, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[1].id, zone: "wing_l_3", attempts: 9, made: 4, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[1].id, zone: "corner_l_3", attempts: 5, made: 1, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[1].id, zone: "wing_r_mid", attempts: 6, made: 4, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[1].id, zone: "top_mid", attempts: 8, made: 5, shot_type: "attack_off_dribble", element: "shot_fake", finish_type: "jump_shot" },
+        { session_id: insertedShotSessions[1].id, zone: "free_throw", attempts: 12, made: 10, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[1].id, zone: "under_basket", attempts: 15, made: 11, shot_type: "attack_off_dribble", element: "jab_cross", finish_type: "eurostep" },
+        // Session 3
+        { session_id: insertedShotSessions[2].id, zone: "corner_r_3", attempts: 6, made: 2, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[2].id, zone: "wing_r_3", attempts: 7, made: 3, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[2].id, zone: "top_3", attempts: 9, made: 3, shot_type: "attack_off_dribble", element: "jab_step", finish_type: "jump_shot" },
+        { session_id: insertedShotSessions[2].id, zone: "wing_l_3", attempts: 5, made: 3, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[2].id, zone: "corner_l_3", attempts: 8, made: 2, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[2].id, zone: "corner_r_mid", attempts: 4, made: 2, shot_type: "attack_off_dribble", element: "shot_fake", finish_type: "jump_shot" },
+        { session_id: insertedShotSessions[2].id, zone: "wing_l_mid", attempts: 6, made: 4, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[2].id, zone: "corner_l_mid", attempts: 5, made: 3, shot_type: "attack_off_dribble", element: "jab_cross", finish_type: "jump_shot" },
+        { session_id: insertedShotSessions[2].id, zone: "free_throw", attempts: 8, made: 7, shot_type: "catch_and_shoot" },
+        { session_id: insertedShotSessions[2].id, zone: "under_basket", attempts: 10, made: 8, shot_type: "attack_off_dribble", element: "jab_step", finish_type: "power_finish" },
+      ];
+
+      await adminClient.from("shots").insert(shotData);
+    }
+
     return new Response(JSON.stringify({ success: true, demoUserId }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
