@@ -5,14 +5,19 @@ import { Button } from '@/components/ui/button';
 import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
+import AddPlayerDialog from '@/components/AddPlayerDialog';
 
 const CoachDashboard = () => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
-  const { players, loading } = usePlayers();
+  const { players, loading, refetch } = usePlayers();
   const sessionCounts = usePlayerSessionCounts();
+  const [addPlayerOpen, setAddPlayerOpen] = useState(false);
 
-  const playerData = players.map(p => {
+  // Filter players: show coach's own players + demo players
+  const myPlayers = players.filter(p => p.coach_id === user?.id || p.is_demo);
+
+  const playerData = myPlayers.map(p => {
     const sc = sessionCounts[p.user_id] || { count: 0, avgScore: 0, latestScores: [] };
     let trend: 'up' | 'down' | 'neutral' = 'neutral';
     if (sc.latestScores.length >= 2) {
@@ -38,9 +43,13 @@ const CoachDashboard = () => {
               <Shield className="ml-2 h-4 w-4" />
               ניהול משתמשים
             </Button>
+            <Button onClick={() => setAddPlayerOpen(true)} className="gradient-accent text-accent-foreground">
+              <Plus className="ml-2 h-4 w-4" />
+              הוסף שחקן
+            </Button>
             <div className="flex items-center gap-2 rounded-lg bg-card px-4 py-2">
               <Users className="h-5 w-5 text-accent" />
-              <span className="font-semibold text-foreground">{players.length} שחקנים</span>
+              <span className="font-semibold text-foreground">{myPlayers.length} שחקנים</span>
             </div>
             <NotificationBell />
             <Button variant="ghost" onClick={logout} className="text-muted-foreground hover:text-foreground">
@@ -60,6 +69,9 @@ const CoachDashboard = () => {
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
+                  {p.is_demo && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent font-medium">דמו</span>
+                  )}
                   {p.trend === 'up' && <TrendingUp className="h-5 w-5 text-success" />}
                   {p.trend === 'down' && <TrendingDown className="h-5 w-5 text-destructive" />}
                   {p.trend === 'neutral' && <Minus className="h-5 w-5 text-muted-foreground" />}
@@ -85,13 +97,14 @@ const CoachDashboard = () => {
               </div>
             </button>
           ))}
-          {players.length === 0 && (
+          {myPlayers.length === 0 && (
             <div className="gradient-card rounded-xl p-8 text-center col-span-2">
-              <p className="text-muted-foreground">אין שחקנים עדיין. שחקנים יופיעו כאן לאחר שיירשמו ויאושרו.</p>
+              <p className="text-muted-foreground">אין שחקנים עדיין. לחץ על "הוסף שחקן" כדי להוסיף שחקן חדש, או שחקנים יופיעו כאן לאחר שיירשמו ויאושרו.</p>
             </div>
           )}
         </div>
       </div>
+      <AddPlayerDialog open={addPlayerOpen} onOpenChange={setAddPlayerOpen} onSaved={refetch} />
     </div>
   );
 };

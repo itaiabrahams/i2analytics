@@ -11,6 +11,8 @@ export interface PlayerProfile {
   position: string | null;
   age: number | null;
   is_approved: boolean;
+  coach_id: string | null;
+  is_demo: boolean;
 }
 
 export interface SessionData {
@@ -60,6 +62,27 @@ export function usePlayers() {
 
   useEffect(() => { fetch(); }, [fetch]);
   return { players, loading, refetch: fetch };
+}
+
+// Get approved coaches (for signup dropdown)
+export function useCoaches() {
+  const [coaches, setCoaches] = useState<{ user_id: string; display_name: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase
+      .from('profiles')
+      .select('user_id, display_name')
+      .eq('role', 'coach')
+      .eq('is_approved', true)
+      .order('display_name')
+      .then(({ data }) => {
+        if (data) setCoaches(data);
+        setLoading(false);
+      });
+  }, []);
+
+  return { coaches, loading };
 }
 
 // Get a single player profile
