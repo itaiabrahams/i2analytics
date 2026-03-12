@@ -62,6 +62,7 @@ const NewSession = () => {
       date,
       opponent,
       videoUrl,
+      meetingUrl,
       coachNotes,
       actions,
       gameStats,
