@@ -15,6 +15,7 @@ const NewSession = () => {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [opponent, setOpponent] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
+  const [meetingUrl, setMeetingUrl] = useState('');
   const [coachNotes, setCoachNotes] = useState('');
   const [gameStats, setGameStats] = useState<GameStats>({
     points: 0, assists: 0, rebounds: 0, steals: 0, turnovers: 0, fgPercentage: 0,
