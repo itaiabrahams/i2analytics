@@ -1,26 +1,40 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { store } from '@/lib/store';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowRight, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { GameAction, GameStats, Session, ACTION_TYPES } from '@/lib/types';
+import { ACTION_TYPES } from '@/lib/types';
+import { supabase } from '@/integrations/supabase/client';
+import { usePlayer } from '@/hooks/useSupabaseData';
+import { toast } from 'sonner';
+
+interface LocalAction {
+  id: string;
+  quarter: number;
+  minute: number;
+  score: 1 | 0 | -1;
+  description: string;
+  type: string;
+}
 
 const NewSession = () => {
   const { playerId } = useParams();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const player = store.getPlayer(playerId!);
+  const { player, loading } = usePlayer(playerId);
 
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [opponent, setOpponent] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const [meetingUrl, setMeetingUrl] = useState('');
   const [coachNotes, setCoachNotes] = useState('');
-  const [gameStats, setGameStats] = useState<GameStats>({
+  const [gameStats, setGameStats] = useState({
     points: 0, assists: 0, rebounds: 0, steals: 0, turnovers: 0, fgPercentage: 0,
   });
-  const [actions, setActions] = useState<GameAction[]>([]);
+  const [actions, setActions] = useState<LocalAction[]>([]);
+  const [saving, setSaving] = useState(false);
 
   // New action form
   const [actionQuarter, setActionQuarter] = useState('1');
@@ -29,6 +43,7 @@ const NewSession = () => {
   const [actionType, setActionType] = useState('');
   const [actionDesc, setActionDesc] = useState('');
 
+  if (loading) return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
   if (!player) return <div className="p-8 text-center text-foreground">שחקן לא נמצא</div>;
 
   const overallScore = actions.length > 0
@@ -37,7 +52,7 @@ const NewSession = () => {
 
   const addAction = () => {
     if (!actionType || !actionDesc || !actionMinute) return;
-    const newAction: GameAction = {
+    const newAction: LocalAction = {
       id: `new-${Date.now()}`,
       quarter: parseInt(actionQuarter),
       minute: parseInt(actionMinute),
@@ -54,25 +69,63 @@ const NewSession = () => {
     setActions(prev => prev.filter(a => a.id !== id));
   };
 
-  const handleSave = () => {
-    if (!opponent || !date) return;
-    const session: Session = {
-      id: `s-${Date.now()}`,
-      playerId: playerId!,
-      date,
-      opponent,
-      videoUrl,
-      meetingUrl,
-      coachNotes,
-      actions,
-      gameStats,
-      overallScore: parseFloat(overallScore.toFixed(2)),
-    };
-    store.addSession(session);
-    navigate(`/player/${playerId}`);
+  const handleSave = async () => {
+    if (!opponent || !date || !user) return;
+    setSaving(true);
+
+    try {
+      // Insert session
+      const { data: sessionData, error: sessionError } = await supabase
+        .from('sessions')
+        .insert({
+          player_id: playerId!,
+          coach_id: user.id,
+          date,
+          opponent,
+          video_url: videoUrl,
+          meeting_url: meetingUrl,
+          coach_notes: coachNotes,
+          points: gameStats.points,
+          assists: gameStats.assists,
+          rebounds: gameStats.rebounds,
+          steals: gameStats.steals,
+          turnovers: gameStats.turnovers,
+          fg_percentage: gameStats.fgPercentage,
+          overall_score: parseFloat(overallScore.toFixed(2)),
+        })
+        .select()
+        .single();
+
+      if (sessionError) throw sessionError;
+
+      // Insert actions
+      if (actions.length > 0) {
+        const actionsToInsert = actions.map(a => ({
+          session_id: sessionData.id,
+          quarter: a.quarter,
+          minute: a.minute,
+          score: a.score,
+          description: a.description,
+          type: a.type,
+        }));
+
+        const { error: actionsError } = await supabase
+          .from('game_actions')
+          .insert(actionsToInsert);
+
+        if (actionsError) throw actionsError;
+      }
+
+      toast.success('הסשן נשמר בהצלחה!');
+      navigate(`/player/${playerId}`);
+    } catch (err: any) {
+      toast.error('שגיאה בשמירת הסשן: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const updateStat = (key: keyof GameStats, val: string) => {
+  const updateStat = (key: string, val: string) => {
     setGameStats(prev => ({ ...prev, [key]: parseInt(val) || 0 }));
   };
 
@@ -84,7 +137,7 @@ const NewSession = () => {
           <ArrowRight className="mr-2 h-4 w-4" />
         </Button>
 
-        <h1 className="text-2xl font-bold text-foreground mb-6">סשן חדש עבור {player.name}</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-6">סשן חדש עבור {player.display_name}</h1>
 
         {/* Session details */}
         <div className="gradient-card rounded-xl p-6 mb-6 space-y-4">
@@ -114,13 +167,13 @@ const NewSession = () => {
               ['steals', 'גניבות'],
               ['turnovers', 'טורנוברים'],
               ['fgPercentage', '% קליעה'],
-            ] as [keyof GameStats, string][]).map(([key, label]) => (
+            ] as [string, string][]).map(([key, label]) => (
               <div key={key}>
                 <label className="text-xs text-muted-foreground block text-right mb-1">{label}</label>
                 <Input
                   type="number"
                   min={0}
-                  value={gameStats[key]}
+                  value={(gameStats as any)[key]}
                   onChange={e => updateStat(key, e.target.value)}
                   className="bg-secondary border-border text-foreground text-center"
                 />
@@ -212,8 +265,8 @@ const NewSession = () => {
           </div>
         </div>
 
-        <Button onClick={handleSave} disabled={!opponent} className="w-full gradient-accent text-accent-foreground h-12 text-lg font-semibold mb-8">
-          שמור סשן
+        <Button onClick={handleSave} disabled={!opponent || saving} className="w-full gradient-accent text-accent-foreground h-12 text-lg font-semibold mb-8">
+          {saving ? 'שומר...' : 'שמור סשן'}
         </Button>
       </div>
     </div>

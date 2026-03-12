@@ -1,31 +1,29 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { store } from '@/lib/store';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield } from 'lucide-react';
-import PlayerFormDialog from '@/components/PlayerFormDialog';
 import NotificationBell from '@/components/NotificationBell';
+import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
 
 const CoachDashboard = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [, setRefresh] = useState(0);
+  const { players, loading } = usePlayers();
+  const sessionCounts = usePlayerSessionCounts();
 
-  const forceRefresh = useCallback(() => setRefresh(n => n + 1), []);
-
-  const players = store.getPlayers();
   const playerData = players.map(p => {
-    const sessions = store.getPlayerSessions(p.id);
-    const avgScore = store.getPlayerAvgScore(p.id);
+    const sc = sessionCounts[p.user_id] || { count: 0, avgScore: 0, latestScores: [] };
     let trend: 'up' | 'down' | 'neutral' = 'neutral';
-    if (sessions.length >= 2) {
-      const sorted = [...sessions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      trend = sorted[0].overallScore > sorted[1].overallScore ? 'up' : sorted[0].overallScore < sorted[1].overallScore ? 'down' : 'neutral';
+    if (sc.latestScores.length >= 2) {
+      trend = sc.latestScores[0] > sc.latestScores[1] ? 'up' : sc.latestScores[0] < sc.latestScores[1] ? 'down' : 'neutral';
     }
-    return { ...p, sessionsCount: sessions.length, avgScore, trend };
+    return { ...p, sessionsCount: sc.count, avgScore: sc.avgScore, trend };
   });
+
+  if (loading) {
+    return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
+  }
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -36,10 +34,6 @@ const CoachDashboard = () => {
             <p className="text-muted-foreground">ניהול שחקנים וסשנים</p>
           </div>
           <div className="flex gap-3 items-center">
-            <Button onClick={() => setDialogOpen(true)} className="gradient-accent text-accent-foreground">
-              <Plus className="ml-2 h-4 w-4" />
-              שחקן חדש
-            </Button>
             <Button variant="outline" onClick={() => navigate('/manage-users')} className="text-muted-foreground">
               <Shield className="ml-2 h-4 w-4" />
               ניהול משתמשים
@@ -60,7 +54,7 @@ const CoachDashboard = () => {
           {playerData.map((p, i) => (
             <button
               key={p.id}
-              onClick={() => navigate(`/player/${p.id}`)}
+              onClick={() => navigate(`/player/${p.user_id}`)}
               className="gradient-card rounded-xl p-6 text-right transition-all hover:scale-[1.02] hover:shadow-lg animate-fade-in"
               style={{ animationDelay: `${i * 100}ms` }}
             >
@@ -71,7 +65,7 @@ const CoachDashboard = () => {
                   {p.trend === 'neutral' && <Minus className="h-5 w-5 text-muted-foreground" />}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-foreground">{p.name}</h3>
+                  <h3 className="text-xl font-bold text-foreground">{p.display_name}</h3>
                   <p className="text-sm text-muted-foreground">{p.position} · {p.team}</p>
                 </div>
               </div>
@@ -85,16 +79,19 @@ const CoachDashboard = () => {
                   <p className="text-xs text-muted-foreground">סשנים</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{p.age}</p>
+                  <p className="text-2xl font-bold text-foreground">{p.age ?? '-'}</p>
                   <p className="text-xs text-muted-foreground">גיל</p>
                 </div>
               </div>
             </button>
           ))}
+          {players.length === 0 && (
+            <div className="gradient-card rounded-xl p-8 text-center col-span-2">
+              <p className="text-muted-foreground">אין שחקנים עדיין. שחקנים יופיעו כאן לאחר שיירשמו ויאושרו.</p>
+            </div>
+          )}
         </div>
       </div>
-
-      <PlayerFormDialog open={dialogOpen} onOpenChange={setDialogOpen} player={null} onSaved={forceRefresh} />
     </div>
   );
 };

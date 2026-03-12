@@ -1,11 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { store } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { ACTION_TYPES } from '@/lib/types';
 import VideoMeeting from '@/components/VideoMeeting';
+import { useSession, usePlayer } from '@/hooks/useSupabaseData';
 
 const SessionDetail = () => {
   const { sessionId } = useParams();
@@ -13,17 +13,22 @@ const SessionDetail = () => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<string>('all');
 
-  const session = store.getSession(sessionId!);
+  const { session, actions, loading } = useSession(sessionId);
+  const { player } = usePlayer(session?.player_id);
+
+  if (loading) {
+    return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
+  }
+
   if (!session) return <div className="p-8 text-center text-foreground">סשן לא נמצא</div>;
 
-  const player = store.getPlayer(session.playerId);
-  const plusActions = session.actions.filter(a => a.score === 1).length;
-  const zeroActions = session.actions.filter(a => a.score === 0).length;
-  const minusActions = session.actions.filter(a => a.score === -1).length;
+  const plusActions = actions.filter(a => a.score === 1).length;
+  const zeroActions = actions.filter(a => a.score === 0).length;
+  const minusActions = actions.filter(a => a.score === -1).length;
 
-  const filteredActions = filter === 'all' ? session.actions : session.actions.filter(a => a.type === filter);
+  const filteredActions = filter === 'all' ? actions : actions.filter(a => a.type === filter);
 
-  const backPath = auth.role === 'coach' ? `/player/${session.playerId}` : `/player/${auth.playerId}`;
+  const backPath = auth.role === 'coach' ? `/player/${session.player_id}` : `/player/${auth.playerId}`;
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -37,16 +42,16 @@ const SessionDetail = () => {
         <div className="gradient-card rounded-xl p-6 mb-6 animate-fade-in">
           <div className="flex items-start justify-between">
             <div className="stat-glow rounded-xl bg-secondary p-4 text-center">
-              <p className={`text-3xl font-bold ${session.overallScore > 0 ? 'text-success' : session.overallScore < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                {session.overallScore.toFixed(2)}
+              <p className={`text-3xl font-bold ${Number(session.overall_score) > 0 ? 'text-success' : Number(session.overall_score) < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                {Number(session.overall_score).toFixed(2)}
               </p>
               <p className="text-xs text-muted-foreground">ציון כולל</p>
             </div>
             <div className="text-right">
               <h1 className="text-2xl font-bold text-foreground">נגד {session.opponent}</h1>
-              <p className="text-muted-foreground">{player?.name} · {new Date(session.date).toLocaleDateString('he-IL')}</p>
-              {session.videoUrl && (
-                <a href={session.videoUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm text-accent hover:underline">
+              <p className="text-muted-foreground">{player?.display_name} · {new Date(session.date).toLocaleDateString('he-IL')}</p>
+              {session.video_url && (
+                <a href={session.video_url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm text-accent hover:underline">
                   <ExternalLink className="h-3 w-3" />
                   צפייה בוידאו
                 </a>
@@ -78,12 +83,12 @@ const SessionDetail = () => {
             <h3 className="mb-3 text-right font-semibold text-foreground">סטטיסטיקות משחק</h3>
             <div className="grid grid-cols-3 gap-2 text-center">
               {[
-                { label: 'נקודות', value: session.gameStats.points },
-                { label: 'אסיסטים', value: session.gameStats.assists },
-                { label: 'ריבאונדים', value: session.gameStats.rebounds },
-                { label: 'גניבות', value: session.gameStats.steals },
-                { label: 'טורנוברים', value: session.gameStats.turnovers },
-                { label: '% קליעה', value: `${session.gameStats.fgPercentage}%` },
+                { label: 'נקודות', value: session.points },
+                { label: 'אסיסטים', value: session.assists },
+                { label: 'ריבאונדים', value: session.rebounds },
+                { label: 'גניבות', value: session.steals },
+                { label: 'טורנוברים', value: session.turnovers },
+                { label: '% קליעה', value: `${session.fg_percentage}%` },
               ].map((s, i) => (
                 <div key={i} className="rounded-lg bg-secondary p-2">
                   <p className="text-lg font-bold text-foreground">{s.value}</p>
@@ -95,13 +100,13 @@ const SessionDetail = () => {
         </div>
 
         {/* Video meeting */}
-        <VideoMeeting meetingUrl={session.meetingUrl} />
+        <VideoMeeting meetingUrl={session.meeting_url} />
 
         {/* Coach notes */}
-        {session.coachNotes && (
+        {session.coach_notes && (
           <div className="gradient-card rounded-xl p-4 mb-6">
             <h3 className="mb-2 text-right font-semibold text-foreground">הערות מאמן</h3>
-            <p className="text-right text-muted-foreground">{session.coachNotes}</p>
+            <p className="text-right text-muted-foreground">{session.coach_notes}</p>
           </div>
         )}
 
@@ -154,6 +159,9 @@ const SessionDetail = () => {
                 </span>
               </div>
             ))}
+            {filteredActions.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">אין פעולות</p>
+            )}
           </div>
         </div>
       </div>
