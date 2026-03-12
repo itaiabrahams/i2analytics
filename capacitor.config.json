@@ -1,0 +1,9 @@
+{
+  "appId": "app.lovable.d1cda48f076c4adda35cc6b92c255bb9",
+  "appName": "i2analytics",
+  "webDir": "dist",
+  "server": {
+    "url": "https://d1cda48f-076c-4add-a35c-c6b92c255bb9.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  }
+}
