@@ -9,6 +9,8 @@ import PlayerFormDialog from '@/components/PlayerFormDialog';
 import ScheduleMeetingDialog from '@/components/ScheduleMeetingDialog';
 import NotificationBell from '@/components/NotificationBell';
 import UpcomingMeetings from '@/components/UpcomingMeetings';
+import PlayerRatings from '@/components/PlayerRatings';
+import PlayerGoals from '@/components/PlayerGoals';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
