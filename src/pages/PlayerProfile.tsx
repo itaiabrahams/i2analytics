@@ -3,9 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { store } from '@/lib/store';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Plus, LogOut, Pencil } from 'lucide-react';
+import { ArrowRight, Plus, LogOut, Pencil, Video } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import PlayerFormDialog from '@/components/PlayerFormDialog';
+import ScheduleMeetingDialog from '@/components/ScheduleMeetingDialog';
+import NotificationBell from '@/components/NotificationBell';
+import UpcomingMeetings from '@/components/UpcomingMeetings';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
