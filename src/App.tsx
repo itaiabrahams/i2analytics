@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import LoginPage from "./pages/LoginPage";
+import LandingPage from "./pages/LandingPage";
 import PendingApproval from "./pages/PendingApproval";
 import CoachDashboard from "./pages/CoachDashboard";
 import PlayerProfile from "./pages/PlayerProfile";
@@ -32,7 +32,7 @@ const AppRoutes = () => {
   }
 
   if (!role) {
-    return <LoginPage />;
+    return <LandingPage />;
   }
 
   if (!isApproved) {
