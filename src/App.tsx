@@ -14,16 +14,29 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
-  const { auth } = useAuth();
+  const { role, loading } = useAuth();
 
-  if (!auth.role) {
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl gradient-accent animate-pulse">
+            <span className="text-2xl font-black text-accent-foreground">I&I</span>
+          </div>
+          <p className="text-muted-foreground">טוען...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!role) {
     return <LoginPage />;
   }
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={auth.role === 'coach' ? <CoachDashboard /> : <PlayerProfile />} />
+        <Route path="/" element={role === 'coach' ? <CoachDashboard /> : <PlayerProfile />} />
         <Route path="/player/:playerId" element={<PlayerProfile />} />
         <Route path="/player/:playerId/new-session" element={<NewSession />} />
         <Route path="/session/:sessionId" element={<SessionDetail />} />
