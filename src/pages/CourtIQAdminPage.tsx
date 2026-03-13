@@ -88,9 +88,9 @@ const CourtIQAdminPage = () => {
       supabase.from('courtiq_questions' as any).select('*').order('publish_at', { ascending: false }),
       supabase.from('courtiq_suggestions' as any).select('*').eq('status', 'pending').order('created_at', { ascending: false }),
     ]);
-    if (catsRes.data) setCategories(catsRes.data as CourtIQCategory[]);
-    if (qRes.data) setQuestions(qRes.data as QuestionRow[]);
-    if (sugRes.data) setSuggestions(sugRes.data as SuggestionRow[]);
+    if (catsRes.data) setCategories(catsRes.data as unknown as CourtIQCategory[]);
+    if (qRes.data) setQuestions(qRes.data as unknown as QuestionRow[]);
+    if (sugRes.data) setSuggestions(sugRes.data as unknown as SuggestionRow[]);
   };
 
   const getStatus = (q: QuestionRow) => {

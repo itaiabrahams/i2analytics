@@ -36,7 +36,7 @@ const CourtIQProfilePage = () => {
       supabase.from('courtiq_player_stats' as any).select('*').eq('player_id', user.id).maybeSingle(),
       supabase.rpc('get_courtiq_leaderboard' as any, { _period: 'weekly' }),
     ]);
-    if (statsRes.data) setStats(statsRes.data as CourtIQStats);
+    if (statsRes.data) setStats(statsRes.data as unknown as CourtIQStats);
     if (lbRes.data) {
       const entries = lbRes.data as LeaderboardEntry[];
       const rank = entries.findIndex(e => e.player_id === user.id) + 1;

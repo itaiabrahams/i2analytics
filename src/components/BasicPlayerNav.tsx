@@ -14,6 +14,7 @@ const BasicPlayerNav = () => {
   const tabs = [
     { path: '/shots', icon: Target, label: 'קליעות' },
     { path: '/challenges', icon: Trophy, label: 'אתגרים' },
+    { path: '/courtiq', icon: Brain, label: 'Court IQ' },
     { path: '/leaderboard', icon: BarChart3, label: 'דירוג' },
   ];
 

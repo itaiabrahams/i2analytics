@@ -120,7 +120,7 @@ const CourtIQPage = () => {
     setAnswering(false);
     // Refresh stats
     const { data: newStats } = await supabase.from('courtiq_player_stats' as any).select('*').eq('player_id', user!.id).maybeSingle();
-    if (newStats) setStats(newStats as CourtIQStats);
+    if (newStats) setStats(newStats as unknown as CourtIQStats);
   };
 
   const handleNextQuestion = () => {
