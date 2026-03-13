@@ -234,15 +234,38 @@ const CourtIQAdminPage = () => {
     toast.success('נדחתה');
   };
 
-  const handleBulkImport = async () => {
-    if (!bulkText.trim()) return;
-    setBulkImporting(true);
-    const lines = bulkText.trim().split('\n').filter(l => l.trim());
+  const parseCSVLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
+        else inQuotes = !inQuotes;
+      } else if (ch === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += ch;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  const parseLinesIntoQuestions = (lines: string[]) => {
     const questionsToInsert: any[] = [];
     let errors = 0;
-
     for (const line of lines) {
-      const parts = line.split('|').map(p => p.trim());
+      if (!line.trim()) continue;
+      // Try pipe-separated first, then comma-separated
+      let parts: string[];
+      if (line.includes('|')) {
+        parts = line.split('|').map(p => p.trim());
+      } else {
+        parts = parseCSVLine(line);
+      }
       if (parts.length < 6) { errors++; continue; }
       const [questionText, optA, optB, optC, optD, correct, explanation] = parts;
       if (!questionText || !optA || !optB || !optC || !optD || !['a', 'b', 'c', 'd'].includes(correct?.toLowerCase())) {
@@ -263,6 +286,17 @@ const CourtIQAdminPage = () => {
         created_by: user!.id,
       });
     }
+    return { questionsToInsert, errors };
+  };
+
+  const handleBulkImport = async () => {
+    if (!bulkText.trim()) return;
+    setBulkImporting(true);
+    const lines = bulkText.trim().split('\n').filter(l => l.trim());
+    // Skip header row if it looks like one
+    const firstLine = lines[0]?.toLowerCase() || '';
+    const startIndex = (firstLine.includes('שאלה') || firstLine.includes('question')) ? 1 : 0;
+    const { questionsToInsert, errors } = parseLinesIntoQuestions(lines.slice(startIndex));
 
     if (questionsToInsert.length === 0) {
       toast.error('לא נמצאו שאלות תקינות');
@@ -270,7 +304,6 @@ const CourtIQAdminPage = () => {
       return;
     }
 
-    // Insert in batches of 50
     for (let i = 0; i < questionsToInsert.length; i += 50) {
       const batch = questionsToInsert.slice(i, i + 50);
       const { error } = await supabase.from('courtiq_questions' as any).insert(batch);
@@ -282,6 +315,16 @@ const CourtIQAdminPage = () => {
     setBulkImportOpen(false);
     setBulkImporting(false);
     fetchAll();
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    setBulkText(text);
+    toast.success(`הקובץ "${file.name}" נטען — ${text.trim().split('\n').length} שורות`);
+    // Reset input so same file can be re-uploaded
+    e.target.value = '';
   };
 
   const filteredQuestions = questions.filter(q => {
@@ -329,11 +372,31 @@ const CourtIQAdminPage = () => {
                   <DialogHeader><DialogTitle>ייבוא שאלות למאגר</DialogTitle></DialogHeader>
                   <div className="space-y-3 mt-2">
                     <div className="text-xs text-muted-foreground bg-secondary rounded-lg p-3 space-y-1">
-                      <p className="font-bold text-foreground">פורמט: כל שורה = שאלה אחת, מופרדת ב-|</p>
-                      <p className="font-mono text-[10px]">שאלה | תשובה A | תשובה B | תשובה C | תשובה D | a/b/c/d | הסבר</p>
+                      <p className="font-bold text-foreground">פורמט: כל שורה = שאלה אחת</p>
+                      <p>מופרד ב-<code className="bg-muted px-1 rounded">|</code> (פייפ) או <code className="bg-muted px-1 rounded">,</code> (CSV)</p>
+                      <p className="font-mono text-[10px] mt-1">שאלה | תשובה A | תשובה B | תשובה C | תשובה D | a/b/c/d | הסבר</p>
                       <p className="mt-1">דוגמה:</p>
                       <p className="font-mono text-[10px]">כמה שחקנים יש על המגרש? | 5 | 6 | 7 | 4 | a | כל קבוצה מורכבת מ-5 שחקנים</p>
                     </div>
+
+                    {/* File upload */}
+                    <div>
+                      <Label className="text-sm font-medium text-foreground mb-1 block">העלה קובץ (CSV / TXT)</Label>
+                      <Input
+                        type="file"
+                        accept=".csv,.txt,.tsv"
+                        onChange={handleFileUpload}
+                        className="text-sm cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="relative">
+                      <div className="absolute inset-x-0 top-0 flex items-center justify-center">
+                        <span className="bg-background px-2 text-xs text-muted-foreground -mt-2">או הדבק טקסט ידנית</span>
+                      </div>
+                      <div className="border-t border-border mt-1 pt-3" />
+                    </div>
+
                     <Select value={bulkCategory} onValueChange={setBulkCategory}>
                       <SelectTrigger><SelectValue placeholder="קטגוריה (אופציונלי)" /></SelectTrigger>
                       <SelectContent>
@@ -341,15 +404,15 @@ const CourtIQAdminPage = () => {
                       </SelectContent>
                     </Select>
                     <Textarea
-                      placeholder="הדבק שאלות כאן..."
+                      placeholder="הדבק שאלות כאן או העלה קובץ למעלה..."
                       value={bulkText}
                       onChange={e => setBulkText(e.target.value)}
-                      rows={12}
+                      rows={10}
                       className="font-mono text-xs"
                       dir="rtl"
                     />
                     <p className="text-xs text-muted-foreground">{bulkText.trim() ? `${bulkText.trim().split('\n').filter(l => l.trim()).length} שורות` : ''}</p>
-                    <Button onClick={handleBulkImport} disabled={bulkImporting} className="w-full gradient-accent text-accent-foreground">
+                    <Button onClick={handleBulkImport} disabled={bulkImporting || !bulkText.trim()} className="w-full gradient-accent text-accent-foreground">
                       <Upload className="h-4 w-4 ml-2" /> {bulkImporting ? 'מייבא...' : 'ייבא למאגר'}
                     </Button>
                   </div>
