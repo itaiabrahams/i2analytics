@@ -300,7 +300,7 @@ const CourtIQPage = () => {
 
               {/* Timer */}
               <div className="flex justify-center">
-                <div className="relative w-24 h-24">
+                <div className="relative w-20 h-20 sm:w-24 sm:h-24">
                   <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
                     <circle cx="50" cy="50" r="45" fill="none" strokeWidth="6" className="stroke-muted" />
                     <circle cx="50" cy="50" r="45" fill="none" strokeWidth="6"
