@@ -9,6 +9,7 @@ import NotificationBell from '@/components/NotificationBell';
 import UpcomingMeetings from '@/components/UpcomingMeetings';
 import PlayerRatings from '@/components/PlayerRatings';
 import PlayerGoals from '@/components/PlayerGoals';
+import TeamCoachFeedbackSection from '@/components/TeamCoachFeedbackSection';
 import { usePlayer, usePlayerSessions, usePlayerAvgScore } from '@/hooks/useSupabaseData';
 
 const PlayerProfile = () => {
