@@ -6,8 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
+import { Target, Crown } from 'lucide-react';
 
 type Mode = 'select' | 'login' | 'signup';
+type SubscriptionTier = 'basic' | 'premium';
 
 const LoginPage = () => {
   const { login, signup } = useAuth();
@@ -18,12 +20,12 @@ const LoginPage = () => {
   const [role, setRole] = useState<'coach' | 'player'>('player');
   const [coachId, setCoachId] = useState('');
   const [teamCoachApproved, setTeamCoachApproved] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('basic');
   const [coaches, setCoaches] = useState<{ user_id: string; display_name: string }[]>([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch coaches for the dropdown
   useEffect(() => {
     supabase
       .from('profiles')
@@ -43,6 +45,7 @@ const LoginPage = () => {
     setRole('player');
     setCoachId('');
     setTeamCoachApproved(false);
+    setSubscriptionTier('basic');
     setError('');
     setSuccess('');
   };
@@ -68,21 +71,32 @@ const LoginPage = () => {
       setError('סיסמה חייבת להכיל לפחות 6 תווים');
       return;
     }
-    if (role === 'player' && !coachId && coaches.length > 0) {
+    if (role === 'player' && subscriptionTier === 'premium' && !coachId && coaches.length > 0) {
       setError('יש לבחור מאמן מלווה');
       return;
     }
-    if (role === 'player' && !teamCoachApproved) {
+    if (role === 'player' && subscriptionTier === 'premium' && !teamCoachApproved) {
       setError('יש לאשר שמאמן הקבוצה שלך אישר לך להיכנס לתהליך הליווי');
       return;
     }
     setIsLoading(true);
     setError('');
-    const result = await signup(email.trim(), password, displayName.trim(), role, role === 'player' ? coachId : undefined);
+    const result = await signup(
+      email.trim(),
+      password,
+      displayName.trim(),
+      role,
+      role === 'player' && subscriptionTier === 'premium' ? coachId : undefined,
+      role === 'player' ? subscriptionTier : 'free'
+    );
     if (result.error) {
       setError(result.error);
     } else {
-      setSuccess('ההרשמה הצליחה! חשבונך ממתין לאישור המאמן.');
+      if (role === 'coach') {
+        setSuccess('ההרשמה הצליחה! חשבונך ממתין לאישור.');
+      } else {
+        setSuccess('ההרשמה הצליחה! לאחר ביצוע התשלום, חשבונך יאושר על ידי המאמן.');
+      }
     }
     setIsLoading(false);
   };
@@ -201,7 +215,46 @@ const LoginPage = () => {
                   </SelectContent>
                 </Select>
               </div>
-              {role === 'player' && coaches.length > 0 && (
+
+              {/* Tier selection - only for players */}
+              {role === 'player' && (
+                <div className="space-y-3">
+                  <Label>סוג מנוי</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => { setSubscriptionTier('basic'); setCoachId(''); setError(''); }}
+                      className={`rounded-xl border-2 p-4 text-right transition-all ${
+                        subscriptionTier === 'basic'
+                          ? 'border-accent bg-accent/10'
+                          : 'border-border bg-secondary hover:border-muted-foreground'
+                      }`}
+                    >
+                      <Target className="h-6 w-6 text-accent mb-2" />
+                      <p className="font-semibold text-foreground text-sm">מעקב קליעות</p>
+                      <p className="text-xs text-muted-foreground mt-1">אתגרים, טבלת מובילים, מעקב זריקות</p>
+                      <p className="text-accent font-bold mt-2">30₪ / חודש</p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setSubscriptionTier('premium'); setError(''); }}
+                      className={`rounded-xl border-2 p-4 text-right transition-all ${
+                        subscriptionTier === 'premium'
+                          ? 'border-accent bg-accent/10'
+                          : 'border-border bg-secondary hover:border-muted-foreground'
+                      }`}
+                    >
+                      <Crown className="h-6 w-6 text-accent mb-2" />
+                      <p className="font-semibold text-foreground text-sm">ליווי אישי</p>
+                      <p className="text-xs text-muted-foreground mt-1">כולל את הכל + ניתוח וידאו, פגישות, יעדים</p>
+                      <p className="text-accent font-bold mt-2">לפי חבילה</p>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Coach selection - only for premium players */}
+              {role === 'player' && subscriptionTier === 'premium' && coaches.length > 0 && (
                 <div className="space-y-2">
                   <Label>מאמן מלווה</Label>
                   <Select value={coachId} onValueChange={v => { setCoachId(v); setError(''); }}>
@@ -216,7 +269,9 @@ const LoginPage = () => {
                   </Select>
                 </div>
               )}
-              {role === 'player' && (
+
+              {/* Team coach approval checkbox - only for premium players */}
+              {role === 'player' && subscriptionTier === 'premium' && (
                 <div className="flex items-start gap-3 rounded-lg bg-secondary/50 p-3 border border-border">
                   <Checkbox
                     id="teamCoachApproved"
@@ -229,6 +284,19 @@ const LoginPage = () => {
                   </label>
                 </div>
               )}
+
+              {/* Payment note */}
+              {role === 'player' && (
+                <div className="rounded-lg bg-accent/10 border border-accent/30 p-3 text-right">
+                  <p className="text-sm text-foreground font-medium">
+                    {subscriptionTier === 'basic'
+                      ? '💳 עלות: 30₪ לחודש — התשלום מתבצע מחוץ לאפליקציה'
+                      : '💳 התשלום לליווי אישי מתבצע מחוץ לאפליקציה בהתאם לחבילה שנבחרה'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">לאחר ביצוע התשלום, המאמן יאשר את הגישה שלך</p>
+                </div>
+              )}
+
               {error && <p className="text-sm text-destructive">{error}</p>}
               {success && <p className="text-sm text-success">{success}</p>}
               <Button onClick={handleSignup} disabled={isLoading} className="w-full gradient-accent text-accent-foreground h-12 text-lg font-semibold">

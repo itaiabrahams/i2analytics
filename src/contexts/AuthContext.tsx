@@ -12,7 +12,7 @@ interface AuthContextType {
   isApproved: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
-  signup: (email: string, password: string, displayName: string, role: UserRole, coachId?: string) => Promise<{ error?: string }>;
+  signup: (email: string, password: string, displayName: string, role: UserRole, coachId?: string, subscriptionTier?: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   // Legacy compat for in-memory store
   auth: { role: UserRole | null; playerId: string | null };
