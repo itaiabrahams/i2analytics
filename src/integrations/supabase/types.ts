@@ -288,6 +288,7 @@ export type Database = {
           position: string | null
           role: Database["public"]["Enums"]["app_role"]
           team: string | null
+          team_coach_approved: boolean
           updated_at: string
           user_id: string
         }
@@ -302,6 +303,7 @@ export type Database = {
           position?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           team?: string | null
+          team_coach_approved?: boolean
           updated_at?: string
           user_id: string
         }
@@ -316,6 +318,7 @@ export type Database = {
           position?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           team?: string | null
+          team_coach_approved?: boolean
           updated_at?: string
           user_id?: string
         }
@@ -499,6 +502,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      team_coach_feedback: {
+        Row: {
+          category: string
+          coach_name: string
+          content: string
+          created_at: string
+          feedback_token: string
+          id: string
+          player_id: string
+        }
+        Insert: {
+          category?: string
+          coach_name?: string
+          content?: string
+          created_at?: string
+          feedback_token?: string
+          id?: string
+          player_id: string
+        }
+        Update: {
+          category?: string
+          coach_name?: string
+          content?: string
+          created_at?: string
+          feedback_token?: string
+          id?: string
+          player_id?: string
+        }
+        Relationships: []
+      }
+      team_coach_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          player_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          player_id: string
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          player_id?: string
+          token?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
