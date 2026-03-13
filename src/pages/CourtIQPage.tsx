@@ -319,7 +319,7 @@ const CourtIQPage = () => {
 
               {/* Question */}
               <div className="text-center space-y-4">
-                <h2 className="text-xl font-bold text-foreground leading-relaxed">{currentQuestion.question_text}</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-foreground leading-relaxed">{currentQuestion.question_text}</h2>
                 {currentQuestion.media_url && (
                   <div className="flex justify-center">
                     {currentQuestion.media_type === 'video' ? (
