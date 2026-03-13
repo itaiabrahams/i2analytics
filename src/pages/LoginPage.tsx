@@ -72,6 +72,10 @@ const LoginPage = () => {
       setError('יש לבחור מאמן מלווה');
       return;
     }
+    if (role === 'player' && !teamCoachApproved) {
+      setError('יש לאשר שמאמן הקבוצה שלך אישר לך להיכנס לתהליך הליווי');
+      return;
+    }
     setIsLoading(true);
     setError('');
     const result = await signup(email.trim(), password, displayName.trim(), role, role === 'player' ? coachId : undefined);
