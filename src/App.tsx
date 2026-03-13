@@ -16,6 +16,7 @@ import ChallengesPage from "./pages/ChallengesPage";
 import Leaderboard from "./pages/Leaderboard";
 import TeamCoachFeedback from "./pages/TeamCoachFeedback";
 import NotFound from "./pages/NotFound";
+import BasicPlayerNav from "./components/BasicPlayerNav";
 
 const queryClient = new QueryClient();
 
@@ -57,12 +58,12 @@ const AppRoutes = () => {
       <Routes>
         {isBasicPlayer ? (
           <>
-            <Route path="/" element={<ShotTracker />} />
-            <Route path="/shots" element={<ShotTracker />} />
-            <Route path="/challenges" element={<ChallengesPage />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ShotTracker /></div></>} />
+            <Route path="/shots" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ShotTracker /></div></>} />
+            <Route path="/challenges" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ChallengesPage /></div></>} />
+            <Route path="/leaderboard" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><Leaderboard /></div></>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
-            <Route path="*" element={<ShotTracker />} />
+            <Route path="*" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ShotTracker /></div></>} />
           </>
         ) : (
           <>
