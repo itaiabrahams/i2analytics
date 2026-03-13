@@ -79,21 +79,29 @@ const CourtIQProfilePage = () => {
     return 'המשך לענות ולהתקדם! 💪';
   };
 
+  const appLink = 'https://i2analytics.lovable.app/courtiq';
+
   const handleShareCard = async () => {
-    const text = `🏀 COURT IQ — כרטיס שחקן\n` +
+    const text = `🏀 COURT IQ — כרטיס שחקן\n\n` +
       `👤 ${profile?.display_name}\n` +
+      `🏀 ${profile?.position || 'שחקן'} · ${profile?.team || ''}\n` +
       `🔥 Streak: ${stats?.current_streak || 0} ימים\n` +
       `⭐ ${stats?.total_points || 0} נקודות\n` +
-      `🎯 ${accuracy}% דיוק\n` +
-      `🏆 מקום ${weeklyRank || '?'} השבוע\n` +
+      `🎯 דיוק: ${accuracy}%\n` +
+      `📊 שאלות שנענו: ${stats?.total_answered || 0}\n` +
+      `✅ תשובות נכונות: ${stats?.total_correct || 0}\n` +
+      `🏆 מקום ${weeklyRank || '?'} בדירוג השבועי\n` +
+      `⚡ רצף נכונות: ${stats?.correct_streak || 0}\n` +
+      `🔥 Streak שיא: ${stats?.longest_streak || 0}\n\n` +
       `${getAchievementPhrase()}\n\n` +
-      `${window.location.origin}/courtiq`;
+      `🏀 בוא לשחק גם! 👇\n` +
+      appLink;
 
     if (navigator.share) {
-      await navigator.share({ text });
+      await navigator.share({ title: 'COURT IQ — כרטיס שחקן', text, url: appLink });
     } else {
       await navigator.clipboard.writeText(text);
-      toast.success('הכרטיס הועתק!');
+      toast.success('הכרטיס הועתק ללוח!');
     }
   };
 
@@ -166,7 +174,10 @@ const CourtIQProfilePage = () => {
             </div>
 
             <p className="text-sm text-accent font-medium pt-1">{getAchievementPhrase()}</p>
-            <p className="text-[10px] text-muted-foreground/50 pt-2">i2analytics.lovable.app/courtiq</p>
+            {profile?.position && (
+              <p className="text-xs text-muted-foreground">{profile.position} · {profile.team || ''}</p>
+            )}
+            <p className="text-[10px] text-muted-foreground/50 pt-2">🏀 i2analytics.lovable.app/courtiq</p>
           </div>
         </motion.div>
 
