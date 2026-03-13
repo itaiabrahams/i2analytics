@@ -234,15 +234,38 @@ const CourtIQAdminPage = () => {
     toast.success('נדחתה');
   };
 
-  const handleBulkImport = async () => {
-    if (!bulkText.trim()) return;
-    setBulkImporting(true);
-    const lines = bulkText.trim().split('\n').filter(l => l.trim());
+  const parseCSVLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
+        else inQuotes = !inQuotes;
+      } else if (ch === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += ch;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  const parseLinesIntoQuestions = (lines: string[]) => {
     const questionsToInsert: any[] = [];
     let errors = 0;
-
     for (const line of lines) {
-      const parts = line.split('|').map(p => p.trim());
+      if (!line.trim()) continue;
+      // Try pipe-separated first, then comma-separated
+      let parts: string[];
+      if (line.includes('|')) {
+        parts = line.split('|').map(p => p.trim());
+      } else {
+        parts = parseCSVLine(line);
+      }
       if (parts.length < 6) { errors++; continue; }
       const [questionText, optA, optB, optC, optD, correct, explanation] = parts;
       if (!questionText || !optA || !optB || !optC || !optD || !['a', 'b', 'c', 'd'].includes(correct?.toLowerCase())) {
@@ -263,6 +286,17 @@ const CourtIQAdminPage = () => {
         created_by: user!.id,
       });
     }
+    return { questionsToInsert, errors };
+  };
+
+  const handleBulkImport = async () => {
+    if (!bulkText.trim()) return;
+    setBulkImporting(true);
+    const lines = bulkText.trim().split('\n').filter(l => l.trim());
+    // Skip header row if it looks like one
+    const firstLine = lines[0]?.toLowerCase() || '';
+    const startIndex = (firstLine.includes('שאלה') || firstLine.includes('question')) ? 1 : 0;
+    const { questionsToInsert, errors } = parseLinesIntoQuestions(lines.slice(startIndex));
 
     if (questionsToInsert.length === 0) {
       toast.error('לא נמצאו שאלות תקינות');
@@ -270,7 +304,6 @@ const CourtIQAdminPage = () => {
       return;
     }
 
-    // Insert in batches of 50
     for (let i = 0; i < questionsToInsert.length; i += 50) {
       const batch = questionsToInsert.slice(i, i + 50);
       const { error } = await supabase.from('courtiq_questions' as any).insert(batch);
@@ -282,6 +315,16 @@ const CourtIQAdminPage = () => {
     setBulkImportOpen(false);
     setBulkImporting(false);
     fetchAll();
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    setBulkText(text);
+    toast.success(`הקובץ "${file.name}" נטען — ${text.trim().split('\n').length} שורות`);
+    // Reset input so same file can be re-uploaded
+    e.target.value = '';
   };
 
   const filteredQuestions = questions.filter(q => {
