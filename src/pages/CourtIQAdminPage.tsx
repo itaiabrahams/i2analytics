@@ -372,11 +372,31 @@ const CourtIQAdminPage = () => {
                   <DialogHeader><DialogTitle>ייבוא שאלות למאגר</DialogTitle></DialogHeader>
                   <div className="space-y-3 mt-2">
                     <div className="text-xs text-muted-foreground bg-secondary rounded-lg p-3 space-y-1">
-                      <p className="font-bold text-foreground">פורמט: כל שורה = שאלה אחת, מופרדת ב-|</p>
-                      <p className="font-mono text-[10px]">שאלה | תשובה A | תשובה B | תשובה C | תשובה D | a/b/c/d | הסבר</p>
+                      <p className="font-bold text-foreground">פורמט: כל שורה = שאלה אחת</p>
+                      <p>מופרד ב-<code className="bg-muted px-1 rounded">|</code> (פייפ) או <code className="bg-muted px-1 rounded">,</code> (CSV)</p>
+                      <p className="font-mono text-[10px] mt-1">שאלה | תשובה A | תשובה B | תשובה C | תשובה D | a/b/c/d | הסבר</p>
                       <p className="mt-1">דוגמה:</p>
                       <p className="font-mono text-[10px]">כמה שחקנים יש על המגרש? | 5 | 6 | 7 | 4 | a | כל קבוצה מורכבת מ-5 שחקנים</p>
                     </div>
+
+                    {/* File upload */}
+                    <div>
+                      <Label className="text-sm font-medium text-foreground mb-1 block">העלה קובץ (CSV / TXT)</Label>
+                      <Input
+                        type="file"
+                        accept=".csv,.txt,.tsv"
+                        onChange={handleFileUpload}
+                        className="text-sm cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="relative">
+                      <div className="absolute inset-x-0 top-0 flex items-center justify-center">
+                        <span className="bg-background px-2 text-xs text-muted-foreground -mt-2">או הדבק טקסט ידנית</span>
+                      </div>
+                      <div className="border-t border-border mt-1 pt-3" />
+                    </div>
+
                     <Select value={bulkCategory} onValueChange={setBulkCategory}>
                       <SelectTrigger><SelectValue placeholder="קטגוריה (אופציונלי)" /></SelectTrigger>
                       <SelectContent>
@@ -384,15 +404,15 @@ const CourtIQAdminPage = () => {
                       </SelectContent>
                     </Select>
                     <Textarea
-                      placeholder="הדבק שאלות כאן..."
+                      placeholder="הדבק שאלות כאן או העלה קובץ למעלה..."
                       value={bulkText}
                       onChange={e => setBulkText(e.target.value)}
-                      rows={12}
+                      rows={10}
                       className="font-mono text-xs"
                       dir="rtl"
                     />
                     <p className="text-xs text-muted-foreground">{bulkText.trim() ? `${bulkText.trim().split('\n').filter(l => l.trim()).length} שורות` : ''}</p>
-                    <Button onClick={handleBulkImport} disabled={bulkImporting} className="w-full gradient-accent text-accent-foreground">
+                    <Button onClick={handleBulkImport} disabled={bulkImporting || !bulkText.trim()} className="w-full gradient-accent text-accent-foreground">
                       <Upload className="h-4 w-4 ml-2" /> {bulkImporting ? 'מייבא...' : 'ייבא למאגר'}
                     </Button>
                   </div>
