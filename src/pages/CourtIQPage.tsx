@@ -358,28 +358,28 @@ const CourtIQPage = () => {
 
           {/* Result */}
           {result && (
-            <motion.div key="result" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="w-full max-w-lg space-y-6 text-center">
+            <motion.div key="result" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="w-full max-w-lg space-y-4 sm:space-y-6 text-center">
               {/* Correct/Wrong indicator */}
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', damping: 10, stiffness: 200 }}
-                className={`w-24 h-24 rounded-full mx-auto flex items-center justify-center text-4xl ${
+                className={`w-16 h-16 sm:w-24 sm:h-24 rounded-full mx-auto flex items-center justify-center text-3xl sm:text-4xl ${
                   result.is_correct ? 'bg-success/20 border-2 border-success' : 'bg-destructive/20 border-2 border-destructive'
                 }`}
               >
                 {result.is_correct ? '✅' : '❌'}
               </motion.div>
 
-              <motion.h2 initial={{ y: 20 }} animate={{ y: 0 }} className="text-2xl font-black">
+              <motion.h2 initial={{ y: 20 }} animate={{ y: 0 }} className="text-xl sm:text-2xl font-black">
                 {result.is_correct ? 'נכון!' : 'לא נכון'}
               </motion.h2>
 
               {/* Points */}
               {result.points_earned > 0 && (
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2 }} className="text-3xl font-black text-accent">
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2 }} className="text-2xl sm:text-3xl font-black text-accent">
                   +{result.points_earned}
-                  {result.bonus_points > 0 && <span className="text-lg text-yellow-500 block">+{result.bonus_points} בונוס יומי! 🎉</span>}
+                  {result.bonus_points > 0 && <span className="text-base text-yellow-500 block">+{result.bonus_points} בונוס יומי! 🎉</span>}
                 </motion.div>
               )}
 
@@ -392,13 +392,13 @@ const CourtIQPage = () => {
 
               {/* Explanation */}
               {result.explanation && (
-                <div className="gradient-card rounded-xl p-4 text-sm text-muted-foreground">
+                <div className="gradient-card rounded-xl p-3 sm:p-4 text-sm text-muted-foreground">
                   💡 {result.explanation}
                 </div>
               )}
 
               {/* Stats */}
-              <div className="text-sm text-muted-foreground">
+              <div className="text-xs sm:text-sm text-muted-foreground">
                 {result.is_correct
                   ? `${result.correct_percentage}% מהשחקנים ענו נכון — ${result.correct_percentage < 50 ? 'אתה בין המובילים! 🌟' : 'יפה מאוד! 💪'}`
                   : `${100 - result.correct_percentage}% גם טעו — ${result.correct_percentage < 50 ? 'זו שאלה קשה! 💪' : 'בפעם הבאה! 🔥'}`}
@@ -406,20 +406,20 @@ const CourtIQPage = () => {
 
               {/* Correct streak badge */}
               {result.correct_streak >= 5 && (
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-accent/20 text-accent text-sm font-bold">
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs sm:text-sm font-bold">
                   🔥 {result.correct_streak} תשובות נכונות ברצף!
                 </motion.div>
               )}
 
               {/* Action buttons */}
-              <div className="flex gap-3 justify-center pt-4">
-                <Button onClick={handleShare} variant="outline" className="gap-2">
-                  <Share2 className="h-4 w-4" /> שתף
+              <div className="flex gap-2 sm:gap-3 justify-center pt-2 sm:pt-4">
+                <Button onClick={handleShare} variant="outline" size="sm" className="gap-1.5 h-9">
+                  <Share2 className="h-3.5 w-3.5" /> שתף
                 </Button>
-                <Button onClick={() => navigate('/courtiq/leaderboard')} variant="outline" className="gap-2">
-                  <Trophy className="h-4 w-4" /> דירוג
+                <Button onClick={() => navigate('/courtiq/leaderboard')} variant="outline" size="sm" className="gap-1.5 h-9">
+                  <Trophy className="h-3.5 w-3.5" /> דירוג
                 </Button>
-                <Button onClick={handleNextQuestion} className="gradient-accent text-accent-foreground gap-2">
+                <Button onClick={handleNextQuestion} size="sm" className="gradient-accent text-accent-foreground gap-1.5 h-9">
                   המשך
                 </Button>
               </div>
