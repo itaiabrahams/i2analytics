@@ -113,19 +113,46 @@ const ShotTracker = () => {
   const activeSession = sessions.find(s => s.id === activeSessionId);
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
+    <div className="min-h-screen p-3 sm:p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-4 space-y-3">
+          {/* Title row */}
+          <div className="flex items-center justify-between">
+            <Button
+              variant={showHeatMap ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setShowHeatMap(!showHeatMap)}
+              className={`h-8 text-xs ${showHeatMap ? 'gradient-accent text-accent-foreground' : 'text-muted-foreground'}`}
+            >
+              <Flame className="ml-1 h-3.5 w-3.5" />
+              Heat Map
+            </Button>
+            <div className="flex items-center gap-2">
+              <div className="text-right">
+                <h1 className="text-lg sm:text-2xl font-bold text-foreground flex items-center gap-1.5 justify-end">
+                  <span>מעקב קליעות</span>
+                  <BarChart3 className="h-5 w-5 text-accent" />
+                </h1>
+                {player && <p className="text-xs text-muted-foreground">{player.display_name}</p>}
+              </div>
+              {isCoach && (
+                <Button variant="ghost" size="sm" onClick={() => navigate(`/player/${id}`)} className="text-muted-foreground h-8 px-2">
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+          {/* Action buttons row */}
           <div className="flex items-center gap-2">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="text-accent border-accent/30">
-                  <Trophy className="ml-1 h-4 w-4" />
+                <Button variant="outline" size="sm" className="text-accent border-accent/30 h-8 text-xs px-2.5">
+                  <Trophy className="ml-1 h-3.5 w-3.5" />
                   אתגרים
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-full sm:w-[420px] overflow-y-auto p-4">
+              <SheetContent side="left" className="w-[90vw] sm:w-[420px] overflow-y-auto p-4">
                 <div className="space-y-6 mt-6">
                   <WeeklyChallenges />
                   {id && <PlayerChallenges playerId={id} />}
@@ -136,32 +163,10 @@ const ShotTracker = () => {
               variant="outline"
               size="sm"
               onClick={() => navigate('/leaderboard')}
-              className="text-accent border-accent/30"
+              className="text-accent border-accent/30 h-8 text-xs px-2.5"
             >
-              <BarChart3 className="ml-1 h-4 w-4" />
+              <BarChart3 className="ml-1 h-3.5 w-3.5" />
               דירוג
-            </Button>
-            <Button
-              variant={showHeatMap ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setShowHeatMap(!showHeatMap)}
-              className={showHeatMap ? 'gradient-accent text-accent-foreground' : 'text-muted-foreground'}
-            >
-              <Flame className="ml-1 h-4 w-4" />
-              Heat Map
-            </Button>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <h1 className="text-2xl font-bold text-foreground flex items-center gap-2 justify-end">
-                <span>מעקב קליעות</span>
-                <BarChart3 className="h-6 w-6 text-accent" />
-              </h1>
-              {player && <p className="text-sm text-muted-foreground">{player.display_name}</p>}
-            </div>
-            <Button variant="ghost" onClick={() => navigate(isCoach ? `/player/${id}` : '/')} className="text-muted-foreground">
-              חזרה
-              <ArrowRight className="mr-2 h-4 w-4" />
             </Button>
           </div>
         </div>
