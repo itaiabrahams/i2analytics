@@ -55,6 +55,231 @@ export type Database = {
           },
         ]
       }
+      courtiq_answers: {
+        Row: {
+          answer_time_ms: number
+          answered_at: string | null
+          id: string
+          is_correct: boolean
+          player_id: string
+          points_earned: number | null
+          question_id: string
+          selected_option: string
+        }
+        Insert: {
+          answer_time_ms: number
+          answered_at?: string | null
+          id?: string
+          is_correct: boolean
+          player_id: string
+          points_earned?: number | null
+          question_id: string
+          selected_option: string
+        }
+        Update: {
+          answer_time_ms?: number
+          answered_at?: string | null
+          id?: string
+          is_correct?: boolean
+          player_id?: string
+          points_earned?: number | null
+          question_id?: string
+          selected_option?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courtiq_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "courtiq_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courtiq_categories: {
+        Row: {
+          color: string
+          created_at: string | null
+          icon: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      courtiq_player_stats: {
+        Row: {
+          correct_streak: number | null
+          current_streak: number | null
+          id: string
+          last_active_date: string | null
+          longest_streak: number | null
+          player_id: string
+          questions_today: number | null
+          total_answered: number | null
+          total_correct: number | null
+          total_points: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          correct_streak?: number | null
+          current_streak?: number | null
+          id?: string
+          last_active_date?: string | null
+          longest_streak?: number | null
+          player_id: string
+          questions_today?: number | null
+          total_answered?: number | null
+          total_correct?: number | null
+          total_points?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          correct_streak?: number | null
+          current_streak?: number | null
+          id?: string
+          last_active_date?: string | null
+          longest_streak?: number | null
+          player_id?: string
+          questions_today?: number | null
+          total_answered?: number | null
+          total_correct?: number | null
+          total_points?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      courtiq_questions: {
+        Row: {
+          category_id: string | null
+          correct_option: string
+          created_at: string | null
+          created_by: string
+          expires_at: string | null
+          explanation: string | null
+          id: string
+          is_ai_generated: boolean | null
+          media_type: string | null
+          media_url: string | null
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          publish_at: string
+          question_text: string
+          status: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          correct_option: string
+          created_at?: string | null
+          created_by: string
+          expires_at?: string | null
+          explanation?: string | null
+          id?: string
+          is_ai_generated?: boolean | null
+          media_type?: string | null
+          media_url?: string | null
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          publish_at: string
+          question_text: string
+          status?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          correct_option?: string
+          created_at?: string | null
+          created_by?: string
+          expires_at?: string | null
+          explanation?: string | null
+          id?: string
+          is_ai_generated?: boolean | null
+          media_type?: string | null
+          media_url?: string | null
+          option_a?: string
+          option_b?: string
+          option_c?: string
+          option_d?: string
+          publish_at?: string
+          question_text?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courtiq_questions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "courtiq_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courtiq_suggestions: {
+        Row: {
+          category_id: string | null
+          correct_option: string | null
+          created_at: string | null
+          id: string
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          player_id: string
+          question_text: string
+          status: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          correct_option?: string | null
+          created_at?: string | null
+          id?: string
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          player_id: string
+          question_text: string
+          status?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          correct_option?: string | null
+          created_at?: string | null
+          id?: string
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          player_id?: string
+          question_text?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courtiq_suggestions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "courtiq_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       game_actions: {
         Row: {
           created_at: string
@@ -628,6 +853,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_active_courtiq_questions: { Args: never; Returns: Json }
+      get_courtiq_leaderboard: { Args: { _period: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -637,6 +864,14 @@ export type Database = {
       }
       is_head_coach: { Args: { _user_id: string }; Returns: boolean }
       is_user_approved: { Args: { _user_id: string }; Returns: boolean }
+      submit_courtiq_answer: {
+        Args: {
+          _answer_time_ms: number
+          _question_id: string
+          _selected_option: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "coach" | "player"
