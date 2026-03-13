@@ -17,6 +17,10 @@ import Leaderboard from "./pages/Leaderboard";
 import TeamCoachFeedback from "./pages/TeamCoachFeedback";
 import NotFound from "./pages/NotFound";
 import BasicPlayerNav from "./components/BasicPlayerNav";
+import CourtIQPage from "./pages/CourtIQPage";
+import CourtIQLeaderboardPage from "./pages/CourtIQLeaderboardPage";
+import CourtIQProfilePage from "./pages/CourtIQProfilePage";
+import CourtIQAdminPage from "./pages/CourtIQAdminPage";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +66,9 @@ const AppRoutes = () => {
             <Route path="/shots" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ShotTracker /></div></>} />
             <Route path="/challenges" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ChallengesPage /></div></>} />
             <Route path="/leaderboard" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><Leaderboard /></div></>} />
+            <Route path="/courtiq" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><CourtIQPage /></div></>} />
+            <Route path="/courtiq/leaderboard" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><CourtIQLeaderboardPage /></div></>} />
+            <Route path="/courtiq/profile" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><CourtIQProfilePage /></div></>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
             <Route path="*" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ShotTracker /></div></>} />
           </>
@@ -77,6 +84,10 @@ const AppRoutes = () => {
             <Route path="/challenges" element={<ChallengesPage />} />
             <Route path="/player/:playerId/challenges" element={<ChallengesPage />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/courtiq" element={<CourtIQPage />} />
+            <Route path="/courtiq/leaderboard" element={<CourtIQLeaderboardPage />} />
+            <Route path="/courtiq/profile" element={<CourtIQProfilePage />} />
+            <Route path="/courtiq/admin" element={<CourtIQAdminPage />} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
             <Route path="*" element={<NotFound />} />
           </>

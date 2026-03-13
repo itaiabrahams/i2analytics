@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Target, Trophy, BarChart3, Crown, LogOut } from 'lucide-react';
+import { Target, Trophy, BarChart3, Crown, LogOut, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import UpgradeDialog from './UpgradeDialog';
@@ -14,6 +14,7 @@ const BasicPlayerNav = () => {
   const tabs = [
     { path: '/shots', icon: Target, label: 'קליעות' },
     { path: '/challenges', icon: Trophy, label: 'אתגרים' },
+    { path: '/courtiq', icon: Brain, label: 'Court IQ' },
     { path: '/leaderboard', icon: BarChart3, label: 'דירוג' },
   ];
 
