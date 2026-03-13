@@ -332,7 +332,7 @@ const CourtIQPage = () => {
               </div>
 
               {/* Options - shuffled per player */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 {(() => {
                   const shuffledKeys = user ? getShuffledOptions(currentQuestion.id, user.id) : (['a', 'b', 'c', 'd'] as OptionKey[]);
                   return shuffledKeys.map((originalKey, displayIndex) => {
@@ -344,10 +344,10 @@ const CourtIQPage = () => {
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleAnswer(originalKey)}
                         disabled={answering}
-                        className="p-4 rounded-xl border-2 border-border bg-card hover:border-accent hover:bg-secondary transition-all text-right disabled:opacity-50"
+                        className="p-3 sm:p-4 rounded-xl border-2 border-border bg-card hover:border-accent hover:bg-secondary transition-all text-right disabled:opacity-50 min-h-[60px]"
                       >
-                        <span className="text-xs font-bold text-accent mb-1 block">{displayLabel}</span>
-                        <span className="text-sm font-medium text-foreground">{optionText}</span>
+                        <span className="text-xs font-bold text-accent mb-0.5 block">{displayLabel}</span>
+                        <span className="text-xs sm:text-sm font-medium text-foreground">{optionText}</span>
                       </motion.button>
                     );
                   });

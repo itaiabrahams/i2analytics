@@ -44,22 +44,22 @@ const BasicPlayerNav = () => {
       </div>
 
       {/* Bottom navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-t border-border">
-        <div className="flex items-center justify-around py-2 px-4 max-w-md mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border safe-area-bottom">
+        <div className="flex items-center justify-around py-1.5 px-2 max-w-md mx-auto">
           {tabs.map(tab => {
             const isActive = currentPath === tab.path || (tab.path === '/shots' && currentPath === '/');
             return (
               <button
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
-                className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all ${
+                className={`flex flex-col items-center gap-0.5 min-w-[56px] min-h-[44px] justify-center px-2 py-1 rounded-xl transition-all ${
                   isActive
                     ? 'text-accent scale-105'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <tab.icon className={`h-5 w-5 ${isActive ? 'drop-shadow-[0_0_6px_hsl(var(--accent)/0.5)]' : ''}`} />
-                <span className="text-xs font-medium">{tab.label}</span>
+                <span className="text-[10px] sm:text-xs font-medium">{tab.label}</span>
                 {isActive && <div className="h-0.5 w-4 rounded-full bg-accent" />}
               </button>
             );
