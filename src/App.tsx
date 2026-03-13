@@ -16,6 +16,7 @@ import ChallengesPage from "./pages/ChallengesPage";
 import Leaderboard from "./pages/Leaderboard";
 import TeamCoachFeedback from "./pages/TeamCoachFeedback";
 import NotFound from "./pages/NotFound";
+import BasicPlayerNav from "./components/BasicPlayerNav";
 
 const queryClient = new QueryClient();
 
