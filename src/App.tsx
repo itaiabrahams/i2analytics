@@ -36,7 +36,14 @@ const AppRoutes = () => {
   }
 
   if (!role) {
-    return <LandingPage />;
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
+          <Route path="*" element={<LandingPage />} />
+        </Routes>
+      </BrowserRouter>
+    );
   }
 
   if (!isApproved) {
@@ -56,6 +63,7 @@ const AppRoutes = () => {
         <Route path="/challenges" element={<ChallengesPage />} />
         <Route path="/player/:playerId/challenges" element={<ChallengesPage />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

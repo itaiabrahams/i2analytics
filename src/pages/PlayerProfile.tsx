@@ -154,10 +154,15 @@ const PlayerProfile = () => {
           </div>
         )}
 
-        {/* Ratings & Goals */}
+        {/* Ratings, Goals & Team Coach Feedback */}
         <div className="grid gap-4 md:grid-cols-2 mb-6">
           <PlayerGoals playerId={id} isCoach={auth.role === 'coach'} />
           <PlayerRatings playerId={id} isCoach={auth.role === 'coach'} />
+        </div>
+
+        {/* Team Coach Feedback */}
+        <div className="mb-6">
+          <TeamCoachFeedbackSection playerId={id} isPlayer={auth.role === 'player'} />
         </div>
 
         {/* Session history */}
