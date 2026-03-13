@@ -238,7 +238,7 @@ const CourtIQPage = () => {
         </div>
       )}
 
-      <div className="flex-1 flex flex-col items-center justify-center p-4">
+      <div className="flex-1 flex flex-col items-center justify-center p-3 sm:p-4 overflow-y-auto">
         <AnimatePresence mode="wait">
           {/* No active question */}
           {!currentQuestion && !result && (
