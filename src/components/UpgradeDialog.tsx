@@ -24,7 +24,7 @@ const plans = [
 
 const UpgradeDialog = ({ open, onOpenChange }: UpgradeDialogProps) => {
   const handleContact = () => {
-    window.open('https://wa.me/972000000000?text=היי, אני מעוניין לשדרג לליווי אישי!', '_blank');
+    window.open('https://wa.me/972526124759?text=היי, אני מעוניין לשדרג לליווי אישי!', '_blank');
   };
 
   return (
