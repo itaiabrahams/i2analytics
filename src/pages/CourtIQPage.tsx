@@ -312,7 +312,7 @@ const CourtIQPage = () => {
                     />
                   </svg>
                   <div className={`absolute inset-0 flex items-center justify-center ${isUrgent ? 'animate-pulse' : ''}`}>
-                    <span className={`text-3xl font-black ${isUrgent ? 'text-destructive' : 'text-foreground'}`}>{seconds}</span>
+                    <span className={`text-2xl sm:text-3xl font-black ${isUrgent ? 'text-destructive' : 'text-foreground'}`}>{seconds}</span>
                   </div>
                 </div>
               </div>
