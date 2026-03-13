@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRight, Check, X, UserCheck, UserX, Shield, Clock } from 'lucide-react';
+import { ArrowRight, Check, X, UserCheck, UserX, Shield, Clock, CreditCard, Crown, Target } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PendingUser {
@@ -15,7 +15,21 @@ interface PendingUser {
   position: string | null;
   is_approved: boolean;
   created_at: string;
+  subscription_tier: string;
+  payment_status: string;
 }
+
+const TIER_LABELS: Record<string, string> = {
+  free: 'חינם',
+  basic: 'מעקב קליעות',
+  premium: 'ליווי אישי',
+};
+
+const PAYMENT_LABELS: Record<string, string> = {
+  active: 'שולם',
+  pending: 'ממתין לתשלום',
+  expired: 'פג תוקף',
+};
 
 const UserManagement = () => {
   const { user } = useAuth();
@@ -26,7 +40,7 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('id, user_id, display_name, role, team, position, is_approved, created_at')
+      .select('id, user_id, display_name, role, team, position, is_approved, created_at, subscription_tier, payment_status')
       .neq('user_id', user?.id ?? '')
       .order('created_at', { ascending: false });
     if (data) setUsers(data as PendingUser[]);
@@ -37,14 +51,13 @@ const UserManagement = () => {
   const handleApprove = async (profileId: string, userId: string) => {
     const { error } = await supabase
       .from('profiles')
-      .update({ is_approved: true })
+      .update({ is_approved: true, payment_status: 'active' })
       .eq('id', profileId);
     if (error) {
       toast.error('שגיאה באישור המשתמש');
       return;
     }
 
-    // Send notification
     await supabase.from('notifications').insert({
       user_id: userId,
       title: 'החשבון שלך אושר!',
@@ -74,6 +87,20 @@ const UserManagement = () => {
     });
 
     toast.success('המשתמש נדחה');
+    fetchUsers();
+  };
+
+  const handleTogglePayment = async (profileId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'active' ? 'pending' : 'active';
+    const { error } = await supabase
+      .from('profiles')
+      .update({ payment_status: newStatus })
+      .eq('id', profileId);
+    if (error) {
+      toast.error('שגיאה בעדכון סטטוס תשלום');
+      return;
+    }
+    toast.success(newStatus === 'active' ? 'תשלום אושר' : 'תשלום בוטל');
     fetchUsers();
   };
 
@@ -136,7 +163,7 @@ const UserManagement = () => {
           ) : (
             displayed.map(u => (
               <div key={u.id} className="gradient-card rounded-xl p-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   {tab === 'pending' ? (
                     <>
                       <Button
@@ -157,23 +184,45 @@ const UserManagement = () => {
                       </Button>
                     </>
                   ) : (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleReject(u.id, u.user_id)}
-                      className="text-destructive hover:bg-destructive/10"
-                    >
-                      <UserX className="ml-1 h-4 w-4" />
-                      בטל גישה
-                    </Button>
+                    <>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleReject(u.id, u.user_id)}
+                        className="text-destructive hover:bg-destructive/10"
+                      >
+                        <UserX className="ml-1 h-4 w-4" />
+                        בטל גישה
+                      </Button>
+                      {u.role === 'player' && u.subscription_tier !== 'free' && (
+                        <Button
+                          size="sm"
+                          variant={u.payment_status === 'active' ? 'outline' : 'default'}
+                          onClick={() => handleTogglePayment(u.id, u.payment_status)}
+                          className={u.payment_status === 'active' ? 'text-muted-foreground' : 'gradient-primary text-primary-foreground'}
+                        >
+                          <CreditCard className="ml-1 h-4 w-4" />
+                          {u.payment_status === 'active' ? 'בטל תשלום' : 'אשר תשלום'}
+                        </Button>
+                      )}
+                    </>
                   )}
                 </div>
                 <div className="text-right">
-                  <div className="flex items-center gap-2 justify-end">
-                    <span className={`text-xs px-2 py-0.5 rounded ${
-                      u.role === 'coach' ? 'bg-accent/20 text-accent' : 'bg-primary/20 text-primary-foreground'
+                  <div className="flex items-center gap-2 justify-end flex-wrap">
+                    {u.role === 'player' && u.subscription_tier !== 'free' && (
+                      <span className={`text-xs px-2 py-0.5 rounded flex items-center gap-1 ${
+                        u.payment_status === 'active' ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive'
+                      }`}>
+                        <CreditCard className="h-3 w-3" />
+                        {PAYMENT_LABELS[u.payment_status] || u.payment_status}
+                      </span>
+                    )}
+                    <span className={`text-xs px-2 py-0.5 rounded flex items-center gap-1 ${
+                      u.subscription_tier === 'premium' ? 'bg-accent/20 text-accent' : 'bg-primary/20 text-primary-foreground'
                     }`}>
-                      {u.role === 'coach' ? 'מאמן' : 'שחקן'}
+                      {u.subscription_tier === 'premium' ? <Crown className="h-3 w-3" /> : u.role === 'player' ? <Target className="h-3 w-3" /> : null}
+                      {u.role === 'coach' ? 'מאמן' : TIER_LABELS[u.subscription_tier] || u.subscription_tier}
                     </span>
                     <p className="font-medium text-foreground">{u.display_name}</p>
                   </div>

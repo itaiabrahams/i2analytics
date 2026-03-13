@@ -285,8 +285,11 @@ export type Database = {
           id: string
           is_approved: boolean
           is_demo: boolean
+          payment_status: string
           position: string | null
           role: Database["public"]["Enums"]["app_role"]
+          subscription_note: string | null
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
           team: string | null
           team_coach_approved: boolean
           updated_at: string
@@ -300,8 +303,11 @@ export type Database = {
           id?: string
           is_approved?: boolean
           is_demo?: boolean
+          payment_status?: string
           position?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          subscription_note?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
           team?: string | null
           team_coach_approved?: boolean
           updated_at?: string
@@ -315,8 +321,11 @@ export type Database = {
           id?: string
           is_approved?: boolean
           is_demo?: boolean
+          payment_status?: string
           position?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          subscription_note?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
           team?: string | null
           team_coach_approved?: boolean
           updated_at?: string
@@ -631,6 +640,7 @@ export type Database = {
     }
     Enums: {
       app_role: "coach" | "player"
+      subscription_tier: "free" | "basic" | "premium"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -759,6 +769,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["coach", "player"],
+      subscription_tier: ["free", "basic", "premium"],
     },
   },
 } as const

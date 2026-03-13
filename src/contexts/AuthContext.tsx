@@ -8,11 +8,11 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: UserRole | null;
-  profile: { display_name: string; team?: string; position?: string; age?: number; is_approved?: boolean } | null;
+  profile: { display_name: string; team?: string; position?: string; age?: number; is_approved?: boolean; subscription_tier?: string; payment_status?: string } | null;
   isApproved: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
-  signup: (email: string, password: string, displayName: string, role: UserRole, coachId?: string) => Promise<{ error?: string }>;
+  signup: (email: string, password: string, displayName: string, role: UserRole, coachId?: string, subscriptionTier?: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   // Legacy compat for in-memory store
   auth: { role: UserRole | null; playerId: string | null };
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
       .from('profiles')
-      .select('display_name, role, team, position, age, is_approved')
+      .select('display_name, role, team, position, age, is_approved, subscription_tier, payment_status')
       .eq('user_id', userId)
       .single();
     if (data) {
@@ -43,6 +43,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         position: data.position ?? undefined,
         age: data.age ?? undefined,
         is_approved: data.is_approved ?? false,
+        subscription_tier: (data as any).subscription_tier ?? 'basic',
+        payment_status: (data as any).payment_status ?? 'pending',
       });
     }
   };
@@ -79,12 +81,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return {};
   };
 
-  const signup = async (email: string, password: string, displayName: string, signupRole: UserRole, coachId?: string) => {
+  const signup = async (email: string, password: string, displayName: string, signupRole: UserRole, coachId?: string, subscriptionTier?: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: displayName, role: signupRole, coach_id: coachId || null },
+        data: { display_name: displayName, role: signupRole, coach_id: coachId || null, subscription_tier: subscriptionTier || 'basic' },
         emailRedirectTo: window.location.origin,
       },
     });
