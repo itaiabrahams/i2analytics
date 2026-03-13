@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -16,6 +17,7 @@ const LoginPage = () => {
   const [displayName, setDisplayName] = useState('');
   const [role, setRole] = useState<'coach' | 'player'>('player');
   const [coachId, setCoachId] = useState('');
+  const [teamCoachApproved, setTeamCoachApproved] = useState(false);
   const [coaches, setCoaches] = useState<{ user_id: string; display_name: string }[]>([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -40,6 +42,7 @@ const LoginPage = () => {
     setDisplayName('');
     setRole('player');
     setCoachId('');
+    setTeamCoachApproved(false);
     setError('');
     setSuccess('');
   };
@@ -67,6 +70,10 @@ const LoginPage = () => {
     }
     if (role === 'player' && !coachId && coaches.length > 0) {
       setError('יש לבחור מאמן מלווה');
+      return;
+    }
+    if (role === 'player' && !teamCoachApproved) {
+      setError('יש לאשר שמאמן הקבוצה שלך אישר לך להיכנס לתהליך הליווי');
       return;
     }
     setIsLoading(true);
@@ -207,6 +214,19 @@ const LoginPage = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+              )}
+              {role === 'player' && (
+                <div className="flex items-start gap-3 rounded-lg bg-secondary/50 p-3 border border-border">
+                  <Checkbox
+                    id="teamCoachApproved"
+                    checked={teamCoachApproved}
+                    onCheckedChange={(checked) => { setTeamCoachApproved(checked === true); setError(''); }}
+                    className="mt-0.5"
+                  />
+                  <label htmlFor="teamCoachApproved" className="text-sm text-foreground cursor-pointer leading-relaxed">
+                    אני מאשר/ת שמאמן הקבוצה שלי יודע ואישר לי להיכנס לתהליך ליווי אישי
+                  </label>
                 </div>
               )}
               {error && <p className="text-sm text-destructive">{error}</p>}
