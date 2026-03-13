@@ -43,6 +43,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         position: data.position ?? undefined,
         age: data.age ?? undefined,
         is_approved: data.is_approved ?? false,
+        subscription_tier: (data as any).subscription_tier ?? 'basic',
+        payment_status: (data as any).payment_status ?? 'pending',
       });
     }
   };
