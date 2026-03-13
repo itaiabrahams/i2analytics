@@ -230,6 +230,33 @@ export type Database = {
           },
         ]
       }
+      courtiq_settings: {
+        Row: {
+          auto_publish_enabled: boolean
+          id: string
+          publish_end_hour: number
+          publish_start_hour: number
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          auto_publish_enabled?: boolean
+          id?: string
+          publish_end_hour?: number
+          publish_start_hour?: number
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          auto_publish_enabled?: boolean
+          id?: string
+          publish_end_hour?: number
+          publish_start_hour?: number
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       courtiq_suggestions: {
         Row: {
           category_id: string | null

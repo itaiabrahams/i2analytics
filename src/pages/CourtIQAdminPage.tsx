@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Sparkles, Check, X, ChevronLeft, Clock, Brain, Tag, Lightbulb, Edit } from 'lucide-react';
+import { Plus, Trash2, Sparkles, Check, X, ChevronLeft, Clock, Brain, Tag, Lightbulb, Edit, Upload, Power, PowerOff, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import type { CourtIQCategory } from '@/lib/courtiq-types';
@@ -77,23 +78,34 @@ const CourtIQAdminPage = () => {
   const [newCatIcon, setNewCatIcon] = useState('🏀');
   const [questionFilter, setQuestionFilter] = useState('all');
   const [editingQuestion, setEditingQuestion] = useState<string | null>(null);
+  const [autoPublishEnabled, setAutoPublishEnabled] = useState(true);
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
+  const [bulkText, setBulkText] = useState('');
+  const [bulkCategory, setBulkCategory] = useState('');
+  const [bulkImporting, setBulkImporting] = useState(false);
+  const [addToPool, setAddToPool] = useState(false);
 
   useEffect(() => {
     fetchAll();
   }, []);
 
   const fetchAll = async () => {
-    const [catsRes, qRes, sugRes] = await Promise.all([
+    const [catsRes, qRes, sugRes, settingsRes] = await Promise.all([
       supabase.from('courtiq_categories' as any).select('*').order('created_at'),
       supabase.from('courtiq_questions' as any).select('*').order('publish_at', { ascending: false }),
       supabase.from('courtiq_suggestions' as any).select('*').eq('status', 'pending').order('created_at', { ascending: false }),
+      supabase.from('courtiq_settings' as any).select('*').limit(1).single(),
     ]);
     if (catsRes.data) setCategories(catsRes.data as unknown as CourtIQCategory[]);
     if (qRes.data) setQuestions(qRes.data as unknown as QuestionRow[]);
     if (sugRes.data) setSuggestions(sugRes.data as unknown as SuggestionRow[]);
+    if (settingsRes.data) setAutoPublishEnabled((settingsRes.data as any).auto_publish_enabled);
   };
 
+  const poolCount = questions.filter(q => q.status === 'pool').length;
+
   const getStatus = (q: QuestionRow) => {
+    if (q.status === 'pool') return 'pool';
     const now = Date.now();
     const pub = new Date(q.publish_at).getTime();
     const exp = new Date(q.expires_at).getTime();
@@ -102,12 +114,26 @@ const CourtIQAdminPage = () => {
     return 'expired';
   };
 
+  const handleToggleAutoPublish = async (enabled: boolean) => {
+    setAutoPublishEnabled(enabled);
+    const { error } = await supabase.from('courtiq_settings' as any)
+      .update({ auto_publish_enabled: enabled, updated_at: new Date().toISOString(), updated_by: user!.id })
+      .not('id', 'is', null); // update all rows
+    if (error) { toast.error(error.message); return; }
+    toast.success(enabled ? 'פרסום אוטומטי הופעל ✅' : 'פרסום אוטומטי הופסק ⏸️');
+  };
+
   const handleCreateQuestion = async () => {
-    if (!form.question_text || !form.option_a || !form.option_b || !form.option_c || !form.option_d || !form.correct_option || !form.publish_at) {
+    if (!form.question_text || !form.option_a || !form.option_b || !form.option_c || !form.option_d || !form.correct_option) {
       toast.error('מלא את כל השדות הנדרשים');
       return;
     }
+    if (!addToPool && !form.publish_at) {
+      toast.error('בחר תזמון פרסום או סמן "הוסף למאגר"');
+      return;
+    }
     setCreating(true);
+    const isPool = addToPool;
     const { error } = await supabase.from('courtiq_questions' as any).insert({
       question_text: form.question_text,
       option_a: form.option_a,
@@ -119,13 +145,15 @@ const CourtIQAdminPage = () => {
       category_id: form.category_id || null,
       media_url: form.media_url || null,
       media_type: form.media_type || null,
-      publish_at: new Date(form.publish_at).toISOString(),
+      publish_at: isPool ? '2099-01-01T00:00:00Z' : new Date(form.publish_at).toISOString(),
+      status: isPool ? 'pool' : 'scheduled',
       created_by: user!.id,
     });
     setCreating(false);
     if (error) { toast.error(error.message); return; }
-    toast.success('השאלה נוצרה בהצלחה!');
+    toast.success(isPool ? 'השאלה נוספה למאגר!' : 'השאלה נוצרה בהצלחה!');
     setForm(defaultForm);
+    setAddToPool(false);
     fetchAll();
   };
 
@@ -180,7 +208,6 @@ const CourtIQAdminPage = () => {
   };
 
   const handleApproveSuggestion = async (sug: SuggestionRow) => {
-    // Create question from suggestion
     if (sug.option_a && sug.option_b && sug.option_c && sug.option_d && sug.correct_option) {
       setForm({
         question_text: sug.question_text,
@@ -207,6 +234,56 @@ const CourtIQAdminPage = () => {
     toast.success('נדחתה');
   };
 
+  const handleBulkImport = async () => {
+    if (!bulkText.trim()) return;
+    setBulkImporting(true);
+    const lines = bulkText.trim().split('\n').filter(l => l.trim());
+    const questionsToInsert: any[] = [];
+    let errors = 0;
+
+    for (const line of lines) {
+      const parts = line.split('|').map(p => p.trim());
+      if (parts.length < 6) { errors++; continue; }
+      const [questionText, optA, optB, optC, optD, correct, explanation] = parts;
+      if (!questionText || !optA || !optB || !optC || !optD || !['a', 'b', 'c', 'd'].includes(correct?.toLowerCase())) {
+        errors++;
+        continue;
+      }
+      questionsToInsert.push({
+        question_text: questionText,
+        option_a: optA,
+        option_b: optB,
+        option_c: optC,
+        option_d: optD,
+        correct_option: correct.toLowerCase(),
+        explanation: explanation || null,
+        category_id: bulkCategory || null,
+        publish_at: '2099-01-01T00:00:00Z',
+        status: 'pool',
+        created_by: user!.id,
+      });
+    }
+
+    if (questionsToInsert.length === 0) {
+      toast.error('לא נמצאו שאלות תקינות');
+      setBulkImporting(false);
+      return;
+    }
+
+    // Insert in batches of 50
+    for (let i = 0; i < questionsToInsert.length; i += 50) {
+      const batch = questionsToInsert.slice(i, i + 50);
+      const { error } = await supabase.from('courtiq_questions' as any).insert(batch);
+      if (error) { toast.error(error.message); setBulkImporting(false); return; }
+    }
+
+    toast.success(`${questionsToInsert.length} שאלות נוספו למאגר!${errors > 0 ? ` (${errors} שורות לא תקינות)` : ''}`);
+    setBulkText('');
+    setBulkImportOpen(false);
+    setBulkImporting(false);
+    fetchAll();
+  };
+
   const filteredQuestions = questions.filter(q => {
     if (questionFilter === 'all') return true;
     return getStatus(q) === questionFilter;
@@ -221,6 +298,66 @@ const CourtIQAdminPage = () => {
         <h1 className="text-lg font-bold text-foreground flex items-center gap-2">
           <Brain className="h-5 w-5 text-accent" /> ניהול COURT IQ
         </h1>
+      </div>
+
+      {/* Auto-publish toggle + pool stats */}
+      <div className="px-4 mt-4 space-y-3">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {autoPublishEnabled ? <Power className="h-5 w-5 text-success" /> : <PowerOff className="h-5 w-5 text-muted-foreground" />}
+                <div>
+                  <p className="font-semibold text-foreground text-sm">פרסום אוטומטי</p>
+                  <p className="text-xs text-muted-foreground">שאלה אקראית מהמאגר כל שעה (09:00-22:00)</p>
+                </div>
+              </div>
+              <Switch checked={autoPublishEnabled} onCheckedChange={handleToggleAutoPublish} />
+            </div>
+            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+              <Database className="h-4 w-4 text-accent" />
+              <span className="text-sm text-muted-foreground">
+                <span className="font-bold text-foreground">{poolCount}</span> שאלות במאגר
+              </span>
+              <Dialog open={bulkImportOpen} onOpenChange={setBulkImportOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" variant="outline" className="mr-auto gap-1.5 text-xs">
+                    <Upload className="h-3.5 w-3.5" /> ייבוא מאגר
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+                  <DialogHeader><DialogTitle>ייבוא שאלות למאגר</DialogTitle></DialogHeader>
+                  <div className="space-y-3 mt-2">
+                    <div className="text-xs text-muted-foreground bg-secondary rounded-lg p-3 space-y-1">
+                      <p className="font-bold text-foreground">פורמט: כל שורה = שאלה אחת, מופרדת ב-|</p>
+                      <p className="font-mono text-[10px]">שאלה | תשובה A | תשובה B | תשובה C | תשובה D | a/b/c/d | הסבר</p>
+                      <p className="mt-1">דוגמה:</p>
+                      <p className="font-mono text-[10px]">כמה שחקנים יש על המגרש? | 5 | 6 | 7 | 4 | a | כל קבוצה מורכבת מ-5 שחקנים</p>
+                    </div>
+                    <Select value={bulkCategory} onValueChange={setBulkCategory}>
+                      <SelectTrigger><SelectValue placeholder="קטגוריה (אופציונלי)" /></SelectTrigger>
+                      <SelectContent>
+                        {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Textarea
+                      placeholder="הדבק שאלות כאן..."
+                      value={bulkText}
+                      onChange={e => setBulkText(e.target.value)}
+                      rows={12}
+                      className="font-mono text-xs"
+                      dir="rtl"
+                    />
+                    <p className="text-xs text-muted-foreground">{bulkText.trim() ? `${bulkText.trim().split('\n').filter(l => l.trim()).length} שורות` : ''}</p>
+                    <Button onClick={handleBulkImport} disabled={bulkImporting} className="w-full gradient-accent text-accent-foreground">
+                      <Upload className="h-4 w-4 ml-2" /> {bulkImporting ? 'מייבא...' : 'ייבא למאגר'}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs defaultValue="questions" className="px-4 mt-4">
@@ -283,19 +420,37 @@ const CourtIQAdminPage = () => {
                 ))}
               </div>
               <Textarea placeholder="הסבר (מוצג אחרי תשובה)" value={form.explanation} onChange={e => setForm(p => ({ ...p, explanation: e.target.value }))} rows={2} />
-              <div>
-                <Label className="text-xs text-muted-foreground">תזמון פרסום *</Label>
-                <Input type="datetime-local" value={form.publish_at} onChange={e => setForm(p => ({ ...p, publish_at: e.target.value }))} />
+              
+              {/* Add to pool toggle */}
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary">
+                <Switch checked={addToPool} onCheckedChange={setAddToPool} />
+                <div>
+                  <p className="text-sm font-medium text-foreground">הוסף למאגר</p>
+                  <p className="text-xs text-muted-foreground">השאלה תפורסם אוטומטית בזמן אקראי</p>
+                </div>
               </div>
+
+              {!addToPool && (
+                <div>
+                  <Label className="text-xs text-muted-foreground">תזמון פרסום *</Label>
+                  <Input type="datetime-local" value={form.publish_at} onChange={e => setForm(p => ({ ...p, publish_at: e.target.value }))} />
+                </div>
+              )}
               <Button onClick={handleCreateQuestion} disabled={creating} className="w-full gradient-accent text-accent-foreground">
-                <Plus className="h-4 w-4 ml-2" /> {creating ? 'שומר...' : 'צור שאלה'}
+                <Plus className="h-4 w-4 ml-2" /> {creating ? 'שומר...' : addToPool ? 'הוסף למאגר' : 'צור שאלה'}
               </Button>
             </CardContent>
           </Card>
 
           {/* Filter */}
-          <div className="flex gap-2">
-            {[{ v: 'all', l: 'הכל' }, { v: 'scheduled', l: 'מתוזמנות' }, { v: 'active', l: 'פעילות' }, { v: 'expired', l: 'פג תוקף' }].map(f => (
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { v: 'all', l: 'הכל' },
+              { v: 'pool', l: `מאגר (${poolCount})` },
+              { v: 'scheduled', l: 'מתוזמנות' },
+              { v: 'active', l: 'פעילות' },
+              { v: 'expired', l: 'פג תוקף' },
+            ].map(f => (
               <Button key={f.v} size="sm" variant={questionFilter === f.v ? 'default' : 'outline'} onClick={() => setQuestionFilter(f.v)}>
                 {f.l}
               </Button>
@@ -312,18 +467,20 @@ const CourtIQAdminPage = () => {
                   <CardContent className="p-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant={status === 'active' ? 'default' : status === 'scheduled' ? 'secondary' : 'outline'} className="text-xs">
-                            {status === 'active' ? '🟢 פעילה' : status === 'scheduled' ? '🕐 מתוזמנת' : '⏱️ פג תוקף'}
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <Badge variant={status === 'active' ? 'default' : status === 'scheduled' ? 'secondary' : status === 'pool' ? 'outline' : 'outline'} className="text-xs">
+                            {status === 'active' ? '🟢 פעילה' : status === 'scheduled' ? '🕐 מתוזמנת' : status === 'pool' ? '📦 מאגר' : '⏱️ פג תוקף'}
                           </Badge>
                           {cat && <span className="text-xs" style={{ color: cat.color }}>{cat.icon} {cat.name}</span>}
                           {q.is_ai_generated && <Badge variant="outline" className="text-xs">AI</Badge>}
                         </div>
                         <p className="text-sm text-foreground truncate">{q.question_text}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          <Clock className="h-3 w-3 inline ml-1" />
-                          {new Date(q.publish_at).toLocaleString('he-IL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                        </p>
+                        {status !== 'pool' && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            <Clock className="h-3 w-3 inline ml-1" />
+                            {new Date(q.publish_at).toLocaleString('he-IL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        )}
                       </div>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteQuestion(q.id)}>
                         <Trash2 className="h-4 w-4" />
