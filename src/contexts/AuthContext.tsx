@@ -8,7 +8,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: UserRole | null;
-  profile: { display_name: string; team?: string; position?: string; age?: number; is_approved?: boolean } | null;
+  profile: { display_name: string; team?: string; position?: string; age?: number; is_approved?: boolean; subscription_tier?: string; payment_status?: string } | null;
   isApproved: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
