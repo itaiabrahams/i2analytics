@@ -12,6 +12,24 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import type { ActiveQuestion, CourtIQStats, AnswerResult, OptionKey, CourtIQCategory } from '@/lib/courtiq-types';
 
+// Deterministic shuffle based on playerId + questionId to prevent copying
+function getShuffledOptions(questionId: string, playerId: string) {
+  let seed = 0;
+  const str = questionId + playerId;
+  for (let i = 0; i < str.length; i++) {
+    seed = ((seed << 5) - seed) + str.charCodeAt(i);
+    seed |= 0;
+  }
+  const keys: OptionKey[] = ['a', 'b', 'c', 'd'];
+  const shuffled = [...keys];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    const j = seed % (i + 1);
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled; // shuffled[displayIndex] = originalKey
+}
+
 const TIMER_DURATION = 15000;
 
 const CourtIQPage = () => {
