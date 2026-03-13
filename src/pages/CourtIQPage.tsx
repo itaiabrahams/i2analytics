@@ -43,9 +43,9 @@ const CourtIQPage = () => {
       supabase.from('courtiq_player_stats' as any).select('*').eq('player_id', user.id).maybeSingle(),
       supabase.from('courtiq_categories' as any).select('*'),
     ]);
-    if (questionsRes.data) setQuestions(questionsRes.data as ActiveQuestion[]);
-    if (statsRes.data) setStats(statsRes.data as CourtIQStats);
-    if (catsRes.data) setCategories(catsRes.data as CourtIQCategory[]);
+    if (questionsRes.data) setQuestions(questionsRes.data as unknown as ActiveQuestion[]);
+    if (statsRes.data) setStats(statsRes.data as unknown as CourtIQStats);
+    if (catsRes.data) setCategories(catsRes.data as unknown as CourtIQCategory[]);
     setLoading(false);
   }, [user]);
 
