@@ -81,12 +81,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return {};
   };
 
-  const signup = async (email: string, password: string, displayName: string, signupRole: UserRole, coachId?: string) => {
+  const signup = async (email: string, password: string, displayName: string, signupRole: UserRole, coachId?: string, subscriptionTier?: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: displayName, role: signupRole, coach_id: coachId || null },
+        data: { display_name: displayName, role: signupRole, coach_id: coachId || null, subscription_tier: subscriptionTier || 'basic' },
         emailRedirectTo: window.location.origin,
       },
     });
