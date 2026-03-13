@@ -20,7 +20,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
-  const { role, loading, isApproved } = useAuth();
+  const { role, loading, isApproved, profile } = useAuth();
 
   if (loading) {
     return (
@@ -50,21 +50,36 @@ const AppRoutes = () => {
     return <PendingApproval />;
   }
 
+  const isBasicPlayer = role === 'player' && profile?.subscription_tier === 'basic';
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={role === 'coach' ? <CoachDashboard /> : <PlayerProfile />} />
-        <Route path="/player/:playerId" element={<PlayerProfile />} />
-        <Route path="/player/:playerId/new-session" element={<NewSession />} />
-        <Route path="/session/:sessionId" element={<SessionDetail />} />
-        <Route path="/player/:playerId/shots" element={<ShotTracker />} />
-        <Route path="/shots" element={<ShotTracker />} />
-        <Route path="/manage-users" element={<UserManagement />} />
-        <Route path="/challenges" element={<ChallengesPage />} />
-        <Route path="/player/:playerId/challenges" element={<ChallengesPage />} />
-        <Route path="/leaderboard" element={<Leaderboard />} />
-        <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
-        <Route path="*" element={<NotFound />} />
+        {isBasicPlayer ? (
+          <>
+            <Route path="/" element={<ShotTracker />} />
+            <Route path="/shots" element={<ShotTracker />} />
+            <Route path="/challenges" element={<ChallengesPage />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
+            <Route path="*" element={<ShotTracker />} />
+          </>
+        ) : (
+          <>
+            <Route path="/" element={role === 'coach' ? <CoachDashboard /> : <PlayerProfile />} />
+            <Route path="/player/:playerId" element={<PlayerProfile />} />
+            <Route path="/player/:playerId/new-session" element={<NewSession />} />
+            <Route path="/session/:sessionId" element={<SessionDetail />} />
+            <Route path="/player/:playerId/shots" element={<ShotTracker />} />
+            <Route path="/shots" element={<ShotTracker />} />
+            <Route path="/manage-users" element={<UserManagement />} />
+            <Route path="/challenges" element={<ChallengesPage />} />
+            <Route path="/player/:playerId/challenges" element={<ChallengesPage />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
+            <Route path="*" element={<NotFound />} />
+          </>
+        )}
       </Routes>
     </BrowserRouter>
   );
