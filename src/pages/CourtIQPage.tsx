@@ -331,23 +331,27 @@ const CourtIQPage = () => {
                 )}
               </div>
 
-              {/* Options */}
+              {/* Options - shuffled per player */}
               <div className="grid grid-cols-2 gap-3">
-                {(['a', 'b', 'c', 'd'] as const).map(key => {
-                  const optionText = currentQuestion[`option_${key}` as keyof ActiveQuestion] as string;
-                  return (
-                    <motion.button
-                      key={key}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleAnswer(key)}
-                      disabled={answering}
-                      className="p-4 rounded-xl border-2 border-border bg-card hover:border-accent hover:bg-secondary transition-all text-right disabled:opacity-50"
-                    >
-                      <span className="text-xs font-bold text-accent mb-1 block">{key.toUpperCase()}</span>
-                      <span className="text-sm font-medium text-foreground">{optionText}</span>
-                    </motion.button>
-                  );
-                })}
+                {(() => {
+                  const shuffledKeys = user ? getShuffledOptions(currentQuestion.id, user.id) : (['a', 'b', 'c', 'd'] as OptionKey[]);
+                  return shuffledKeys.map((originalKey, displayIndex) => {
+                    const displayLabel = ['A', 'B', 'C', 'D'][displayIndex];
+                    const optionText = currentQuestion[`option_${originalKey}` as keyof ActiveQuestion] as string;
+                    return (
+                      <motion.button
+                        key={originalKey}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleAnswer(originalKey)}
+                        disabled={answering}
+                        className="p-4 rounded-xl border-2 border-border bg-card hover:border-accent hover:bg-secondary transition-all text-right disabled:opacity-50"
+                      >
+                        <span className="text-xs font-bold text-accent mb-1 block">{displayLabel}</span>
+                        <span className="text-sm font-medium text-foreground">{optionText}</span>
+                      </motion.button>
+                    );
+                  });
+                })()}
               </div>
             </motion.div>
           )}
