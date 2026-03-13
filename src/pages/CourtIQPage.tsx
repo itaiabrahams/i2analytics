@@ -283,7 +283,7 @@ const CourtIQPage = () => {
 
           {/* Active question */}
           {currentQuestion && !result && (
-            <motion.div key="question" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="w-full max-w-lg space-y-6">
+            <motion.div key="question" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="w-full max-w-lg space-y-4 sm:space-y-6">
               {/* Expiry warning */}
               {getExpiryWarning() && (
                 <div className="text-center text-sm text-destructive animate-pulse font-medium">
