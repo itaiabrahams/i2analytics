@@ -216,6 +216,19 @@ const LoginPage = () => {
                   </Select>
                 </div>
               )}
+              {role === 'player' && (
+                <div className="flex items-start gap-3 rounded-lg bg-secondary/50 p-3 border border-border">
+                  <Checkbox
+                    id="teamCoachApproved"
+                    checked={teamCoachApproved}
+                    onCheckedChange={(checked) => { setTeamCoachApproved(checked === true); setError(''); }}
+                    className="mt-0.5"
+                  />
+                  <label htmlFor="teamCoachApproved" className="text-sm text-foreground cursor-pointer leading-relaxed">
+                    אני מאשר/ת שמאמן הקבוצה שלי יודע ואישר לי להיכנס לתהליך ליווי אישי
+                  </label>
+                </div>
+              )}
               {error && <p className="text-sm text-destructive">{error}</p>}
               {success && <p className="text-sm text-success">{success}</p>}
               <Button onClick={handleSignup} disabled={isLoading} className="w-full gradient-accent text-accent-foreground h-12 text-lg font-semibold">
