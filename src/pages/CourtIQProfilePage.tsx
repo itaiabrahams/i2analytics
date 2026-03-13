@@ -174,7 +174,10 @@ const CourtIQProfilePage = () => {
             </div>
 
             <p className="text-sm text-accent font-medium pt-1">{getAchievementPhrase()}</p>
-            <p className="text-[10px] text-muted-foreground/50 pt-2">i2analytics.lovable.app/courtiq</p>
+            {profile?.position && (
+              <p className="text-xs text-muted-foreground">{profile.position} · {profile.team || ''}</p>
+            )}
+            <p className="text-[10px] text-muted-foreground/50 pt-2">🏀 i2analytics.lovable.app/courtiq</p>
           </div>
         </motion.div>
 

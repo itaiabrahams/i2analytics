@@ -39,6 +39,10 @@ const CoachDashboard = () => {
             <p className="text-muted-foreground">ניהול שחקנים וסשנים</p>
           </div>
           <div className="flex gap-3 items-center">
+            <Button variant="outline" onClick={() => navigate('/courtiq/admin')} className="text-muted-foreground">
+              <Brain className="ml-2 h-4 w-4" />
+              Court IQ
+            </Button>
             <Button variant="outline" onClick={() => navigate('/manage-users')} className="text-muted-foreground">
               <Shield className="ml-2 h-4 w-4" />
               ניהול משתמשים
