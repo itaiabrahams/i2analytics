@@ -14,6 +14,7 @@ import UserManagement from "./pages/UserManagement";
 import ShotTracker from "./pages/ShotTracker";
 import ChallengesPage from "./pages/ChallengesPage";
 import Leaderboard from "./pages/Leaderboard";
+import TeamCoachFeedback from "./pages/TeamCoachFeedback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
