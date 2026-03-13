@@ -208,25 +208,25 @@ const CourtIQPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Stats Bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <Flame className="h-5 w-5 text-orange-500" />
-            <span className="font-bold text-foreground">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1">
+            <Flame className="h-4 w-4 text-orange-500" />
+            <span className="font-bold text-sm text-foreground">
               {stats ? (stats.questions_today >= 3 ? stats.current_streak + 1 : stats.current_streak) : 0}
             </span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Star className="h-5 w-5 text-yellow-500" />
-            <span className="font-bold text-foreground">{stats?.total_points || 0}</span>
+          <div className="flex items-center gap-1">
+            <Star className="h-4 w-4 text-yellow-500" />
+            <span className="font-bold text-sm text-foreground">{stats?.total_points || 0}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/courtiq/leaderboard')} className="text-muted-foreground gap-1">
-            <Trophy className="h-4 w-4" /> דירוג
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/courtiq/leaderboard')} className="text-muted-foreground gap-1 h-8 px-2 text-xs">
+            <Trophy className="h-3.5 w-3.5" /> דירוג
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/courtiq/profile')} className="text-muted-foreground gap-1">
-            <Brain className="h-4 w-4" /> פרופיל
+          <Button variant="ghost" size="sm" onClick={() => navigate('/courtiq/profile')} className="text-muted-foreground gap-1 h-8 px-2 text-xs">
+            <Brain className="h-3.5 w-3.5" /> פרופיל
           </Button>
         </div>
       </div>
