@@ -23,19 +23,20 @@ const BasicPlayerNav = () => {
   return (
     <>
       {/* Top bar with upgrade + logout */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border px-3 py-2 flex items-center justify-between safe-area-top">
+        <div className="flex items-center gap-1.5">
           <Button
             size="sm"
             onClick={() => setUpgradeOpen(true)}
-            className="gradient-accent text-accent-foreground gap-1.5 font-semibold"
+            className="gradient-accent text-accent-foreground gap-1 font-semibold text-xs h-8 px-2.5"
           >
-            <Crown className="h-4 w-4" />
-            שדרג לליווי אישי
+            <Crown className="h-3.5 w-3.5" />
+            <span className="hidden xs:inline">שדרג לליווי אישי</span>
+            <span className="xs:hidden">שדרג</span>
           </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-foreground">I² Analytics</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs sm:text-sm font-bold text-foreground">I² Analytics</span>
           <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground h-8 w-8">
             <LogOut className="h-4 w-4" />
           </Button>
