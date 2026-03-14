@@ -104,10 +104,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsApproved(false);
   };
 
+  const refreshProfile = async () => {
+    if (user) await fetchProfile(user.id);
+  };
+
   const auth = { role, playerId: user?.id ?? null };
 
   return (
-    <AuthContext.Provider value={{ user, session, role, profile, isApproved, loading, login, signup, logout, auth }}>
+    <AuthContext.Provider value={{ user, session, role, profile, isApproved, loading, login, signup, logout, refreshProfile, auth }}>
       {children}
     </AuthContext.Provider>
   );
