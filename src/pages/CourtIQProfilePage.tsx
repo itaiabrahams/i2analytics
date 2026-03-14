@@ -53,23 +53,59 @@ const CourtIQProfilePage = () => {
     setLoading(false);
   };
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [cropImage, setCropImage] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+
+  const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
+    setCroppedAreaPixels(croppedPixels);
+  }, []);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('הקובץ גדול מדי (מקסימום 2MB)');
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('הקובץ גדול מדי (מקסימום 5MB)');
       return;
     }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImage(reader.result as string);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+    };
+    reader.readAsDataURL(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const getCroppedBlob = async (): Promise<Blob> => {
+    const image = new Image();
+    image.src = cropImage!;
+    await new Promise(r => { image.onload = r; });
+    const canvas = document.createElement('canvas');
+    const size = 400;
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d')!;
+    const { x, y, width, height } = croppedAreaPixels!;
+    ctx.drawImage(image, x, y, width, height, 0, 0, size, size);
+    return new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.9));
+  };
+
+  const handleCropSave = async () => {
+    if (!user || !croppedAreaPixels) return;
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop();
-      const path = `${user.id}/avatar.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+      const blob = await getCroppedBlob();
+      const path = `${user.id}/avatar.jpg`;
+      const { error: uploadErr } = await supabase.storage.from('avatars').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
       if (uploadErr) throw uploadErr;
       const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
       const urlWithCacheBust = `${publicUrl}?t=${Date.now()}`;
       await supabase.from('profiles').update({ avatar_url: urlWithCacheBust } as any).eq('user_id', user.id);
       setAvatarUrl(urlWithCacheBust);
+      setCropImage(null);
       toast.success('התמונה עודכנה!');
     } catch (err) {
       console.error(err);
