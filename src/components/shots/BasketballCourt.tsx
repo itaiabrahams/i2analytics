@@ -14,41 +14,42 @@ const cx = 250;
 const baseY = 40;
 const basketY = baseY + 15;
 
-// Paint: 16ft wide × 19ft deep
-const paintW = 160;
-const paintH = 190;
-const paintL = cx - paintW / 2; // 170
-const paintR = cx + paintW / 2; // 330
-const paintB = baseY + paintH;  // 230
-const paintMid = baseY + paintH / 2; // 135
+// Paint: 16ft wide × 15ft deep (compact to stay inside 3pt arc)
+const paintW = 140;
+const paintH = 155;
+const paintL = cx - paintW / 2;
+const paintR = cx + paintW / 2;
+const paintB = baseY + paintH;
+const paintMid = baseY + paintH / 2;
 
-// Free throw circle
-const ftR = 60;
+// Free throw circle (at paint bottom, well inside 3pt arc)
+const ftR = 55;
 
-// 3pt: arc radius 238px from basket, corner lines 140px from center
-const threeR = 238;
+// 3pt: arc radius 245px from basket — clearly outside FT circle
+// FT circle bottom from basket = paintH + ftR = 210, 3pt = 245, gap = 35px
+const threeR = 245;
 const corner3X = 140;
-const corner3L = cx - corner3X; // 110
-const corner3R_x = cx + corner3X; // 390
+const corner3L = cx - corner3X;
+const corner3R_x = cx + corner3X;
 
 // Where corner lines meet the arc
 const arcCornerDy = Math.sqrt(threeR * threeR - corner3X * corner3X);
 const arcCornerY = basketY + arcCornerDy;
 
-// Court height: just past the arc bottom
+// Court height
 const courtH = basketY + threeR + 50;
 
-// Angular divisions of the arc
+// Angular divisions: 3 equal sectors between corners, perfectly symmetric around π/2
 const cornerAngle = Math.acos(corner3X / threeR);
 const arcSpan = Math.PI - 2 * cornerAngle;
 const sector = arcSpan / 3;
-const angA = cornerAngle;
-const angB = cornerAngle + sector;
-const angC = cornerAngle + 2 * sector;
-const angD = Math.PI - cornerAngle;
+const angA = cornerAngle;            // right corner
+const angB = cornerAngle + sector;   // right-center boundary
+const angC = cornerAngle + 2 * sector; // left-center boundary (mirror of angB around π/2)
+const angD = Math.PI - cornerAngle;  // left corner (mirror of angA)
 
 // 3pt band thickness
-const band = 35;
+const band = 38;
 const outerR = threeR + band;
 
 // Helper: point on circle from basket center
