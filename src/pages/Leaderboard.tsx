@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Trophy, Medal, Crown, Flame } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format, startOfDay, startOfWeek, startOfMonth } from 'date-fns';
+import { getVerbalRating } from '@/lib/shotZones';
 
 type Period = 'daily' | 'weekly' | 'monthly' | 'all';
 
