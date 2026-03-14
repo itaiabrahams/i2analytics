@@ -24,6 +24,9 @@ const CourtIQProfilePage = () => {
   const [stats, setStats] = useState<CourtIQStats | null>(null);
   const [weeklyRank, setWeeklyRank] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
