@@ -1,4 +1,4 @@
-import { ZoneStats, ZONES, isColdZone } from '@/lib/shotZones';
+import { ZoneStats, ZONES, isColdZone, getVerbalRating } from '@/lib/shotZones';
 import { AlertTriangle, Target, TrendingUp } from 'lucide-react';
 
 interface Props {
@@ -9,6 +9,7 @@ const ShotStats = ({ zoneStats }: Props) => {
   const totalAttempts = zoneStats.reduce((s, z) => s + z.attempts, 0);
   const totalMade = zoneStats.reduce((s, z) => s + z.made, 0);
   const overallPct = totalAttempts > 0 ? Math.round((totalMade / totalAttempts) * 100) : 0;
+  const overallVerbal = getVerbalRating(overallPct, totalAttempts);
 
   const threeStats = zoneStats.filter(z => ZONES.find(zone => zone.id === z.zone)?.type === '3pt');
   const midStats = zoneStats.filter(z => ZONES.find(zone => zone.id === z.zone)?.type === 'mid');
@@ -39,7 +40,8 @@ const ShotStats = ({ zoneStats }: Props) => {
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <p className="text-2xl font-bold text-accent">{overallPct}%</p>
-            <p className="text-xs text-muted-foreground">אחוז קליעה</p>
+            <p className={`text-xs font-semibold ${overallVerbal.color}`}>{overallVerbal.label}</p>
+            <p className="text-[10px] text-muted-foreground">אחוז קליעה</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-foreground">{totalMade}</p>
@@ -63,15 +65,19 @@ const ShotStats = ({ zoneStats }: Props) => {
             { label: 'שלוש נקודות', ...three, color: 'text-accent' },
             { label: 'Mid Range', ...mid, color: 'text-warning' },
             { label: 'צבע', ...paint, color: 'text-success' },
-          ].map(area => (
-            <div key={area.label} className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className={`font-bold ${area.color}`}>{area.pct}%</span>
-                <span className="text-xs text-muted-foreground">{area.md}/{area.att}</span>
+          ].map(area => {
+            const verbal = getVerbalRating(area.pct, area.att);
+            return (
+              <div key={area.label} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className={`font-bold ${area.color}`}>{area.pct}%</span>
+                  <span className={`text-xs font-medium ${verbal.color}`}>({verbal.label})</span>
+                  <span className="text-xs text-muted-foreground">{area.md}/{area.att}</span>
+                </div>
+                <span className="text-sm text-foreground">{area.label}</span>
               </div>
-              <span className="text-sm text-foreground">{area.label}</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
