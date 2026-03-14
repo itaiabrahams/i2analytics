@@ -361,6 +361,33 @@ const CourtIQProfilePage = () => {
         </Card>
       </div>
 
+      {/* Edit Profile Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-sm" dir="rtl">
+          <DialogTitle className="text-base font-bold text-foreground">עריכת פרופיל</DialogTitle>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">שם</Label>
+              <Input id="edit-name" value={editName} onChange={e => setEditName(e.target.value)} placeholder="השם שלך" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-team">קבוצה</Label>
+              <Input id="edit-team" value={editTeam} onChange={e => setEditTeam(e.target.value)} placeholder="שם הקבוצה" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-position">עמדה</Label>
+              <Input id="edit-position" value={editPosition} onChange={e => setEditPosition(e.target.value)} placeholder="למשל: פוינט גארד" />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setEditOpen(false)}>ביטול</Button>
+              <Button className="flex-1" onClick={handleSaveProfile} disabled={saving || !editName.trim()}>
+                {saving ? 'שומר...' : 'שמור'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Crop Dialog */}
       <Dialog open={!!cropImage} onOpenChange={(open) => { if (!open) setCropImage(null); }}>
         <DialogContent className="max-w-sm p-0 overflow-hidden">
