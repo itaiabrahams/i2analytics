@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -6,9 +6,12 @@ import { Flame, Star, Target, Brain, Trophy, Share2, ChevronLeft, TrendingUp, Za
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import Cropper from 'react-easy-crop';
 import type { CourtIQStats, LeaderboardEntry } from '@/lib/courtiq-types';
+import type { Area } from 'react-easy-crop';
 
 interface Achievement {
   id: string;
