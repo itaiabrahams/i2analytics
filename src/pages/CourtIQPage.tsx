@@ -209,6 +209,9 @@ const CourtIQPage = () => {
     <div className="min-h-screen flex flex-col">
       {/* Stats Bar */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="h-8 w-8 text-muted-foreground">
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
             <Flame className="h-4 w-4 text-orange-500" />
