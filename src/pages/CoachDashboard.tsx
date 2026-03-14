@@ -102,18 +102,19 @@ const CoachDashboard = () => {
           <>
             {/* Age Category Tiles */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {categoriesToShow.map((cat, i) => {
+              {AGE_CATEGORIES.filter(cat => cat.key !== 'לא מוגדר' || groupedPlayers['לא מוגדר'].length > 0).map((cat, i) => {
                 const catPlayers = groupedPlayers[cat.key];
+                const isEmpty = catPlayers.length === 0;
                 return (
                   <button
                     key={cat.key}
                     onClick={() => setSelectedCategory(cat.key)}
-                    className="gradient-card rounded-2xl p-6 text-center transition-all hover:scale-[1.03] hover:shadow-xl animate-fade-in border border-border/50"
+                    className={`gradient-card rounded-2xl p-6 text-center transition-all hover:scale-[1.03] hover:shadow-xl animate-fade-in border ${isEmpty ? 'border-border/30 opacity-70' : 'border-accent/30'}`}
                     style={{ animationDelay: `${i * 80}ms` }}
                   >
                     <span className="text-4xl block mb-3">{cat.emoji}</span>
                     <h2 className="text-2xl font-black text-foreground mb-1">{cat.label}</h2>
-                    <Badge variant="secondary" className="text-sm font-bold">
+                    <Badge variant={isEmpty ? 'outline' : 'secondary'} className="text-sm font-bold">
                       {catPlayers.length} שחקנים
                     </Badge>
                   </button>
