@@ -322,6 +322,45 @@ const CourtIQProfilePage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Crop Dialog */}
+      <Dialog open={!!cropImage} onOpenChange={(open) => { if (!open) setCropImage(null); }}>
+        <DialogContent className="max-w-sm p-0 overflow-hidden">
+          <DialogTitle className="px-4 pt-4 text-base font-bold text-foreground">כוון את התמונה</DialogTitle>
+          <div className="relative w-full h-72 bg-black">
+            {cropImage && (
+              <Cropper
+                image={cropImage}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            )}
+          </div>
+          <div className="px-4 pb-4 space-y-3">
+            <input
+              type="range"
+              min={1}
+              max={3}
+              step={0.05}
+              value={zoom}
+              onChange={(e) => setZoom(Number(e.target.value))}
+              className="w-full accent-[hsl(var(--accent))]"
+            />
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setCropImage(null)}>ביטול</Button>
+              <Button className="flex-1 gradient-accent text-accent-foreground" onClick={handleCropSave} disabled={uploading}>
+                {uploading ? 'שומר...' : 'שמור תמונה'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
