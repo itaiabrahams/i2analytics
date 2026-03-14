@@ -333,9 +333,9 @@ const LoginPage = () => {
                 <div className="rounded-lg bg-accent/10 border border-accent/30 p-3 text-right">
                   <p className="text-sm text-foreground font-medium">
                     {subscriptionTier === 'basic'
-                      ? '💳 עלות: 30₪ לחודש — התשלום מתבצע מחוץ לאפליקציה'
+                      ? '💳 עלות: 30₪ לחודש · התשלום מתבצע מחוץ לאפליקציה'
                       : premiumPackage
-                        ? `💳 חבילה שנבחרה: ${premiumPackage === 'single' ? 'סשן בודד — 350₪' : premiumPackage === 'monthly' ? 'מנוי חודשי — 1,500₪/חודש' : 'מנוי עונתי — 1,250₪/חודש'} — התשלום מתבצע מחוץ לאפליקציה`
+                        ? `💳 חבילה שנבחרה: ${premiumPackage === 'single' ? 'סשן בודד · 350₪' : premiumPackage === 'monthly' ? 'מנוי חודשי · 1,500₪/חודש' : 'מנוי עונתי · 1,250₪/חודש'} · התשלום מתבצע מחוץ לאפליקציה`
                         : '💳 התשלום לליווי אישי מתבצע מחוץ לאפליקציה בהתאם לחבילה שנבחרה'}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">לאחר ביצוע התשלום, המאמן יאשר את הגישה שלך</p>

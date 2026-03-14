@@ -98,7 +98,7 @@ const CourtIQProfilePage = () => {
       appLink;
 
     if (navigator.share) {
-      await navigator.share({ title: 'COURT IQ — כרטיס שחקן', text, url: appLink });
+      await navigator.share({ title: 'COURT IQ | כרטיס שחקן', text, url: appLink });
     } else {
       await navigator.clipboard.writeText(text);
       toast.success('הכרטיס הועתק ללוח!');

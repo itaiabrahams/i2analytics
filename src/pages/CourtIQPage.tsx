@@ -151,8 +151,8 @@ const CourtIQPage = () => {
 
   const handleShare = async () => {
     const text = result?.is_correct
-      ? `🏀 COURT IQ — עניתי נכון וצברתי ${result.points_earned} נקודות! 🔥\nStreak: ${stats?.current_streak || 0} ימים\n${window.location.origin}/courtiq`
-      : `🏀 COURT IQ — אתגר הידע הכדורסלני!\n${window.location.origin}/courtiq`;
+      ? `🏀 COURT IQ | עניתי נכון וצברתי ${result.points_earned} נקודות! 🔥\nStreak: ${stats?.current_streak || 0} ימים\n${window.location.origin}/courtiq`
+      : `🏀 COURT IQ | אתגר הידע הכדורסלני!\n${window.location.origin}/courtiq`;
     if (navigator.share) {
       await navigator.share({ text });
     } else {
