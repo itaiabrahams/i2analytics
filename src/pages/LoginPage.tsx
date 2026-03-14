@@ -230,7 +230,7 @@ const LoginPage = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => { setSubscriptionTier('basic'); setCoachId(''); setError(''); }}
+                      onClick={() => { setSubscriptionTier('basic'); setCoachId(''); setPremiumPackage(''); setError(''); }}
                       className={`rounded-xl border-2 p-4 text-right transition-all ${
                         subscriptionTier === 'basic'
                           ? 'border-accent bg-accent/10'
