@@ -1,11 +1,33 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain } from 'lucide-react';
+import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ChevronDown, ChevronUp } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
 import AddPlayerDialog from '@/components/AddPlayerDialog';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Badge } from '@/components/ui/badge';
+
+type AgeCategory = 'U14' | 'U15' | 'U16' | 'U18' | 'SENIOR' | 'לא מוגדר';
+
+const AGE_CATEGORIES: { key: AgeCategory; label: string; minAge: number; maxAge: number }[] = [
+  { key: 'U14', label: 'U14', minAge: 0, maxAge: 13 },
+  { key: 'U15', label: 'U15', minAge: 14, maxAge: 14 },
+  { key: 'U16', label: 'U16', minAge: 15, maxAge: 15 },
+  { key: 'U18', label: 'U18', minAge: 16, maxAge: 17 },
+  { key: 'SENIOR', label: 'SENIOR', minAge: 18, maxAge: 99 },
+  { key: 'לא מוגדר', label: 'לא מוגדר', minAge: -1, maxAge: -1 },
+];
+
+function getAgeCategory(age: number | null): AgeCategory {
+  if (age == null) return 'לא מוגדר';
+  for (const cat of AGE_CATEGORIES) {
+    if (cat.key === 'לא מוגדר') continue;
+    if (age >= cat.minAge && age <= cat.maxAge) return cat.key;
+  }
+  return 'SENIOR';
+}
 
 const CoachDashboard = () => {
   const { logout, user } = useAuth();
@@ -13,8 +35,8 @@ const CoachDashboard = () => {
   const { players, loading, refetch } = usePlayers();
   const sessionCounts = usePlayerSessionCounts();
   const [addPlayerOpen, setAddPlayerOpen] = useState(false);
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
 
-  // Filter players: show coach's own players + demo players
   const myPlayers = players.filter(p => p.coach_id === user?.id || p.is_demo);
 
   const playerData = myPlayers.map(p => {
@@ -23,8 +45,28 @@ const CoachDashboard = () => {
     if (sc.latestScores.length >= 2) {
       trend = sc.latestScores[0] > sc.latestScores[1] ? 'up' : sc.latestScores[0] < sc.latestScores[1] ? 'down' : 'neutral';
     }
-    return { ...p, sessionsCount: sc.count, avgScore: sc.avgScore, trend };
+    return { ...p, sessionsCount: sc.count, avgScore: sc.avgScore, trend, ageCategory: getAgeCategory(p.age) };
   });
+
+  const groupedPlayers = useMemo(() => {
+    const groups: Record<AgeCategory, typeof playerData> = {
+      'U14': [], 'U15': [], 'U16': [], 'U18': [], 'SENIOR': [], 'לא מוגדר': [],
+    };
+    playerData.forEach(p => {
+      groups[p.ageCategory].push(p);
+    });
+    return groups;
+  }, [playerData]);
+
+  const toggleCategory = (key: string) => {
+    setOpenCategories(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  // Auto-open categories that have players
+  const isCategoryOpen = (key: string) => {
+    if (openCategories[key] !== undefined) return openCategories[key];
+    return (groupedPlayers[key as AgeCategory]?.length || 0) > 0;
+  };
 
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
@@ -63,46 +105,75 @@ const CoachDashboard = () => {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          {playerData.map((p, i) => (
-            <button
-              key={p.id}
-              onClick={() => navigate(`/player/${p.user_id}`)}
-              className="gradient-card rounded-xl p-6 text-right transition-all hover:scale-[1.02] hover:shadow-lg animate-fade-in"
-              style={{ animationDelay: `${i * 100}ms` }}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  {p.is_demo && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent font-medium">דמו</span>
-                  )}
-                  {p.trend === 'up' && <TrendingUp className="h-5 w-5 text-success" />}
-                  {p.trend === 'down' && <TrendingDown className="h-5 w-5 text-destructive" />}
-                  {p.trend === 'neutral' && <Minus className="h-5 w-5 text-muted-foreground" />}
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-foreground">{p.display_name}</h3>
-                  <p className="text-sm text-muted-foreground">{p.position} · {p.team}</p>
-                </div>
-              </div>
-              <div className="mt-4 flex gap-6 justify-end">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-accent">{p.avgScore.toFixed(2)}</p>
-                  <p className="text-xs text-muted-foreground">ציון ממוצע</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{p.sessionsCount}</p>
-                  <p className="text-xs text-muted-foreground">סשנים</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{p.age ?? '-'}</p>
-                  <p className="text-xs text-muted-foreground">גיל</p>
-                </div>
-              </div>
-            </button>
-          ))}
+        {/* Age Category Groups */}
+        <div className="space-y-4">
+          {AGE_CATEGORIES.map(cat => {
+            const catPlayers = groupedPlayers[cat.key];
+            if (catPlayers.length === 0) return null;
+            const isOpen = isCategoryOpen(cat.key);
+
+            return (
+              <Collapsible key={cat.key} open={isOpen} onOpenChange={() => toggleCategory(cat.key)}>
+                <CollapsibleTrigger className="w-full">
+                  <div className="flex items-center justify-between rounded-xl bg-secondary/60 px-5 py-3 hover:bg-secondary/80 transition-colors cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="secondary" className="text-xs font-bold">
+                        {catPlayers.length} שחקנים
+                      </Badge>
+                      <h2 className="text-lg font-bold text-foreground">{cat.label}</h2>
+                    </div>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 mt-3">
+                    {catPlayers.map((p, i) => (
+                      <button
+                        key={p.id}
+                        onClick={() => navigate(`/player/${p.user_id}`)}
+                        className="gradient-card rounded-xl p-6 text-right transition-all hover:scale-[1.02] hover:shadow-lg animate-fade-in"
+                        style={{ animationDelay: `${i * 100}ms` }}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2">
+                            {p.is_demo && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent font-medium">דמו</span>
+                            )}
+                            {p.trend === 'up' && <TrendingUp className="h-5 w-5 text-success" />}
+                            {p.trend === 'down' && <TrendingDown className="h-5 w-5 text-destructive" />}
+                            {p.trend === 'neutral' && <Minus className="h-5 w-5 text-muted-foreground" />}
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-foreground">{p.display_name}</h3>
+                            <p className="text-sm text-muted-foreground">{p.position} · {p.team}</p>
+                          </div>
+                        </div>
+                        <div className="mt-4 flex gap-6 justify-end">
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-accent">{p.avgScore.toFixed(2)}</p>
+                            <p className="text-xs text-muted-foreground">ציון ממוצע</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-foreground">{p.sessionsCount}</p>
+                            <p className="text-xs text-muted-foreground">סשנים</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-foreground">{p.age ?? '-'}</p>
+                            <p className="text-xs text-muted-foreground">גיל</p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            );
+          })}
+
           {myPlayers.length === 0 && (
-            <div className="gradient-card rounded-xl p-8 text-center col-span-2">
+            <div className="gradient-card rounded-xl p-8 text-center">
               <p className="text-muted-foreground">אין שחקנים עדיין. לחץ על "הוסף שחקן" כדי להוסיף שחקן חדש, או שחקנים יופיעו כאן לאחר שיירשמו ויאושרו.</p>
             </div>
           )}

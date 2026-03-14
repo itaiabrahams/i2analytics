@@ -229,7 +229,11 @@ const CourtIQProfilePage = () => {
 
       <div className="p-4 space-y-4">
         {/* Player Card */}
-        <motion.div ref={cardRef} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+        <motion.div
+          ref={cardRef}
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="relative overflow-hidden rounded-2xl border-2 border-accent/30 p-6"
           style={{ background: 'linear-gradient(135deg, hsl(220, 35%, 14%), hsl(220, 60%, 10%), hsl(25, 40%, 12%))' }}
         >
@@ -240,7 +244,10 @@ const CourtIQProfilePage = () => {
 
           <div className="relative z-10 text-center space-y-3">
             <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleFileSelect} />
-            <div
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.2, duration: 0.5, type: 'spring', stiffness: 200 }}
               onClick={() => fileInputRef.current?.click()}
               className="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-3xl gradient-accent cursor-pointer relative overflow-hidden group"
             >
@@ -253,47 +260,56 @@ const CourtIQProfilePage = () => {
                 <Camera className="h-5 w-5 text-white" />
               </div>
               {uploading && <div className="absolute inset-0 bg-black/60 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /></div>}
-            </div>
-            <div className="relative">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="relative"
+            >
               <h2 className="text-xl font-black text-foreground">{profile?.display_name}</h2>
               {profile?.team && <p className="text-sm text-muted-foreground">{profile.team}</p>}
               <button onClick={openEditDialog} className="absolute -left-2 top-0 p-1 rounded-full hover:bg-accent/20 transition-colors">
                 <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
               </button>
-            </div>
+            </motion.div>
 
-            <div className="grid grid-cols-4 gap-2 pt-2">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Flame className="h-4 w-4 text-orange-500" />
-                  <span className="font-black text-lg text-foreground">{stats?.current_streak || 0}</span>
-                </div>
-                <p className="text-xs text-muted-foreground">Streak</p>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <span className="font-black text-lg text-foreground">{stats?.total_points || 0}</span>
-                </div>
-                <p className="text-xs text-muted-foreground">נקודות</p>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Trophy className="h-4 w-4 text-accent" />
-                  <span className="font-black text-lg text-foreground">#{weeklyRank || '—'}</span>
-                </div>
-                <p className="text-xs text-muted-foreground">דירוג</p>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Target className="h-4 w-4 text-success" />
-                  <span className="font-black text-lg text-foreground">{accuracy}%</span>
-                </div>
-                <p className="text-xs text-muted-foreground">דיוק</p>
-              </div>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="grid grid-cols-4 gap-2 pt-2"
+            >
+              {[
+                { icon: <Flame className="h-4 w-4 text-orange-500" />, value: stats?.current_streak || 0, label: 'Streak' },
+                { icon: <Star className="h-4 w-4 text-yellow-500" />, value: stats?.total_points || 0, label: 'נקודות' },
+                { icon: <Trophy className="h-4 w-4 text-accent" />, value: `#${weeklyRank || '—'}`, label: 'דירוג' },
+                { icon: <Target className="h-4 w-4 text-success" />, value: `${accuracy}%`, label: 'דיוק' },
+              ].map((item, i) => (
+                <motion.div
+                  key={item.label}
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 + i * 0.1, type: 'spring', stiffness: 300 }}
+                  className="text-center"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    {item.icon}
+                    <span className="font-black text-lg text-foreground">{item.value}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{item.label}</p>
+                </motion.div>
+              ))}
+            </motion.div>
 
-            <p className="text-sm text-accent font-medium pt-1">{getAchievementPhrase()}</p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.9 }}
+              className="text-sm text-accent font-medium pt-1"
+            >
+              {getAchievementPhrase()}
+            </motion.p>
             {profile?.position && (
               <p className="text-xs text-muted-foreground">{profile.position} · {profile.team || ''}</p>
             )}
@@ -307,58 +323,78 @@ const CourtIQProfilePage = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <TrendingUp className="h-5 w-5 mx-auto mb-1 text-accent" />
-              <p className="text-2xl font-black text-foreground">{stats?.total_answered || 0}</p>
-              <p className="text-xs text-muted-foreground">שאלות שנענו</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Zap className="h-5 w-5 mx-auto mb-1 text-yellow-500" />
-              <p className="text-2xl font-black text-foreground">{stats?.correct_streak || 0}</p>
-              <p className="text-xs text-muted-foreground">רצף נכונות</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Flame className="h-5 w-5 mx-auto mb-1 text-orange-500" />
-              <p className="text-2xl font-black text-foreground">{stats?.longest_streak || 0}</p>
-              <p className="text-xs text-muted-foreground">Streak שיא</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Award className="h-5 w-5 mx-auto mb-1 text-purple-500" />
-              <p className="text-2xl font-black text-foreground">{unlockedCount}/{achievements.length}</p>
-              <p className="text-xs text-muted-foreground">הישגים</p>
-            </CardContent>
-          </Card>
+          {[
+            { icon: <TrendingUp className="h-5 w-5 mx-auto mb-1 text-accent" />, value: stats?.total_answered || 0, label: 'שאלות שנענו' },
+            { icon: <Zap className="h-5 w-5 mx-auto mb-1 text-yellow-500" />, value: stats?.correct_streak || 0, label: 'רצף נכונות' },
+            { icon: <Flame className="h-5 w-5 mx-auto mb-1 text-orange-500" />, value: stats?.longest_streak || 0, label: 'Streak שיא' },
+            { icon: <Award className="h-5 w-5 mx-auto mb-1 text-purple-500" />, value: `${unlockedCount}/${achievements.length}`, label: 'הישגים' },
+          ].map((item, i) => (
+            <motion.div
+              key={item.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.1 }}
+            >
+              <Card>
+                <CardContent className="p-4 text-center">
+                  {item.icon}
+                  <p className="text-2xl font-black text-foreground">{item.value}</p>
+                  <p className="text-xs text-muted-foreground">{item.label}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
         </div>
 
         {/* Achievements */}
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
-              <Award className="h-5 w-5 text-accent" /> הישגים
-            </h3>
-            <div className="grid grid-cols-3 gap-2">
-              {achievements.map(ach => (
-                <motion.div
-                  key={ach.id}
-                  whileTap={{ scale: 0.95 }}
-                  className={`p-3 rounded-xl text-center transition-all ${
-                    ach.unlocked ? 'bg-accent/10 border border-accent/30' : 'bg-muted/30 border border-border opacity-50'
-                  }`}
-                >
-                  <span className="text-2xl block mb-1">{ach.icon}</span>
-                  <p className="text-[10px] font-medium text-foreground leading-tight">{ach.title}</p>
-                </motion.div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+        >
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
+                <Award className="h-5 w-5 text-accent" /> הישגים
+              </h3>
+              <div className="grid grid-cols-3 gap-2">
+                {achievements.map((ach, i) => (
+                  <motion.div
+                    key={ach.id}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.8 + i * 0.06 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`p-3 rounded-xl text-center transition-all relative ${
+                      ach.unlocked
+                        ? 'bg-accent/10 border border-accent/30'
+                        : 'bg-muted/30 border border-border opacity-50'
+                    }`}
+                    style={ach.unlocked ? {
+                      boxShadow: '0 0 15px hsla(25, 95%, 53%, 0.3), 0 0 30px hsla(25, 95%, 53%, 0.15)',
+                    } : undefined}
+                  >
+                    {ach.unlocked && (
+                      <motion.div
+                        className="absolute inset-0 rounded-xl"
+                        animate={{
+                          boxShadow: [
+                            '0 0 10px hsla(25, 95%, 53%, 0.2)',
+                            '0 0 20px hsla(25, 95%, 53%, 0.4)',
+                            '0 0 10px hsla(25, 95%, 53%, 0.2)',
+                          ],
+                        }}
+                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                      />
+                    )}
+                    <span className="text-2xl block mb-1 relative z-10">{ach.icon}</span>
+                    <p className="text-[10px] font-medium text-foreground leading-tight relative z-10">{ach.title}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Edit Profile Dialog */}
