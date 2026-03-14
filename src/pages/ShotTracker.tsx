@@ -136,11 +136,9 @@ const ShotTracker = () => {
                 </h1>
                 {player && <p className="text-xs text-muted-foreground">{player.display_name}</p>}
               </div>
-              {isCoach && (
-                <Button variant="ghost" size="sm" onClick={() => navigate(`/player/${id}`)} className="text-muted-foreground h-8 px-2">
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              )}
+              <Button variant="ghost" size="sm" onClick={() => isCoach ? navigate(`/player/${id}`) : navigate('/')} className="text-muted-foreground h-8 px-2">
+                <ArrowRight className="h-4 w-4" />
+              </Button>
             </div>
           </div>
           {/* Action buttons row */}
