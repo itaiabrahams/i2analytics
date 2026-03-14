@@ -254,9 +254,12 @@ const CourtIQProfilePage = () => {
               </div>
               {uploading && <div className="absolute inset-0 bg-black/60 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /></div>}
             </div>
-            <div>
+            <div className="relative">
               <h2 className="text-xl font-black text-foreground">{profile?.display_name}</h2>
               {profile?.team && <p className="text-sm text-muted-foreground">{profile.team}</p>}
+              <button onClick={openEditDialog} className="absolute -left-2 top-0 p-1 rounded-full hover:bg-accent/20 transition-colors">
+                <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
             </div>
 
             <div className="grid grid-cols-4 gap-2 pt-2">
