@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { getVerbalRating } from '@/lib/shotZones';
 
 interface SessionShotData {
   title: string;
@@ -41,7 +42,10 @@ const ShotProgressChart = ({ sessions, allShots }: ShotProgressChartProps) => {
           <YAxis tick={{ fill: 'hsl(215,15%,55%)', fontSize: 12 }} domain={[0, 100]} unit="%" />
           <Tooltip
             contentStyle={{ background: 'hsl(220,35%,12%)', border: '1px solid hsl(220,25%,20%)', borderRadius: 8, color: 'hsl(210,20%,92%)' }}
-            formatter={(value: number) => [`${value}%`, 'אחוז קליעה']}
+            formatter={(value: number) => {
+              const verbal = getVerbalRating(value, 1);
+              return [`${value}% (${verbal.label})`, 'אחוז קליעה'];
+            }}
           />
           <Line type="monotone" dataKey="percentage" stroke="hsl(25,95%,53%)" strokeWidth={3} dot={{ fill: 'hsl(25,95%,53%)', r: 5 }} />
         </LineChart>

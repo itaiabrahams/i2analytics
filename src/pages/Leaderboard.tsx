@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Trophy, Medal, Crown, Flame } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format, startOfDay, startOfWeek, startOfMonth } from 'date-fns';
+import { getVerbalRating } from '@/lib/shotZones';
 
 type Period = 'daily' | 'weekly' | 'monthly' | 'all';
 
@@ -207,7 +208,9 @@ const Leaderboard = () => {
                     <p className={`text-lg font-black ${i === 0 ? 'text-warning' : 'text-accent'}`}>
                       {player.percentage}%
                     </p>
-                    <p className="text-[10px] text-muted-foreground">אחוז</p>
+                    <p className={`text-[10px] font-medium ${getVerbalRating(player.percentage, player.attempts).color}`}>
+                      {getVerbalRating(player.percentage, player.attempts).label}
+                    </p>
                   </div>
                 </div>
               </button>

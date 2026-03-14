@@ -46,6 +46,22 @@ export const FINISH_TYPE_LABELS: Record<FinishType, string> = {
   power_finish: 'Power Finish',
 };
 
+// Distinct color for each zone
+export const ZONE_COLORS: Record<ZoneId, string> = {
+  corner_r_3: 'hsla(0, 75%, 55%, 0.55)',      // red
+  wing_r_3: 'hsla(25, 85%, 55%, 0.55)',       // orange
+  top_3: 'hsla(45, 85%, 50%, 0.55)',          // gold
+  wing_l_3: 'hsla(80, 60%, 45%, 0.55)',       // lime
+  corner_l_3: 'hsla(150, 60%, 40%, 0.55)',    // green
+  corner_r_mid: 'hsla(180, 55%, 45%, 0.55)',  // teal
+  wing_r_mid: 'hsla(200, 65%, 50%, 0.55)',    // sky blue
+  top_mid: 'hsla(220, 60%, 55%, 0.55)',       // blue
+  wing_l_mid: 'hsla(260, 55%, 55%, 0.55)',    // purple
+  corner_l_mid: 'hsla(290, 50%, 50%, 0.55)',  // magenta
+  free_throw: 'hsla(320, 55%, 50%, 0.55)',    // pink
+  under_basket: 'hsla(340, 60%, 50%, 0.55)',  // rose
+};
+
 // Get heat color based on shooting percentage
 export function getHeatColor(percentage: number, attempts: number): string {
   if (attempts === 0) return 'hsla(220, 60%, 30%, 0.15)';
@@ -58,4 +74,15 @@ export function getHeatColor(percentage: number, attempts: number): string {
 
 export function isColdZone(percentage: number, attempts: number): boolean {
   return attempts >= 3 && percentage < 30;
+}
+
+// Verbal rating for a percentage
+export function getVerbalRating(percentage: number, attempts: number): { label: string; color: string } {
+  if (attempts === 0) return { label: 'אין נתונים', color: 'text-muted-foreground' };
+  if (percentage >= 80) return { label: 'מצויין', color: 'text-success' };
+  if (percentage >= 65) return { label: 'טוב מאוד', color: 'text-success' };
+  if (percentage >= 50) return { label: 'טוב', color: 'text-accent' };
+  if (percentage >= 35) return { label: 'סביר', color: 'text-warning' };
+  if (percentage >= 20) return { label: 'דרוש שיפור', color: 'text-destructive' };
+  return { label: 'חלש', color: 'text-destructive' };
 }
