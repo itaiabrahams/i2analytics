@@ -24,7 +24,7 @@ interface Achievement {
 }
 
 const CourtIQProfilePage = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<CourtIQStats | null>(null);
   const [weeklyRank, setWeeklyRank] = useState(0);
