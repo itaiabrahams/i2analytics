@@ -57,7 +57,8 @@ const CoachDashboard = () => {
     return groups;
   }, [playerData]);
 
-  const categoriesWithPlayers = AGE_CATEGORIES.filter(cat => groupedPlayers[cat.key].length > 0);
+  // Show all categories, even empty ones (except 'לא מוגדר' if empty)
+  const categoriesToShow = AGE_CATEGORIES.filter(cat => cat.key !== 'לא מוגדר' || groupedPlayers[cat.key].length > 0);
 
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
@@ -101,7 +102,7 @@ const CoachDashboard = () => {
           <>
             {/* Age Category Tiles */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {categoriesWithPlayers.map((cat, i) => {
+              {categoriesToShow.map((cat, i) => {
                 const catPlayers = groupedPlayers[cat.key];
                 return (
                   <button
