@@ -399,9 +399,9 @@ const CourtIQPage = () => {
 
               {/* Stats */}
               <div className="text-xs sm:text-sm text-muted-foreground">
-                {result.is_correct
-                  ? `${result.correct_percentage}% מהשחקנים ענו נכון — ${result.correct_percentage < 50 ? 'אתה בין המובילים! 🌟' : 'יפה מאוד! 💪'}`
-                  : `${100 - result.correct_percentage}% גם טעו — ${result.correct_percentage < 50 ? 'זו שאלה קשה! 💪' : 'בפעם הבאה! 🔥'}`}
+                  {result.is_correct
+                  ? `${result.correct_percentage}% מהשחקנים ענו נכון · ${result.correct_percentage < 50 ? 'אתה בין המובילים! 🌟' : 'יפה מאוד! 💪'}`
+                  : `${100 - result.correct_percentage}% גם טעו · ${result.correct_percentage < 50 ? 'זו שאלה קשה! 💪' : 'בפעם הבאה! 🔥'}`}
               </div>
 
               {/* Correct streak badge */}
