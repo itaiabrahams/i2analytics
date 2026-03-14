@@ -231,8 +231,8 @@ const LoginPage = () => {
                       }`}
                     >
                       <Target className="h-6 w-6 text-accent mb-2" />
-                      <p className="font-semibold text-foreground text-sm">מעקב קליעות</p>
-                      <p className="text-xs text-muted-foreground mt-1">אתגרים, טבלת מובילים, מעקב זריקות</p>
+                      <p className="font-semibold text-foreground text-sm">מעקב קליעות + Court IQ</p>
+                      <p className="text-xs text-muted-foreground mt-1">אתגרים, טבלת מובילים, מעקב זריקות, חידון כדורסל</p>
                       <p className="text-accent font-bold mt-2">30₪ / חודש</p>
                     </button>
                     <button
