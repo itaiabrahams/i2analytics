@@ -21,6 +21,7 @@ import CourtIQPage from "./pages/CourtIQPage";
 import CourtIQLeaderboardPage from "./pages/CourtIQLeaderboardPage";
 import CourtIQProfilePage from "./pages/CourtIQProfilePage";
 import CourtIQAdminPage from "./pages/CourtIQAdminPage";
+import RoleSwitcher from "./components/RoleSwitcher";
 
 const queryClient = new QueryClient();
 
