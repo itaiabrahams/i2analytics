@@ -48,6 +48,7 @@ const LoginPage = () => {
     setCoachId('');
     setTeamCoachApproved(false);
     setSubscriptionTier('basic');
+    setPremiumPackage('');
     setError('');
     setSuccess('');
   };
