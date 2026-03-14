@@ -165,8 +165,20 @@ const CourtIQProfilePage = () => {
           </div>
 
           <div className="relative z-10 text-center space-y-3">
-            <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl gradient-accent">
-              {profile?.display_name?.[0]?.toUpperCase() || '?'}
+            <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-3xl gradient-accent cursor-pointer relative overflow-hidden group"
+            >
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                profile?.display_name?.[0]?.toUpperCase() || '?'
+              )}
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="h-5 w-5 text-white" />
+              </div>
+              {uploading && <div className="absolute inset-0 bg-black/60 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /></div>}
             </div>
             <div>
               <h2 className="text-xl font-black text-foreground">{profile?.display_name}</h2>
