@@ -102,7 +102,7 @@ const CoachDashboard = () => {
           <>
             {/* Age Category Tiles */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {categoriesWithPlayers.map((cat, i) => {
+              {categoriesToShow.map((cat, i) => {
                 const catPlayers = groupedPlayers[cat.key];
                 return (
                   <button
