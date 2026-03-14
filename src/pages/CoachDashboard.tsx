@@ -2,22 +2,21 @@ import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ChevronDown, ChevronUp } from 'lucide-react';
+import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
 import AddPlayerDialog from '@/components/AddPlayerDialog';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Badge } from '@/components/ui/badge';
 
 type AgeCategory = 'U14' | 'U15' | 'U16' | 'U18' | 'SENIOR' | 'לא מוגדר';
 
-const AGE_CATEGORIES: { key: AgeCategory; label: string; minAge: number; maxAge: number }[] = [
-  { key: 'U14', label: 'U14', minAge: 0, maxAge: 13 },
-  { key: 'U15', label: 'U15', minAge: 14, maxAge: 14 },
-  { key: 'U16', label: 'U16', minAge: 15, maxAge: 15 },
-  { key: 'U18', label: 'U18', minAge: 16, maxAge: 17 },
-  { key: 'SENIOR', label: 'SENIOR', minAge: 18, maxAge: 99 },
-  { key: 'לא מוגדר', label: 'לא מוגדר', minAge: -1, maxAge: -1 },
+const AGE_CATEGORIES: { key: AgeCategory; label: string; minAge: number; maxAge: number; emoji: string }[] = [
+  { key: 'U14', label: 'U14', minAge: 0, maxAge: 13, emoji: '🏀' },
+  { key: 'U15', label: 'U15', minAge: 14, maxAge: 14, emoji: '🏀' },
+  { key: 'U16', label: 'U16', minAge: 15, maxAge: 15, emoji: '🏀' },
+  { key: 'U18', label: 'U18', minAge: 16, maxAge: 17, emoji: '🏀' },
+  { key: 'SENIOR', label: 'SENIOR', minAge: 18, maxAge: 99, emoji: '⭐' },
+  { key: 'לא מוגדר', label: 'לא מוגדר', minAge: -1, maxAge: -1, emoji: '❓' },
 ];
 
 function getAgeCategory(age: number | null): AgeCategory {
@@ -35,7 +34,7 @@ const CoachDashboard = () => {
   const { players, loading, refetch } = usePlayers();
   const sessionCounts = usePlayerSessionCounts();
   const [addPlayerOpen, setAddPlayerOpen] = useState(false);
-  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
+  const [selectedCategory, setSelectedCategory] = useState<AgeCategory | null>(null);
 
   const myPlayers = players.filter(p => p.coach_id === user?.id || p.is_demo);
 
@@ -58,15 +57,7 @@ const CoachDashboard = () => {
     return groups;
   }, [playerData]);
 
-  const toggleCategory = (key: string) => {
-    setOpenCategories(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  // Auto-open categories that have players
-  const isCategoryOpen = (key: string) => {
-    if (openCategories[key] !== undefined) return openCategories[key];
-    return (groupedPlayers[key as AgeCategory]?.length || 0) > 0;
-  };
+  const categoriesWithPlayers = AGE_CATEGORIES.filter(cat => groupedPlayers[cat.key].length > 0);
 
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
@@ -80,7 +71,7 @@ const CoachDashboard = () => {
             <h1 className="text-3xl font-bold text-foreground">לוח בקרה</h1>
             <p className="text-muted-foreground">ניהול שחקנים וסשנים</p>
           </div>
-          <div className="flex gap-3 items-center">
+          <div className="flex gap-3 items-center flex-wrap justify-end">
             <Button variant="outline" onClick={() => navigate('/courtiq/admin')} className="text-muted-foreground">
               <Brain className="ml-2 h-4 w-4" />
               Court IQ
@@ -105,79 +96,92 @@ const CoachDashboard = () => {
           </div>
         </div>
 
-        {/* Age Category Groups */}
-        <div className="space-y-4">
-          {AGE_CATEGORIES.map(cat => {
-            const catPlayers = groupedPlayers[cat.key];
-            if (catPlayers.length === 0) return null;
-            const isOpen = isCategoryOpen(cat.key);
-
-            return (
-              <Collapsible key={cat.key} open={isOpen} onOpenChange={() => toggleCategory(cat.key)}>
-                <CollapsibleTrigger className="w-full">
-                  <div className="flex items-center justify-between rounded-xl bg-secondary/60 px-5 py-3 hover:bg-secondary/80 transition-colors cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="secondary" className="text-xs font-bold">
-                        {catPlayers.length} שחקנים
-                      </Badge>
-                      <h2 className="text-lg font-bold text-foreground">{cat.label}</h2>
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 mt-3">
-                    {catPlayers.map((p, i) => (
-                      <button
-                        key={p.id}
-                        onClick={() => navigate(`/player/${p.user_id}`)}
-                        className="gradient-card rounded-xl p-6 text-right transition-all hover:scale-[1.02] hover:shadow-lg animate-fade-in"
-                        style={{ animationDelay: `${i * 100}ms` }}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2">
-                            {p.is_demo && (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent font-medium">דמו</span>
-                            )}
-                            {p.trend === 'up' && <TrendingUp className="h-5 w-5 text-success" />}
-                            {p.trend === 'down' && <TrendingDown className="h-5 w-5 text-destructive" />}
-                            {p.trend === 'neutral' && <Minus className="h-5 w-5 text-muted-foreground" />}
-                          </div>
-                          <div>
-                            <h3 className="text-xl font-bold text-foreground">{p.display_name}</h3>
-                            <p className="text-sm text-muted-foreground">{p.position} · {p.team}</p>
-                          </div>
-                        </div>
-                        <div className="mt-4 flex gap-6 justify-end">
-                          <div className="text-center">
-                            <p className="text-2xl font-bold text-accent">{p.avgScore.toFixed(2)}</p>
-                            <p className="text-xs text-muted-foreground">ציון ממוצע</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-2xl font-bold text-foreground">{p.sessionsCount}</p>
-                            <p className="text-xs text-muted-foreground">סשנים</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-2xl font-bold text-foreground">{p.age ?? '-'}</p>
-                            <p className="text-xs text-muted-foreground">גיל</p>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            );
-          })}
-
-          {myPlayers.length === 0 && (
-            <div className="gradient-card rounded-xl p-8 text-center">
-              <p className="text-muted-foreground">אין שחקנים עדיין. לחץ על "הוסף שחקן" כדי להוסיף שחקן חדש, או שחקנים יופיעו כאן לאחר שיירשמו ויאושרו.</p>
+        {/* Category view or Player list view */}
+        {selectedCategory === null ? (
+          <>
+            {/* Age Category Tiles */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {categoriesWithPlayers.map((cat, i) => {
+                const catPlayers = groupedPlayers[cat.key];
+                return (
+                  <button
+                    key={cat.key}
+                    onClick={() => setSelectedCategory(cat.key)}
+                    className="gradient-card rounded-2xl p-6 text-center transition-all hover:scale-[1.03] hover:shadow-xl animate-fade-in border border-border/50"
+                    style={{ animationDelay: `${i * 80}ms` }}
+                  >
+                    <span className="text-4xl block mb-3">{cat.emoji}</span>
+                    <h2 className="text-2xl font-black text-foreground mb-1">{cat.label}</h2>
+                    <Badge variant="secondary" className="text-sm font-bold">
+                      {catPlayers.length} שחקנים
+                    </Badge>
+                  </button>
+                );
+              })}
             </div>
-          )}
-        </div>
+
+            {myPlayers.length === 0 && (
+              <div className="gradient-card rounded-xl p-8 text-center mt-4">
+                <p className="text-muted-foreground">אין שחקנים עדיין. לחץ על "הוסף שחקן" כדי להוסיף שחקן חדש.</p>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {/* Back + Category title */}
+            <div className="flex items-center justify-between mb-6">
+              <div />
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold text-foreground">{selectedCategory}</h2>
+                <Button variant="ghost" size="sm" onClick={() => setSelectedCategory(null)} className="text-muted-foreground">
+                  חזרה לקטגוריות
+                  <ArrowRight className="mr-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Players in category */}
+            <div className="grid gap-4 md:grid-cols-2">
+              {groupedPlayers[selectedCategory].map((p, i) => (
+                <button
+                  key={p.id}
+                  onClick={() => navigate(`/player/${p.user_id}`)}
+                  className="gradient-card rounded-xl p-6 text-right transition-all hover:scale-[1.02] hover:shadow-lg animate-fade-in"
+                  style={{ animationDelay: `${i * 100}ms` }}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-2">
+                      {p.is_demo && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent font-medium">דמו</span>
+                      )}
+                      {p.trend === 'up' && <TrendingUp className="h-5 w-5 text-success" />}
+                      {p.trend === 'down' && <TrendingDown className="h-5 w-5 text-destructive" />}
+                      {p.trend === 'neutral' && <Minus className="h-5 w-5 text-muted-foreground" />}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-foreground">{p.display_name}</h3>
+                      <p className="text-sm text-muted-foreground">{p.position} · {p.team}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex gap-6 justify-end">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-accent">{p.avgScore.toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground">ציון ממוצע</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-foreground">{p.sessionsCount}</p>
+                      <p className="text-xs text-muted-foreground">סשנים</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-foreground">{p.age ?? '-'}</p>
+                      <p className="text-xs text-muted-foreground">גיל</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
       <AddPlayerDialog open={addPlayerOpen} onOpenChange={setAddPlayerOpen} onSaved={refetch} />
     </div>
