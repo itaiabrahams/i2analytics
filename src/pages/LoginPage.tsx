@@ -10,6 +10,7 @@ import { Target, Crown } from 'lucide-react';
 
 type Mode = 'select' | 'login' | 'signup';
 type SubscriptionTier = 'basic' | 'premium';
+type PremiumPackage = 'single' | 'monthly' | 'seasonal';
 
 const LoginPage = () => {
   const { login, signup } = useAuth();
