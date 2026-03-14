@@ -266,7 +266,7 @@ const LoginPage = () => {
                   <Label>בחר חבילת ליווי אישי</Label>
                   <div className="space-y-2">
                     {[
-                      { value: 'single' as PremiumPackage, label: 'סשן בודד', desc: 'פגישה אחת של ניתוח וידאו וליווי', price: '350₪' },
+                      { value: 'single' as PremiumPackage, label: 'סשן בודד', desc: 'סשן וידאו אישי בודד לניתוח משחק, ללא ליווי שוטף', price: '350₪' },
                       { value: 'monthly' as PremiumPackage, label: 'מנוי חודשי', desc: '4 סשנים בחודש + ליווי שוטף', price: '1,500₪ / חודש' },
                       { value: 'seasonal' as PremiumPackage, label: 'מנוי עונתי', desc: 'ליווי לאורך כל העונה, המחיר הכי משתלם', price: '1,250₪ / חודש' },
                     ].map(pkg => (
