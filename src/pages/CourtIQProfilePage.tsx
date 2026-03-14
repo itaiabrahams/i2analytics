@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { Flame, Star, Target, Brain, Trophy, Share2, ChevronLeft, TrendingUp, Zap, Award } from 'lucide-react';
+import { Flame, Star, Target, Brain, Trophy, Share2, ChevronLeft, TrendingUp, Zap, Award, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +24,9 @@ const CourtIQProfilePage = () => {
   const [stats, setStats] = useState<CourtIQStats | null>(null);
   const [weeklyRank, setWeeklyRank] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,9 +35,10 @@ const CourtIQProfilePage = () => {
 
   const fetchData = async () => {
     if (!user) return;
-    const [statsRes, lbRes] = await Promise.all([
+    const [statsRes, lbRes, profileRes] = await Promise.all([
       supabase.from('courtiq_player_stats' as any).select('*').eq('player_id', user.id).maybeSingle(),
       supabase.rpc('get_courtiq_leaderboard' as any, { _period: 'weekly' }),
+      supabase.from('profiles').select('avatar_url').eq('user_id', user.id).maybeSingle(),
     ]);
     if (statsRes.data) setStats(statsRes.data as unknown as CourtIQStats);
     if (lbRes.data) {
@@ -42,7 +46,34 @@ const CourtIQProfilePage = () => {
       const rank = entries.findIndex(e => e.player_id === user.id) + 1;
       setWeeklyRank(rank || 0);
     }
+    if (profileRes.data) setAvatarUrl((profileRes.data as any).avatar_url);
     setLoading(false);
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('הקובץ גדול מדי (מקסימום 2MB)');
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${user.id}/avatar.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
+      const urlWithCacheBust = `${publicUrl}?t=${Date.now()}`;
+      await supabase.from('profiles').update({ avatar_url: urlWithCacheBust } as any).eq('user_id', user.id);
+      setAvatarUrl(urlWithCacheBust);
+      toast.success('התמונה עודכנה!');
+    } catch (err) {
+      console.error(err);
+      toast.error('שגיאה בהעלאת התמונה');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const accuracy = stats && stats.total_answered > 0
@@ -134,8 +165,20 @@ const CourtIQProfilePage = () => {
           </div>
 
           <div className="relative z-10 text-center space-y-3">
-            <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl gradient-accent">
-              {profile?.display_name?.[0]?.toUpperCase() || '?'}
+            <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-3xl gradient-accent cursor-pointer relative overflow-hidden group"
+            >
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                profile?.display_name?.[0]?.toUpperCase() || '?'
+              )}
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="h-5 w-5 text-white" />
+              </div>
+              {uploading && <div className="absolute inset-0 bg-black/60 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /></div>}
             </div>
             <div>
               <h2 className="text-xl font-black text-foreground">{profile?.display_name}</h2>
