@@ -22,6 +22,7 @@ const LoginPage = () => {
   const [coachId, setCoachId] = useState('');
   const [teamCoachApproved, setTeamCoachApproved] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('basic');
+  const [premiumPackage, setPremiumPackage] = useState<PremiumPackage | ''>('');
   const [coaches, setCoaches] = useState<{ user_id: string; display_name: string }[]>([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
