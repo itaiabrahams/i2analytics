@@ -59,10 +59,18 @@ const PlayerProfile = () => {
               <ArrowRight className="mr-2 h-4 w-4" />
             </Button>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Button variant="outline" onClick={() => navigate('/shots')} className="text-muted-foreground">
                 <Target className="ml-2 h-4 w-4" />
                 מעקב קליעות
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/courtiq')} className="text-muted-foreground">
+                <Brain className="ml-2 h-4 w-4" />
+                Court IQ
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/courtiq/profile')} className="text-muted-foreground">
+                <User className="ml-2 h-4 w-4" />
+                כרטיס שחקן
               </Button>
               <NotificationBell />
               <Button variant="ghost" onClick={logout} className="text-muted-foreground">
