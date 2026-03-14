@@ -82,7 +82,7 @@ const CourtIQProfilePage = () => {
   const appLink = 'https://i2analytics.lovable.app/courtiq';
 
   const handleShareCard = async () => {
-    const text = `🏀 COURT IQ — כרטיס שחקן\n\n` +
+    const text = `🏀 COURT IQ | כרטיס שחקן\n\n` +
       `👤 ${profile?.display_name}\n` +
       `🏀 ${profile?.position || 'שחקן'} · ${profile?.team || ''}\n` +
       `🔥 Streak: ${stats?.current_streak || 0} ימים\n` +
