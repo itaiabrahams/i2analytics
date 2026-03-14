@@ -260,6 +260,42 @@ const LoginPage = () => {
                 </div>
               )}
 
+              {/* Premium package selection */}
+              {role === 'player' && subscriptionTier === 'premium' && (
+                <div className="space-y-3">
+                  <Label>בחר חבילת ליווי אישי</Label>
+                  <div className="space-y-2">
+                    {[
+                      { value: 'single' as PremiumPackage, label: 'סשן בודד', desc: 'פגישה אחת של ניתוח וידאו וליווי', price: '350₪' },
+                      { value: 'monthly' as PremiumPackage, label: 'מנוי חודשי', desc: '4 סשנים בחודש + ליווי שוטף', price: '1,500₪ / חודש' },
+                      { value: 'seasonal' as PremiumPackage, label: 'מנוי עונתי', desc: 'ליווי לאורך כל העונה — המחיר הכי משתלם', price: '1,250₪ / חודש' },
+                    ].map(pkg => (
+                      <button
+                        key={pkg.value}
+                        type="button"
+                        onClick={() => { setPremiumPackage(pkg.value); setError(''); }}
+                        className={`w-full rounded-xl border-2 p-3 text-right transition-all flex items-center gap-3 ${
+                          premiumPackage === pkg.value
+                            ? 'border-accent bg-accent/10'
+                            : 'border-border bg-secondary hover:border-muted-foreground'
+                        }`}
+                      >
+                        <div className={`h-4 w-4 rounded-full border-2 flex-shrink-0 ${
+                          premiumPackage === pkg.value ? 'border-accent bg-accent' : 'border-muted-foreground'
+                        }`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="font-semibold text-foreground text-sm">{pkg.label}</p>
+                            <p className="text-accent font-bold text-sm whitespace-nowrap">{pkg.price}</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">{pkg.desc}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Coach selection - only for premium players */}
               {role === 'player' && subscriptionTier === 'premium' && coaches.length > 0 && (
                 <div className="space-y-2">
@@ -298,7 +334,9 @@ const LoginPage = () => {
                   <p className="text-sm text-foreground font-medium">
                     {subscriptionTier === 'basic'
                       ? '💳 עלות: 30₪ לחודש — התשלום מתבצע מחוץ לאפליקציה'
-                      : '💳 התשלום לליווי אישי מתבצע מחוץ לאפליקציה בהתאם לחבילה שנבחרה'}
+                      : premiumPackage
+                        ? `💳 חבילה שנבחרה: ${premiumPackage === 'single' ? 'סשן בודד — 350₪' : premiumPackage === 'monthly' ? 'מנוי חודשי — 1,500₪/חודש' : 'מנוי עונתי — 1,250₪/חודש'} — התשלום מתבצע מחוץ לאפליקציה`
+                        : '💳 התשלום לליווי אישי מתבצע מחוץ לאפליקציה בהתאם לחבילה שנבחרה'}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">לאחר ביצוע התשלום, המאמן יאשר את הגישה שלך</p>
                 </div>
