@@ -74,6 +74,10 @@ const LoginPage = () => {
       setError('סיסמה חייבת להכיל לפחות 6 תווים');
       return;
     }
+    if (role === 'player' && subscriptionTier === 'premium' && !premiumPackage) {
+      setError('יש לבחור חבילת ליווי אישי');
+      return;
+    }
     if (role === 'player' && subscriptionTier === 'premium' && !coachId && coaches.length > 0) {
       setError('יש לבחור מאמן מלווה');
       return;
