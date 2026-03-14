@@ -322,7 +322,7 @@ const CourtIQAdminPage = () => {
     if (!file) return;
     const text = await file.text();
     setBulkText(text);
-    toast.success(`הקובץ "${file.name}" נטען — ${text.trim().split('\n').length} שורות`);
+    toast.success(`הקובץ "${file.name}" נטען · ${text.trim().split('\n').length} שורות`);
     // Reset input so same file can be re-uploaded
     e.target.value = '';
   };
