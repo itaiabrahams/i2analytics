@@ -35,9 +35,10 @@ const CourtIQProfilePage = () => {
 
   const fetchData = async () => {
     if (!user) return;
-    const [statsRes, lbRes] = await Promise.all([
+    const [statsRes, lbRes, profileRes] = await Promise.all([
       supabase.from('courtiq_player_stats' as any).select('*').eq('player_id', user.id).maybeSingle(),
       supabase.rpc('get_courtiq_leaderboard' as any, { _period: 'weekly' }),
+      supabase.from('profiles').select('avatar_url').eq('user_id', user.id).maybeSingle(),
     ]);
     if (statsRes.data) setStats(statsRes.data as unknown as CourtIQStats);
     if (lbRes.data) {
@@ -45,7 +46,34 @@ const CourtIQProfilePage = () => {
       const rank = entries.findIndex(e => e.player_id === user.id) + 1;
       setWeeklyRank(rank || 0);
     }
+    if (profileRes.data) setAvatarUrl((profileRes.data as any).avatar_url);
     setLoading(false);
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('הקובץ גדול מדי (מקסימום 2MB)');
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${user.id}/avatar.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
+      const urlWithCacheBust = `${publicUrl}?t=${Date.now()}`;
+      await supabase.from('profiles').update({ avatar_url: urlWithCacheBust } as any).eq('user_id', user.id);
+      setAvatarUrl(urlWithCacheBust);
+      toast.success('התמונה עודכנה!');
+    } catch (err) {
+      console.error(err);
+      toast.error('שגיאה בהעלאת התמונה');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const accuracy = stats && stats.total_answered > 0
