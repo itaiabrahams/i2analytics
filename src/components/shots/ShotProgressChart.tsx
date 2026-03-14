@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { getVerbalRating } from '@/lib/shotZones';
 
 interface SessionShotData {
   title: string;
