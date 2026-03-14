@@ -147,7 +147,7 @@ const CourtIQProfilePage = () => {
   return (
     <div className="min-h-screen pb-8">
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/courtiq')} className="h-8 w-8">
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-8 w-8">
           <ChevronLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-lg font-bold text-foreground">פרופיל COURT IQ</h1>
