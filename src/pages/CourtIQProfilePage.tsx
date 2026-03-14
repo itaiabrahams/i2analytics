@@ -60,6 +60,39 @@ const CourtIQProfilePage = () => {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
+  const [editOpen, setEditOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editTeam, setEditTeam] = useState('');
+  const [editPosition, setEditPosition] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const openEditDialog = () => {
+    setEditName(profile?.display_name || '');
+    setEditTeam(profile?.team || '');
+    setEditPosition(profile?.position || '');
+    setEditOpen(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!user || !editName.trim()) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase.from('profiles').update({
+        display_name: editName.trim(),
+        team: editTeam.trim() || null,
+        position: editPosition.trim() || null,
+      }).eq('user_id', user.id);
+      if (error) throw error;
+      await refreshProfile();
+      setEditOpen(false);
+      toast.success('הפרופיל עודכן!');
+    } catch {
+      toast.error('שגיאה בעדכון הפרופיל');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
     setCroppedAreaPixels(croppedPixels);
   }, []);
