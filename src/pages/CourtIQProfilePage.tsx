@@ -2,11 +2,13 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { Flame, Star, Target, Brain, Trophy, Share2, ChevronLeft, TrendingUp, Zap, Award, Camera } from 'lucide-react';
+import { Flame, Star, Target, Brain, Trophy, Share2, ChevronLeft, TrendingUp, Zap, Award, Camera, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import Cropper from 'react-easy-crop';
@@ -22,7 +24,7 @@ interface Achievement {
 }
 
 const CourtIQProfilePage = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<CourtIQStats | null>(null);
   const [weeklyRank, setWeeklyRank] = useState(0);
@@ -57,6 +59,39 @@ const CourtIQProfilePage = () => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editTeam, setEditTeam] = useState('');
+  const [editPosition, setEditPosition] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const openEditDialog = () => {
+    setEditName(profile?.display_name || '');
+    setEditTeam(profile?.team || '');
+    setEditPosition(profile?.position || '');
+    setEditOpen(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!user || !editName.trim()) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase.from('profiles').update({
+        display_name: editName.trim(),
+        team: editTeam.trim() || null,
+        position: editPosition.trim() || null,
+      }).eq('user_id', user.id);
+      if (error) throw error;
+      await refreshProfile();
+      setEditOpen(false);
+      toast.success('הפרופיל עודכן!');
+    } catch {
+      toast.error('שגיאה בעדכון הפרופיל');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
     setCroppedAreaPixels(croppedPixels);
@@ -219,9 +254,12 @@ const CourtIQProfilePage = () => {
               </div>
               {uploading && <div className="absolute inset-0 bg-black/60 flex items-center justify-center"><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /></div>}
             </div>
-            <div>
+            <div className="relative">
               <h2 className="text-xl font-black text-foreground">{profile?.display_name}</h2>
               {profile?.team && <p className="text-sm text-muted-foreground">{profile.team}</p>}
+              <button onClick={openEditDialog} className="absolute -left-2 top-0 p-1 rounded-full hover:bg-accent/20 transition-colors">
+                <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
             </div>
 
             <div className="grid grid-cols-4 gap-2 pt-2">
@@ -322,6 +360,33 @@ const CourtIQProfilePage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-sm" dir="rtl">
+          <DialogTitle className="text-base font-bold text-foreground">עריכת פרופיל</DialogTitle>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">שם</Label>
+              <Input id="edit-name" value={editName} onChange={e => setEditName(e.target.value)} placeholder="השם שלך" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-team">קבוצה</Label>
+              <Input id="edit-team" value={editTeam} onChange={e => setEditTeam(e.target.value)} placeholder="שם הקבוצה" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-position">עמדה</Label>
+              <Input id="edit-position" value={editPosition} onChange={e => setEditPosition(e.target.value)} placeholder="למשל: פוינט גארד" />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setEditOpen(false)}>ביטול</Button>
+              <Button className="flex-1" onClick={handleSaveProfile} disabled={saving || !editName.trim()}>
+                {saving ? 'שומר...' : 'שמור'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Crop Dialog */}
       <Dialog open={!!cropImage} onOpenChange={(open) => { if (!open) setCropImage(null); }}>

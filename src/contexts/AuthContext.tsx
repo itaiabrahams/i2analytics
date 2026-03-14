@@ -14,6 +14,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ error?: string }>;
   signup: (email: string, password: string, displayName: string, role: UserRole, coachId?: string, subscriptionTier?: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
   // Legacy compat for in-memory store
   auth: { role: UserRole | null; playerId: string | null };
 }
@@ -103,10 +104,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsApproved(false);
   };
 
+  const refreshProfile = async () => {
+    if (user) await fetchProfile(user.id);
+  };
+
   const auth = { role, playerId: user?.id ?? null };
 
   return (
-    <AuthContext.Provider value={{ user, session, role, profile, isApproved, loading, login, signup, logout, auth }}>
+    <AuthContext.Provider value={{ user, session, role, profile, isApproved, loading, login, signup, logout, refreshProfile, auth }}>
       {children}
     </AuthContext.Provider>
   );
