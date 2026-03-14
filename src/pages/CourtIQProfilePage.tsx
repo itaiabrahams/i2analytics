@@ -204,7 +204,7 @@ const CourtIQProfilePage = () => {
           </div>
 
           <div className="relative z-10 text-center space-y-3">
-            <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+            <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleFileSelect} />
             <div
               onClick={() => fileInputRef.current?.click()}
               className="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-3xl gradient-accent cursor-pointer relative overflow-hidden group"
