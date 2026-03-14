@@ -54,7 +54,7 @@ const CourtIQLeaderboardPage = () => {
   }, [period]);
 
   const handleShare = async (entry: LeaderboardEntry, rank: number) => {
-    const text = `🏀 COURT IQ — מקום ${rank} בדירוג ה${periods.find(p => p.value === period)?.label}!\n⭐ ${entry.total_points} נקודות | 🎯 ${entry.accuracy}% דיוק\n${window.location.origin}/courtiq`;
+    const text = `🏀 COURT IQ | מקום ${rank} בדירוג ה${periods.find(p => p.value === period)?.label}!\n⭐ ${entry.total_points} נקודות | 🎯 ${entry.accuracy}% דיוק\n${window.location.origin}/courtiq`;
     if (navigator.share) {
       await navigator.share({ text });
     } else {

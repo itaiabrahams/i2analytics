@@ -151,8 +151,8 @@ const CourtIQPage = () => {
 
   const handleShare = async () => {
     const text = result?.is_correct
-      ? `🏀 COURT IQ — עניתי נכון וצברתי ${result.points_earned} נקודות! 🔥\nStreak: ${stats?.current_streak || 0} ימים\n${window.location.origin}/courtiq`
-      : `🏀 COURT IQ — אתגר הידע הכדורסלני!\n${window.location.origin}/courtiq`;
+      ? `🏀 COURT IQ | עניתי נכון וצברתי ${result.points_earned} נקודות! 🔥\nStreak: ${stats?.current_streak || 0} ימים\n${window.location.origin}/courtiq`
+      : `🏀 COURT IQ | אתגר הידע הכדורסלני!\n${window.location.origin}/courtiq`;
     if (navigator.share) {
       await navigator.share({ text });
     } else {
@@ -399,9 +399,9 @@ const CourtIQPage = () => {
 
               {/* Stats */}
               <div className="text-xs sm:text-sm text-muted-foreground">
-                {result.is_correct
-                  ? `${result.correct_percentage}% מהשחקנים ענו נכון — ${result.correct_percentage < 50 ? 'אתה בין המובילים! 🌟' : 'יפה מאוד! 💪'}`
-                  : `${100 - result.correct_percentage}% גם טעו — ${result.correct_percentage < 50 ? 'זו שאלה קשה! 💪' : 'בפעם הבאה! 🔥'}`}
+                  {result.is_correct
+                  ? `${result.correct_percentage}% מהשחקנים ענו נכון · ${result.correct_percentage < 50 ? 'אתה בין המובילים! 🌟' : 'יפה מאוד! 💪'}`
+                  : `${100 - result.correct_percentage}% גם טעו · ${result.correct_percentage < 50 ? 'זו שאלה קשה! 💪' : 'בפעם הבאה! 🔥'}`}
               </div>
 
               {/* Correct streak badge */}
