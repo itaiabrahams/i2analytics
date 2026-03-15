@@ -28,29 +28,68 @@ const PlayerProfile = () => {
   const { sessions, loading: sessionsLoading } = usePlayerSessions(id);
   const avgScore = usePlayerAvgScore(id);
 
-  // Fetch monthly shot attempts for tier badge
+  // Fetch shot tracker + Court IQ summary
   useEffect(() => {
-    const fetchMonthlyAttempts = async () => {
+    const fetchPerformanceData = async () => {
+      if (!id) return;
+
       const now = new Date();
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-      const { data: sessions } = await supabase
-        .from('shot_sessions')
-        .select('id, date')
-        .eq('player_id', id)
-        .gte('date', monthStart)
-        .lte('date', monthEnd);
-      if (sessions && sessions.length > 0) {
-        const { data: shots } = await supabase
-          .from('shots')
-          .select('attempts')
-          .in('session_id', sessions.map(s => s.id));
-        if (shots) {
-          setMonthlyAttempts(shots.reduce((s, sh) => s + sh.attempts, 0));
-        }
+
+      const [{ data: shotSessions }, { data: courtiqData }] = await Promise.all([
+        supabase.from('shot_sessions').select('id, date').eq('player_id', id),
+        supabase
+          .from('courtiq_player_stats')
+          .select('total_points, total_answered, total_correct, current_streak')
+          .eq('player_id', id)
+          .maybeSingle(),
+      ]);
+
+      setCourtIQStats({
+        totalPoints: courtiqData?.total_points ?? 0,
+        totalAnswered: courtiqData?.total_answered ?? 0,
+        totalCorrect: courtiqData?.total_correct ?? 0,
+        currentStreak: courtiqData?.current_streak ?? 0,
+      });
+
+      if (!shotSessions || shotSessions.length === 0) {
+        setMonthlyAttempts(0);
+        setShotTotals({ attempts: 0, made: 0 });
+        return;
       }
+
+      const allSessionIds = shotSessions.map(s => s.id);
+      const monthlySessionIds = shotSessions
+        .filter(s => s.date >= monthStart && s.date <= monthEnd)
+        .map(s => s.id);
+
+      const { data: allShots } = await supabase
+        .from('shots')
+        .select('attempts, made')
+        .in('session_id', allSessionIds);
+
+      if (allShots) {
+        setShotTotals({
+          attempts: allShots.reduce((sum, shot) => sum + shot.attempts, 0),
+          made: allShots.reduce((sum, shot) => sum + shot.made, 0),
+        });
+      }
+
+      if (monthlySessionIds.length === 0) {
+        setMonthlyAttempts(0);
+        return;
+      }
+
+      const { data: monthlyShots } = await supabase
+        .from('shots')
+        .select('attempts')
+        .in('session_id', monthlySessionIds);
+
+      setMonthlyAttempts((monthlyShots ?? []).reduce((sum, shot) => sum + shot.attempts, 0));
     };
-    if (id) fetchMonthlyAttempts();
+
+    fetchPerformanceData();
   }, [id]);
 
   if (playerLoading || sessionsLoading) {
