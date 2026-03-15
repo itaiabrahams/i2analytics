@@ -64,7 +64,7 @@ const TechniqueVideos = ({ playerId, isOwnProfile }: TechniqueVideosProps) => {
       await supabase.from('player_technique_videos').delete().eq('id', existing.id);
     }
 
-    await (supabase.from('player_technique_videos' as any) as any).insert({
+    await supabase.from('player_technique_videos').insert({
       player_id: playerId,
       category,
       video_url: urlData.publicUrl,
