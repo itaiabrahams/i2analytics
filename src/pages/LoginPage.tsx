@@ -192,6 +192,17 @@ const LoginPage = () => {
                 />
               </div>
               <div className="space-y-2">
+                <Label>מספר טלפון</Label>
+                <Input
+                  type="tel"
+                  placeholder="050-1234567"
+                  value={phone}
+                  onChange={e => { setPhone(e.target.value); setError(''); }}
+                  className="h-12 bg-secondary border-border text-foreground"
+                  dir="ltr"
+                  maxLength={15}
+                />
+              <div className="space-y-2">
                 <Label>אימייל</Label>
                 <Input
                   type="email"
