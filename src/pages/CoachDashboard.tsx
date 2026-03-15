@@ -272,7 +272,7 @@ const CoachDashboard = () => {
                   </Button>
                 </div>
               </div>
-              {renderPlayerCards(shotGroupedPlayers[selectedShotCategory], (userId) => `/player/${userId}/shots`)}
+              {renderPlayerCards(shotGroupedPlayers[selectedShotCategory], (userId) => `/player/${userId}`)}
             </>
           )}
         </div>
