@@ -327,9 +327,13 @@ const CourtIQAdminPage = () => {
     if (isExcel) {
       try {
         const buffer = await file.arrayBuffer();
-        const wb = XLSX.read(new Uint8Array(buffer), { type: 'array', codepage: 65001, raw: false });
+        const data = new Uint8Array(buffer);
+        const wb = XLSX.read(data, { type: 'array' });
         const ws = wb.Sheets[wb.SheetNames[0]];
-        const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
+        const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        
+        console.log('Excel headers:', rows[0]);
+        console.log('Excel first data row:', rows[1]);
 
         // Map Hebrew correct answers to a/b/c/d
         const hebrewToLetter: Record<string, string> = { 'א': 'a', 'ב': 'b', 'ג': 'c', 'ד': 'd', 'a': 'a', 'b': 'b', 'c': 'c', 'd': 'd' };
