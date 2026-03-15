@@ -21,6 +21,8 @@ const PlayerProfile = () => {
   const navigate = useNavigate();
   const [meetingOpen, setMeetingOpen] = useState(false);
   const [monthlyAttempts, setMonthlyAttempts] = useState(0);
+  const [shotTotals, setShotTotals] = useState({ attempts: 0, made: 0 });
+  const [courtIQStats, setCourtIQStats] = useState({ totalPoints: 0, totalAnswered: 0, totalCorrect: 0, currentStreak: 0 });
   const id = auth.role === 'player' ? auth.playerId! : playerId!;
   const { player, loading: playerLoading } = usePlayer(id);
   const { sessions, loading: sessionsLoading } = usePlayerSessions(id);
