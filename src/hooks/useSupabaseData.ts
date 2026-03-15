@@ -13,6 +13,7 @@ export interface PlayerProfile {
   is_approved: boolean;
   coach_id: string | null;
   is_demo: boolean;
+  subscription_tier: string;
 }
 
 export interface SessionData {

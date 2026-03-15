@@ -80,6 +80,17 @@ const LoginPage = () => {
       setError('סיסמה חייבת להכיל לפחות 6 תווים');
       return;
     }
+    if (role === 'player') {
+      const ageNum = parseInt(age);
+      if (!age || isNaN(ageNum) || ageNum < 8 || ageNum > 50) {
+        setError('יש למלא גיל (8-50)');
+        return;
+      }
+      if (!team.trim()) {
+        setError('יש למלא שם קבוצה');
+        return;
+      }
+    }
     if (role === 'player' && subscriptionTier === 'premium' && !premiumPackage) {
       setError('יש לבחור חבילת ליווי אישי');
       return;

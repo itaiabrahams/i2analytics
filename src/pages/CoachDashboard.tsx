@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight, Dumbbell, Target } from 'lucide-react';
+import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight, Dumbbell, Target, Crown } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
 import AddPlayerDialog from '@/components/AddPlayerDialog';
@@ -10,21 +10,21 @@ import { Badge } from '@/components/ui/badge';
 
 type AgeCategory = 'U14' | 'U15' | 'U16' | 'U18' | 'SENIOR' | 'לא מוגדר';
 
-const AGE_CATEGORIES: { key: AgeCategory; label: string; minAge: number; maxAge: number; emoji: string }[] = [
-  { key: 'U14', label: 'U14', minAge: 0, maxAge: 13, emoji: '🏀' },
-  { key: 'U15', label: 'U15', minAge: 14, maxAge: 14, emoji: '🏀' },
-  { key: 'U16', label: 'U16', minAge: 15, maxAge: 15, emoji: '🏀' },
-  { key: 'U18', label: 'U18', minAge: 16, maxAge: 17, emoji: '🏀' },
-  { key: 'SENIOR', label: 'SENIOR', minAge: 18, maxAge: 99, emoji: '⭐' },
-  { key: 'לא מוגדר', label: 'לא מוגדר', minAge: -1, maxAge: -1, emoji: '❓' },
+const AGE_CATEGORIES: { key: AgeCategory; label: string; maxAge: number; emoji: string }[] = [
+  { key: 'U14', label: 'U14', maxAge: 14, emoji: '🏀' },
+  { key: 'U15', label: 'U15', maxAge: 15, emoji: '🏀' },
+  { key: 'U16', label: 'U16', maxAge: 16, emoji: '🏀' },
+  { key: 'U18', label: 'U18', maxAge: 18, emoji: '🏀' },
+  { key: 'SENIOR', label: 'SENIOR', maxAge: 999, emoji: '⭐' },
+  { key: 'לא מוגדר', label: 'לא מוגדר', maxAge: -1, emoji: '❓' },
 ];
 
 function getAgeCategory(age: number | null): AgeCategory {
   if (age == null) return 'לא מוגדר';
-  for (const cat of AGE_CATEGORIES) {
-    if (cat.key === 'לא מוגדר') continue;
-    if (age >= cat.minAge && age <= cat.maxAge) return cat.key;
-  }
+  if (age <= 14) return 'U14';
+  if (age <= 15) return 'U15';
+  if (age <= 16) return 'U16';
+  if (age <= 18) return 'U18';
   return 'SENIOR';
 }
 
@@ -35,9 +35,7 @@ const CoachDashboard = () => {
   const sessionCounts = usePlayerSessionCounts();
   const [addPlayerOpen, setAddPlayerOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<AgeCategory | null>(null);
-
-  // Unified player list: all approved players in one clear flow
-  const allPlayers = players;
+  const [activeSection, setActiveSection] = useState<'premium' | 'basic'>('premium');
 
   const buildPlayerData = (list: typeof players) => list.map(p => {
     const sc = sessionCounts[p.user_id] || { count: 0, avgScore: 0, latestScores: [] };
@@ -48,7 +46,12 @@ const CoachDashboard = () => {
     return { ...p, sessionsCount: sc.count, avgScore: sc.avgScore, trend, ageCategory: getAgeCategory(p.age) };
   });
 
-  const allPlayerData = useMemo(() => buildPlayerData(allPlayers), [allPlayers, sessionCounts]);
+  const allPlayerData = useMemo(() => buildPlayerData(players), [players, sessionCounts]);
+
+  const premiumPlayers = useMemo(() => allPlayerData.filter(p => p.subscription_tier === 'premium'), [allPlayerData]);
+  const basicPlayers = useMemo(() => allPlayerData.filter(p => p.subscription_tier !== 'premium'), [allPlayerData]);
+
+  const currentPlayers = activeSection === 'premium' ? premiumPlayers : basicPlayers;
 
   type PlayerDataItem = ReturnType<typeof buildPlayerData>[number];
 
@@ -56,11 +59,9 @@ const CoachDashboard = () => {
     const groups: Record<AgeCategory, PlayerDataItem[]> = {
       'U14': [], 'U15': [], 'U16': [], 'U18': [], 'SENIOR': [], 'לא מוגדר': [],
     };
-    allPlayerData.forEach(p => {
-      groups[p.ageCategory].push(p);
-    });
+    currentPlayers.forEach(p => { groups[p.ageCategory].push(p); });
     return groups;
-  }, [allPlayerData]);
+  }, [currentPlayers]);
 
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
@@ -123,7 +124,7 @@ const CoachDashboard = () => {
           <div className="flex items-center gap-3">
             <div>
               <h1 className="text-3xl font-bold text-foreground">לוח בקרה</h1>
-              <p className="text-muted-foreground">כל השחקנים במקום אחד: פרופיל + מעקב קליעה</p>
+              <p className="text-muted-foreground">ניהול שחקנים לפי מסלול ותפקיד</p>
             </div>
           </div>
           <div className="flex gap-3 items-center flex-wrap justify-end">
@@ -145,7 +146,7 @@ const CoachDashboard = () => {
             </Button>
             <div className="flex items-center gap-2 rounded-lg bg-card px-4 py-2">
               <Users className="h-5 w-5 text-accent" />
-              <span className="font-semibold text-foreground">{allPlayers.length} שחקנים</span>
+              <span className="font-semibold text-foreground">{players.length} שחקנים</span>
             </div>
             <NotificationBell />
             <Button variant="ghost" onClick={logout} className="text-muted-foreground hover:text-foreground">
@@ -155,12 +156,35 @@ const CoachDashboard = () => {
           </div>
         </div>
 
-        <div className="mb-10">
-          <div className="flex items-center gap-3 mb-5">
-            <Target className="h-6 w-6 text-accent" />
-            <h2 className="text-2xl font-black text-foreground">מעקב שחקנים לפי גיל</h2>
-          </div>
+        {/* Section Toggle */}
+        <div className="mb-6 flex gap-3">
+          <button
+            onClick={() => { setActiveSection('premium'); setSelectedCategory(null); }}
+            className={`flex items-center gap-2 rounded-xl px-5 py-3 font-bold text-sm transition-all ${
+              activeSection === 'premium'
+                ? 'gradient-accent text-accent-foreground shadow-lg'
+                : 'bg-card border border-border text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Crown className="h-5 w-5" />
+            ליווי אישי מלא
+            <Badge variant="secondary" className="mr-1">{premiumPlayers.length}</Badge>
+          </button>
+          <button
+            onClick={() => { setActiveSection('basic'); setSelectedCategory(null); }}
+            className={`flex items-center gap-2 rounded-xl px-5 py-3 font-bold text-sm transition-all ${
+              activeSection === 'basic'
+                ? 'gradient-accent text-accent-foreground shadow-lg'
+                : 'bg-card border border-border text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Target className="h-5 w-5" />
+            מעקב קליעות + Court IQ
+            <Badge variant="secondary" className="mr-1">{basicPlayers.length}</Badge>
+          </button>
+        </div>
 
+        <div className="mb-10">
           {selectedCategory === null ? (
             <>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -183,9 +207,13 @@ const CoachDashboard = () => {
                   );
                 })}
               </div>
-              {allPlayers.length === 0 && (
+              {currentPlayers.length === 0 && (
                 <div className="gradient-card rounded-xl p-8 text-center mt-4">
-                  <p className="text-muted-foreground">אין שחקנים עדיין. לחץ על "הוסף שחקן" כדי להוסיף שחקן חדש.</p>
+                  <p className="text-muted-foreground">
+                    {activeSection === 'premium'
+                      ? 'אין שחקני ליווי אישי עדיין.'
+                      : 'אין שחקני מעקב קליעות עדיין.'}
+                  </p>
                 </div>
               )}
             </>
@@ -201,7 +229,13 @@ const CoachDashboard = () => {
                   </Button>
                 </div>
               </div>
-              {renderPlayerCards(groupedPlayers[selectedCategory])}
+              {groupedPlayers[selectedCategory].length === 0 ? (
+                <div className="gradient-card rounded-xl p-8 text-center">
+                  <p className="text-muted-foreground">אין שחקנים בקטגוריה זו.</p>
+                </div>
+              ) : (
+                renderPlayerCards(groupedPlayers[selectedCategory])
+              )}
             </>
           )}
         </div>
