@@ -19,6 +19,8 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [phone, setPhone] = useState('');
+  const [team, setTeam] = useState('');
+  const [age, setAge] = useState('');
   const [role, setRole] = useState<'coach' | 'player'>('player');
   const [coachId, setCoachId] = useState('');
   const [teamCoachApproved, setTeamCoachApproved] = useState(false);
@@ -46,6 +48,8 @@ const LoginPage = () => {
     setPassword('');
     setDisplayName('');
     setPhone('');
+    setTeam('');
+    setAge('');
     setRole('player');
     setCoachId('');
     setTeamCoachApproved(false);
@@ -97,7 +101,9 @@ const LoginPage = () => {
       role,
       role === 'player' && subscriptionTier === 'premium' ? coachId : undefined,
       role === 'player' ? subscriptionTier : 'free',
-      phone.trim() || undefined
+      phone.trim() || undefined,
+      team.trim() || undefined,
+      age ? parseInt(age) : undefined
     );
     if (result.error) {
       setError(result.error);
@@ -237,6 +243,34 @@ const LoginPage = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Team and age - for players */}
+              {role === 'player' && (
+                <>
+                  <div className="space-y-2">
+                    <Label>קבוצה</Label>
+                    <Input
+                      placeholder="שם הקבוצה"
+                      value={team}
+                      onChange={e => { setTeam(e.target.value); setError(''); }}
+                      className="h-12 bg-secondary border-border text-foreground"
+                      maxLength={100}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>גיל</Label>
+                    <Input
+                      type="number"
+                      placeholder="הגיל שלך"
+                      value={age}
+                      onChange={e => { setAge(e.target.value); setError(''); }}
+                      className="h-12 bg-secondary border-border text-foreground"
+                      min={8}
+                      max={50}
+                    />
+                  </div>
+                </>
+              )}
 
               {/* Tier selection - only for players */}
               {role === 'player' && (

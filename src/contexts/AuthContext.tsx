@@ -12,7 +12,7 @@ interface AuthContextType {
   isApproved: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
-  signup: (email: string, password: string, displayName: string, role: UserRole, coachId?: string, subscriptionTier?: string, phoneNumber?: string) => Promise<{ error?: string }>;
+  signup: (email: string, password: string, displayName: string, role: UserRole, coachId?: string, subscriptionTier?: string, phoneNumber?: string, team?: string, age?: number) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   // Legacy compat for in-memory store
@@ -82,12 +82,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return {};
   };
 
-  const signup = async (email: string, password: string, displayName: string, signupRole: UserRole, coachId?: string, subscriptionTier?: string, phoneNumber?: string) => {
+  const signup = async (email: string, password: string, displayName: string, signupRole: UserRole, coachId?: string, subscriptionTier?: string, phoneNumber?: string, team?: string, age?: number) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: displayName, role: signupRole, coach_id: coachId || null, subscription_tier: subscriptionTier || 'basic', phone_number: phoneNumber || null },
+        data: { display_name: displayName, role: signupRole, coach_id: coachId || null, subscription_tier: subscriptionTier || 'basic', phone_number: phoneNumber || null, team: team || null, age: age || null },
         emailRedirectTo: window.location.origin,
       },
     });

@@ -384,6 +384,7 @@ const CourtIQAdminPage = () => {
                       <Label className="text-sm font-medium text-foreground mb-1 block">העלה קובץ (כל פורמט טקסט)</Label>
                       <Input
                         type="file"
+                        accept="*/*"
                         onChange={handleFileUpload}
                         className="text-sm cursor-pointer"
                       />
