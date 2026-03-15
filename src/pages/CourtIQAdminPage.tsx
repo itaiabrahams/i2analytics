@@ -381,10 +381,9 @@ const CourtIQAdminPage = () => {
 
                     {/* File upload */}
                     <div>
-                      <Label className="text-sm font-medium text-foreground mb-1 block">העלה קובץ (CSV / TXT)</Label>
+                      <Label className="text-sm font-medium text-foreground mb-1 block">העלה קובץ (כל פורמט טקסט)</Label>
                       <Input
                         type="file"
-                        accept=".csv,.txt,.tsv"
                         onChange={handleFileUpload}
                         className="text-sm cursor-pointer"
                       />
