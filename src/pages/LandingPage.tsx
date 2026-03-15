@@ -468,7 +468,7 @@ const LandingPage = () => {
             </div>
             <span className="font-bold">I2 Analytics</span>
           </div>
-          <p className="text-sm text-muted-foreground">© 2026 I² Analytics. כל הזכויות שמורות.</p>
+          <p className="text-sm text-muted-foreground">© 2026 I2 Analytics. כל הזכויות שמורות.</p>
         </div>
       </footer>
     </div>
