@@ -53,9 +53,12 @@ const CoachDashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState<AgeCategory | null>(null);
   const [selectedShotCategory, setSelectedShotCategory] = useState<ShotCategory | null>(null);
 
+  // Section 1 (ליווי אישי מלא): only coach's own players + demos
   const myPlayers = players.filter(p => p.coach_id === user?.id || p.is_demo);
+  // Section 2 (מעקב קליעה & Court IQ): ALL approved players
+  const allPlayers = players;
 
-  const playerData = myPlayers.map(p => {
+  const buildPlayerData = (list: typeof players) => list.map(p => {
     const sc = sessionCounts[p.user_id] || { count: 0, avgScore: 0, latestScores: [] };
     let trend: 'up' | 'down' | 'neutral' = 'neutral';
     if (sc.latestScores.length >= 2) {
@@ -64,31 +67,36 @@ const CoachDashboard = () => {
     return { ...p, sessionsCount: sc.count, avgScore: sc.avgScore, trend, ageCategory: getAgeCategory(p.age), shotCategory: getShotCategory(p.age) };
   });
 
+  const myPlayerData = useMemo(() => buildPlayerData(myPlayers), [myPlayers, sessionCounts]);
+  const allPlayerData = useMemo(() => buildPlayerData(allPlayers), [allPlayers, sessionCounts]);
+
+  type PlayerDataItem = ReturnType<typeof buildPlayerData>[number];
+
   const groupedPlayers = useMemo(() => {
-    const groups: Record<AgeCategory, typeof playerData> = {
+    const groups: Record<AgeCategory, PlayerDataItem[]> = {
       'U14': [], 'U15': [], 'U16': [], 'U18': [], 'SENIOR': [], 'לא מוגדר': [],
     };
-    playerData.forEach(p => {
+    myPlayerData.forEach(p => {
       groups[p.ageCategory].push(p);
     });
     return groups;
-  }, [playerData]);
+  }, [myPlayerData]);
 
   const shotGroupedPlayers = useMemo(() => {
-    const groups: Record<ShotCategory, typeof playerData> = {
+    const groups: Record<ShotCategory, PlayerDataItem[]> = {
       'U14': [], 'U15': [], 'U16': [], 'U18': [],
     };
-    playerData.forEach(p => {
+    allPlayerData.forEach(p => {
       if (p.shotCategory) groups[p.shotCategory].push(p);
     });
     return groups;
-  }, [playerData]);
+  }, [allPlayerData]);
 
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
   }
 
-  const renderPlayerCards = (playersToShow: typeof playerData, navigateTo: (userId: string) => string) => (
+  const renderPlayerCards = (playersToShow: PlayerDataItem[], navigateTo: (userId: string) => string) => (
     <div className="grid gap-4 md:grid-cols-2">
       {playersToShow.map((p, i) => (
         <button
