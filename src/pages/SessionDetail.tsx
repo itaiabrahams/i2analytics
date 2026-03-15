@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { ACTION_TYPES } from '@/lib/types';
 import VideoMeeting from '@/components/VideoMeeting';
 import { useSession, usePlayer } from '@/hooks/useSupabaseData';
+import { getLetterGrade, getGradeColor } from '@/lib/gradeUtils';
 
 const SessionDetail = () => {
   const { sessionId } = useParams();
