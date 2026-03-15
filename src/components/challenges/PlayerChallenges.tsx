@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Swords, Send, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Swords, Send, CheckCircle, Clock, XCircle, Upload, Video, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ZONES } from '@/lib/shotZones';
 
@@ -25,6 +25,8 @@ interface PlayerChallenge {
   created_at: string;
   expires_at: string;
   description: string;
+  challenger_video_url?: string | null;
+  challenged_video_url?: string | null;
   challenger_name?: string;
   challenged_name?: string;
 }
@@ -95,31 +97,31 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
     setSubmitting(false);
   };
 
-  const handleSubmitScore = async (challengeId: string, attempts: number, made: number) => {
+  const handleSubmitScore = async (challengeId: string, attempts: number, made: number, videoUrl: string) => {
+    if (!videoUrl) { toast.error('חובה להעלות סרטון הוכחה'); return; }
     const challenge = challenges.find(c => c.id === challengeId);
     if (!challenge) return;
 
     const isChallenger = challenge.challenger_id === playerId;
-    const updateData = isChallenger
-      ? { challenger_attempts: attempts, challenger_made: made }
-      : { challenged_attempts: attempts, challenged_made: made };
+    const updateData: any = isChallenger
+      ? { challenger_attempts: attempts, challenger_made: made, challenger_video_url: videoUrl }
+      : { challenged_attempts: attempts, challenged_made: made, challenged_video_url: videoUrl };
 
     const otherAttempts = isChallenger ? challenge.challenged_attempts : challenge.challenger_attempts;
     const otherMade = isChallenger ? challenge.challenged_made : challenge.challenger_made;
-    let finalUpdate: any = { ...updateData };
 
     if (otherAttempts > 0) {
       const myPct = attempts > 0 ? made / attempts : 0;
       const otherPct = otherAttempts > 0 ? otherMade / otherAttempts : 0;
-      finalUpdate.status = 'completed';
-      if (myPct > otherPct) finalUpdate.winner_id = playerId;
-      else if (otherPct > myPct) finalUpdate.winner_id = isChallenger ? challenge.challenged_id : challenge.challenger_id;
-      else finalUpdate.winner_id = null;
+      updateData.status = 'completed';
+      if (myPct > otherPct) updateData.winner_id = playerId;
+      else if (otherPct > myPct) updateData.winner_id = isChallenger ? challenge.challenged_id : challenge.challenger_id;
+      else updateData.winner_id = null;
     } else {
-      finalUpdate.status = 'active';
+      updateData.status = 'active';
     }
 
-    const { error } = await supabase.from('player_challenges').update(finalUpdate).eq('id', challengeId);
+    const { error } = await supabase.from('player_challenges').update(updateData).eq('id', challengeId);
     if (error) toast.error('שגיאה בעדכון');
     else { toast.success('תוצאות עודכנו!'); fetchChallenges(); }
   };
@@ -237,16 +239,36 @@ const ChallengeMatchCard = ({
   getZoneLabel: (z: string | null) => string;
   getStatusBadge: (s: string) => JSX.Element | null;
   onAccept: (id: string) => void; onDecline: (id: string) => void;
-  onSubmitScore: (id: string, attempts: number, made: number) => void;
+  onSubmitScore: (id: string, attempts: number, made: number, videoUrl: string) => void;
 }) => {
   const [attempts, setAttempts] = useState('');
   const [made, setMade] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const isChallenger = challenge.challenger_id === playerId;
   const isChallenged = challenge.challenged_id === playerId;
   const myAttempts = isChallenger ? challenge.challenger_attempts : challenge.challenged_attempts;
 
   const challengerPct = challenge.challenger_attempts > 0 ? Math.round((challenge.challenger_made / challenge.challenger_attempts) * 100) : 0;
   const challengedPct = challenge.challenged_attempts > 0 ? Math.round((challenge.challenged_made / challenge.challenged_attempts) * 100) : 0;
+
+  const handleVideoUpload = async (file: File) => {
+    if (!file.type.startsWith('video/')) { toast.error('יש להעלות קובץ וידאו בלבד'); return; }
+    if (file.size > 100 * 1024 * 1024) { toast.error('גודל קובץ מקסימלי: 100MB'); return; }
+    setUploading(true);
+    const ext = file.name.split('.').pop();
+    const path = `challenges/${playerId}/${challenge.id}_${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('shot-videos').upload(path, file, { cacheControl: '3600', upsert: true });
+    if (error) { toast.error('שגיאה בהעלאת הסרטון'); setUploading(false); return; }
+    const { data: urlData } = supabase.storage.from('shot-videos').getPublicUrl(path);
+    setVideoUrl(urlData.publicUrl);
+    toast.success('הסרטון הועלה!');
+    setUploading(false);
+  };
+
+  const myVideoUrl = isChallenger ? challenge.challenger_video_url : challenge.challenged_video_url;
+  const otherVideoUrl = isChallenger ? challenge.challenged_video_url : challenge.challenger_video_url;
 
   return (
     <div className="gradient-card rounded-xl p-4">
@@ -273,6 +295,11 @@ const ChallengeMatchCard = ({
               {challengerPct}% <span className="text-xs text-muted-foreground">({challenge.challenger_made}/{challenge.challenger_attempts})</span>
             </p>
           ) : <p className="text-xs text-muted-foreground">ממתין</p>}
+          {challenge.challenger_video_url && (
+            <a href={challenge.challenger_video_url} target="_blank" rel="noopener noreferrer" className="text-xs text-accent hover:underline flex items-center gap-1 justify-center mt-1">
+              <Video className="h-3 w-3" /> סרטון
+            </a>
+          )}
         </div>
         <div className="px-4">
           <Swords className="h-6 w-6 text-accent" />
@@ -284,6 +311,11 @@ const ChallengeMatchCard = ({
               {challengedPct}% <span className="text-xs text-muted-foreground">({challenge.challenged_made}/{challenge.challenged_attempts})</span>
             </p>
           ) : <p className="text-xs text-muted-foreground">ממתין</p>}
+          {challenge.challenged_video_url && (
+            <a href={challenge.challenged_video_url} target="_blank" rel="noopener noreferrer" className="text-xs text-accent hover:underline flex items-center gap-1 justify-center mt-1">
+              <Video className="h-3 w-3" /> סרטון
+            </a>
+          )}
         </div>
       </div>
 
@@ -309,17 +341,54 @@ const ChallengeMatchCard = ({
         </div>
       )}
 
-      {/* Submit score */}
+      {/* Submit score with mandatory video */}
       {challenge.status === 'active' && myAttempts === 0 && (
-        <div className="flex gap-2 items-end">
-          <Button size="sm" onClick={() => onSubmitScore(challenge.id, Number(attempts), Number(made))} disabled={!attempts || !made} className="gradient-accent text-accent-foreground shrink-0">שלח תוצאות</Button>
-          <div className="flex-1 space-y-1">
-            <Label className="text-xs text-right block">קלועות</Label>
-            <Input type="number" min={0} value={made} onChange={e => setMade(e.target.value)} className="h-8 text-right" />
-          </div>
-          <div className="flex-1 space-y-1">
-            <Label className="text-xs text-right block">ניסיונות</Label>
-            <Input type="number" min={1} value={attempts} onChange={e => setAttempts(e.target.value)} className="h-8 text-right" />
+        <div className="space-y-3">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="video/*"
+            className="hidden"
+            onChange={e => { if (e.target.files?.[0]) handleVideoUpload(e.target.files[0]); }}
+          />
+          {/* Video upload */}
+          {videoUrl ? (
+            <div className="rounded-lg bg-secondary p-2 flex items-center gap-2 text-right">
+              <Video className="h-4 w-4 text-success shrink-0" />
+              <span className="text-xs text-success flex-1">סרטון מצורף ✓</span>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="w-full border-dashed border-2 border-accent/30 text-accent"
+            >
+              {uploading ? (
+                <><Loader2 className="ml-1 h-3 w-3 animate-spin" />מעלה סרטון...</>
+              ) : (
+                <><Upload className="ml-1 h-3 w-3" />העלה סרטון הוכחה (חובה)</>
+              )}
+            </Button>
+          )}
+          <div className="flex gap-2 items-end">
+            <Button
+              size="sm"
+              onClick={() => onSubmitScore(challenge.id, Number(attempts), Number(made), videoUrl)}
+              disabled={!attempts || !made || !videoUrl}
+              className="gradient-accent text-accent-foreground shrink-0"
+            >
+              שלח תוצאות
+            </Button>
+            <div className="flex-1 space-y-1">
+              <Label className="text-xs text-right block">קלועות</Label>
+              <Input type="number" min={0} value={made} onChange={e => setMade(e.target.value)} className="h-8 text-right" />
+            </div>
+            <div className="flex-1 space-y-1">
+              <Label className="text-xs text-right block">ניסיונות</Label>
+              <Input type="number" min={1} value={attempts} onChange={e => setAttempts(e.target.value)} className="h-8 text-right" />
+            </div>
           </div>
         </div>
       )}

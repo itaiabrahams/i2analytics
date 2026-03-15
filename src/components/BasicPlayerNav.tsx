@@ -36,7 +36,10 @@ const BasicPlayerNav = () => {
           </Button>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-xs sm:text-sm font-bold text-foreground">I² Analytics</span>
+          <span className="text-xs sm:text-sm font-bold text-foreground">I2 Analytics</span>
+          <div className="flex items-center justify-center h-7 w-7 rounded-lg gradient-accent">
+            <span className="text-xs font-black text-accent-foreground">I2</span>
+          </div>
           <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground h-8 w-8">
             <LogOut className="h-4 w-4" />
           </Button>

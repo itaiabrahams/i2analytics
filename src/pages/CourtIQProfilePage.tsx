@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { Flame, Star, Target, Brain, Trophy, Share2, ChevronLeft, TrendingUp, Zap, Award, Camera, Pencil } from 'lucide-react';
+import { Flame, Star, Target, Brain, Trophy, Share2, ChevronLeft, TrendingUp, Zap, Award, Camera, Pencil, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import Cropper from 'react-easy-crop';
 import type { CourtIQStats, LeaderboardEntry } from '@/lib/courtiq-types';
 import type { Area } from 'react-easy-crop';
+import { getPlayerTier, getTierBadgeStyle } from '@/lib/gradeUtils';
 
 interface Achievement {
   id: string;
@@ -31,6 +32,10 @@ const CourtIQProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [monthlyAttempts, setMonthlyAttempts] = useState(0);
+  const [totalShotsMade, setTotalShotsMade] = useState(0);
+  const [totalShotsAttempts, setTotalShotsAttempts] = useState(0);
+  const [shotAccuracy, setShotAccuracy] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -52,6 +57,51 @@ const CourtIQProfilePage = () => {
       setWeeklyRank(rank || 0);
     }
     if (profileRes.data) setAvatarUrl((profileRes.data as any).avatar_url);
+
+    // Fetch shot tracker data
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+
+    // Get all player's shot sessions
+    const { data: shotSessions } = await supabase
+      .from('shot_sessions')
+      .select('id, date')
+      .eq('player_id', user.id);
+
+    if (shotSessions && shotSessions.length > 0) {
+      const allSessionIds = shotSessions.map(s => s.id);
+      const monthlySessionIds = shotSessions
+        .filter(s => s.date >= monthStart && s.date <= monthEnd)
+        .map(s => s.id);
+
+      // All-time shots
+      const { data: allShots } = await supabase
+        .from('shots')
+        .select('attempts, made')
+        .in('session_id', allSessionIds);
+
+      if (allShots) {
+        const totalA = allShots.reduce((s, sh) => s + sh.attempts, 0);
+        const totalM = allShots.reduce((s, sh) => s + sh.made, 0);
+        setTotalShotsAttempts(totalA);
+        setTotalShotsMade(totalM);
+        setShotAccuracy(totalA > 0 ? Math.round((totalM / totalA) * 100) : 0);
+      }
+
+      // Monthly shots for tier
+      if (monthlySessionIds.length > 0) {
+        const { data: monthlyShots } = await supabase
+          .from('shots')
+          .select('attempts')
+          .in('session_id', monthlySessionIds);
+
+        if (monthlyShots) {
+          setMonthlyAttempts(monthlyShots.reduce((s, sh) => s + sh.attempts, 0));
+        }
+      }
+    }
+
     setLoading(false);
   };
 
@@ -187,17 +237,18 @@ const CourtIQProfilePage = () => {
   const appLink = 'https://i2analytics.lovable.app/courtiq';
 
   const handleShareCard = async () => {
-    const text = `🏀 COURT IQ | כרטיס שחקן\n\n` +
-      `👤 ${profile?.display_name}\n` +
-      `🏀 ${profile?.position || 'שחקן'} · ${profile?.team || ''}\n` +
+    const tierInfo = getPlayerTier(monthlyAttempts);
+    const text = `🏀 I2 Analytics | כרטיס שחקן\n\n` +
+      `👤 ${profile?.display_name} [${tierInfo.label}]\n` +
+      `🏀 ${profile?.position || 'שחקן'} · ${profile?.team || ''}\n\n` +
+      `📊 Court IQ:\n` +
       `🔥 Streak: ${stats?.current_streak || 0} ימים\n` +
       `⭐ ${stats?.total_points || 0} נקודות\n` +
       `🎯 דיוק: ${accuracy}%\n` +
-      `📊 שאלות שנענו: ${stats?.total_answered || 0}\n` +
-      `✅ תשובות נכונות: ${stats?.total_correct || 0}\n` +
-      `🏆 מקום ${weeklyRank || '?'} בדירוג השבועי\n` +
-      `⚡ רצף נכונות: ${stats?.correct_streak || 0}\n` +
-      `🔥 Streak שיא: ${stats?.longest_streak || 0}\n\n` +
+      `🏆 מקום ${weeklyRank || '?'} בדירוג השבועי\n\n` +
+      `🏀 מעקב קליעות:\n` +
+      `🎯 ${totalShotsAttempts} זריקות · ${totalShotsMade} קלועות · ${shotAccuracy}% דיוק\n` +
+      `📅 ${monthlyAttempts} זריקות החודש\n\n` +
       `${getAchievementPhrase()}\n\n` +
       `🏀 בוא לשחק גם! 👇\n` +
       appLink;
@@ -244,6 +295,17 @@ const CourtIQProfilePage = () => {
 
           <div className="relative z-10 text-center space-y-3">
             <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleFileSelect} />
+            {/* Tier badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1, type: 'spring' }}
+              className="absolute top-0 right-0"
+            >
+              <span className={`text-xs font-black px-3 py-1 rounded-full border ${getTierBadgeStyle(getPlayerTier(monthlyAttempts).tier)}`}>
+                {getPlayerTier(monthlyAttempts).label}
+              </span>
+            </motion.div>
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
@@ -321,7 +383,11 @@ const CourtIQProfilePage = () => {
           <Share2 className="h-4 w-4" /> שתף כרטיס שחקן
         </Button>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Court IQ + Shot Tracker */}
+        <h3 className="font-bold text-foreground text-right flex items-center gap-2 justify-end">
+          <span>Court IQ</span>
+          <Brain className="h-4 w-4 text-accent" />
+        </h3>
         <div className="grid grid-cols-2 gap-3">
           {[
             { icon: <TrendingUp className="h-5 w-5 mx-auto mb-1 text-accent" />, value: stats?.total_answered || 0, label: 'שאלות שנענו' },
@@ -344,6 +410,42 @@ const CourtIQProfilePage = () => {
               </Card>
             </motion.div>
           ))}
+        </div>
+
+        {/* Shot Tracker Stats */}
+        <h3 className="font-bold text-foreground text-right flex items-center gap-2 justify-end pt-2">
+          <span>מעקב קליעות</span>
+          <BarChart3 className="h-4 w-4 text-accent" />
+        </h3>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { icon: <Target className="h-5 w-5 mx-auto mb-1 text-accent" />, value: totalShotsAttempts, label: 'סה"כ זריקות' },
+            { icon: <Star className="h-5 w-5 mx-auto mb-1 text-success" />, value: totalShotsMade, label: 'קלועות' },
+            { icon: <TrendingUp className="h-5 w-5 mx-auto mb-1 text-yellow-500" />, value: `${shotAccuracy}%`, label: 'דיוק קליעה' },
+          ].map((item, i) => (
+            <motion.div
+              key={item.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 + i * 0.1 }}
+            >
+              <Card>
+                <CardContent className="p-3 text-center">
+                  {item.icon}
+                  <p className="text-xl font-black text-foreground">{item.value}</p>
+                  <p className="text-[10px] text-muted-foreground">{item.label}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+        <div className="text-center">
+          <p className="text-xs text-muted-foreground">
+            {monthlyAttempts} זריקות החודש · 
+            <span className={`font-bold ${getPlayerTier(monthlyAttempts).color}`}> {getPlayerTier(monthlyAttempts).label}</span>
+            {monthlyAttempts < 2000 && <span className="text-muted-foreground/70"> · עוד {2000 - monthlyAttempts} לדרגה הבאה</span>}
+            {monthlyAttempts >= 2000 && monthlyAttempts < 4000 && <span className="text-muted-foreground/70"> · עוד {4000 - monthlyAttempts} ל-ELITE</span>}
+          </p>
         </div>
 
         {/* Achievements */}

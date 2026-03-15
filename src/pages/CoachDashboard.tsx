@@ -68,9 +68,14 @@ const CoachDashboard = () => {
     <div className="min-h-screen p-4 md:p-8">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">לוח בקרה</h1>
-            <p className="text-muted-foreground">ניהול שחקנים וסשנים</p>
+          <div className="flex items-center gap-3">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">לוח בקרה</h1>
+              <p className="text-muted-foreground">ניהול שחקנים וסשנים</p>
+            </div>
+            <div className="flex items-center justify-center h-10 w-10 rounded-xl gradient-accent shrink-0">
+              <span className="text-lg font-black text-accent-foreground">I2</span>
+            </div>
           </div>
           <div className="flex gap-3 items-center flex-wrap justify-end">
             <Button variant="outline" onClick={() => navigate('/courtiq/admin')} className="text-muted-foreground">

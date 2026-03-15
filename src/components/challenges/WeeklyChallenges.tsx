@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trophy, Plus, Medal, Target, Calendar } from 'lucide-react';
+import { Trophy, Plus, Medal, Target, Calendar, Upload, Video, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ZONES } from '@/lib/shotZones';
 
@@ -29,6 +29,7 @@ interface Entry {
   attempts: number;
   made: number;
   percentage: number;
+  video_url?: string | null;
   player_name?: string;
 }
 
@@ -96,7 +97,6 @@ const WeeklyChallenges = () => {
       const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
       return { week_start: start.toISOString().split('T')[0], week_end: end.toISOString().split('T')[0] };
     }
-    // weekly default
     const dayOfWeek = now.getDay();
     const start = new Date(now);
     start.setDate(now.getDate() - dayOfWeek);
@@ -129,7 +129,8 @@ const WeeklyChallenges = () => {
     setCreating(false);
   };
 
-  const handleSubmitEntry = async (challengeId: string, attempts: number, made: number) => {
+  const handleSubmitEntry = async (challengeId: string, attempts: number, made: number, videoUrl: string) => {
+    if (!videoUrl) { toast.error('חובה להעלות סרטון הוכחה'); return; }
     const percentage = attempts > 0 ? Math.round((made / attempts) * 100) : 0;
     const { error } = await supabase.from('challenge_entries').upsert({
       challenge_id: challengeId,
@@ -137,6 +138,7 @@ const WeeklyChallenges = () => {
       attempts,
       made,
       percentage,
+      video_url: videoUrl,
     }, { onConflict: 'challenge_id,player_id' });
     if (error) toast.error('שגיאה בשליחת תוצאות');
     else { toast.success('תוצאות נשלחו!'); fetchChallenges(); }
@@ -247,11 +249,28 @@ const ChallengeCard = ({
 }: {
   challenge: Challenge; entries: Entry[]; isCoach: boolean; userId?: string;
   getZoneLabel: (z: string | null) => string; getMedalIcon: (i: number) => JSX.Element;
-  onSubmitEntry: (id: string, attempts: number, made: number) => void;
+  onSubmitEntry: (id: string, attempts: number, made: number, videoUrl: string) => void;
 }) => {
   const [attempts, setAttempts] = useState('');
   const [made, setMade] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const myEntry = entries.find(e => e.player_id === userId);
+
+  const handleVideoUpload = async (file: File) => {
+    if (!file.type.startsWith('video/')) { toast.error('יש להעלות קובץ וידאו בלבד'); return; }
+    if (file.size > 100 * 1024 * 1024) { toast.error('גודל קובץ מקסימלי: 100MB'); return; }
+    setUploading(true);
+    const ext = file.name.split('.').pop();
+    const path = `challenges/${userId}/${challenge.id}_${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('shot-videos').upload(path, file, { cacheControl: '3600', upsert: true });
+    if (error) { toast.error('שגיאה בהעלאת הסרטון'); setUploading(false); return; }
+    const { data: urlData } = supabase.storage.from('shot-videos').getPublicUrl(path);
+    setVideoUrl(urlData.publicUrl);
+    toast.success('הסרטון הועלה!');
+    setUploading(false);
+  };
 
   return (
     <div className="gradient-card rounded-xl p-4">
@@ -281,9 +300,16 @@ const ChallengeCard = ({
           <div className="space-y-1.5">
             {entries.map((e, i) => (
               <div key={e.id} className="flex items-center justify-between text-sm">
-                <span className={`font-bold ${e.percentage >= challenge.target_percentage ? 'text-success' : 'text-foreground'}`}>
-                  {e.percentage}% ({e.made}/{e.attempts})
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={`font-bold ${e.percentage >= challenge.target_percentage ? 'text-success' : 'text-foreground'}`}>
+                    {e.percentage}% ({e.made}/{e.attempts})
+                  </span>
+                  {e.video_url && (
+                    <a href={e.video_url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                      <Video className="h-3 w-3" />
+                    </a>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   <span className="text-foreground">{e.player_name}</span>
                   {getMedalIcon(i)}
@@ -294,24 +320,53 @@ const ChallengeCard = ({
         </div>
       )}
 
-      {/* Submit entry (player only) */}
+      {/* Submit entry (player only) with mandatory video */}
       {!isCoach && (
-        <div className="flex gap-2 items-end">
-          <Button
-            size="sm"
-            onClick={() => onSubmitEntry(challenge.id, Number(attempts), Number(made))}
-            disabled={!attempts || !made}
-            className="gradient-accent text-accent-foreground shrink-0"
-          >
-            {myEntry ? 'עדכן' : 'שלח'}
-          </Button>
-          <div className="flex-1 space-y-1">
-            <Label className="text-xs text-right block">קלועות</Label>
-            <Input type="number" min={0} value={made} onChange={e => setMade(e.target.value)} className="h-8 text-right" placeholder={myEntry ? String(myEntry.made) : '0'} />
-          </div>
-          <div className="flex-1 space-y-1">
-            <Label className="text-xs text-right block">ניסיונות</Label>
-            <Input type="number" min={1} value={attempts} onChange={e => setAttempts(e.target.value)} className="h-8 text-right" placeholder={myEntry ? String(myEntry.attempts) : '0'} />
+        <div className="space-y-2">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="video/*"
+            className="hidden"
+            onChange={e => { if (e.target.files?.[0]) handleVideoUpload(e.target.files[0]); }}
+          />
+          {videoUrl ? (
+            <div className="rounded-lg bg-secondary p-2 flex items-center gap-2 text-right">
+              <Video className="h-4 w-4 text-success shrink-0" />
+              <span className="text-xs text-success flex-1">סרטון מצורף ✓</span>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="w-full border-dashed border-2 border-accent/30 text-accent"
+            >
+              {uploading ? (
+                <><Loader2 className="ml-1 h-3 w-3 animate-spin" />מעלה סרטון...</>
+              ) : (
+                <><Upload className="ml-1 h-3 w-3" />העלה סרטון הוכחה (חובה)</>
+              )}
+            </Button>
+          )}
+          <div className="flex gap-2 items-end">
+            <Button
+              size="sm"
+              onClick={() => onSubmitEntry(challenge.id, Number(attempts), Number(made), videoUrl)}
+              disabled={!attempts || !made || !videoUrl}
+              className="gradient-accent text-accent-foreground shrink-0"
+            >
+              {myEntry ? 'עדכן' : 'שלח'}
+            </Button>
+            <div className="flex-1 space-y-1">
+              <Label className="text-xs text-right block">קלועות</Label>
+              <Input type="number" min={0} value={made} onChange={e => setMade(e.target.value)} className="h-8 text-right" placeholder={myEntry ? String(myEntry.made) : '0'} />
+            </div>
+            <div className="flex-1 space-y-1">
+              <Label className="text-xs text-right block">ניסיונות</Label>
+              <Input type="number" min={1} value={attempts} onChange={e => setAttempts(e.target.value)} className="h-8 text-right" placeholder={myEntry ? String(myEntry.attempts) : '0'} />
+            </div>
           </div>
         </div>
       )}

@@ -10,7 +10,9 @@ import UpcomingMeetings from '@/components/UpcomingMeetings';
 import PlayerRatings from '@/components/PlayerRatings';
 import PlayerGoals from '@/components/PlayerGoals';
 import TeamCoachFeedbackSection from '@/components/TeamCoachFeedbackSection';
+import TechniqueVideos from '@/components/TechniqueVideos';
 import { usePlayer, usePlayerSessions, usePlayerAvgScore } from '@/hooks/useSupabaseData';
+import { getLetterGrade, getGradeColor } from '@/lib/gradeUtils';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
@@ -102,11 +104,19 @@ const PlayerProfile = () => {
           <div className="flex items-center justify-between">
             <div className="stat-glow rounded-xl bg-secondary p-4 text-center">
               <p className="text-3xl font-bold text-accent">{avgScore.toFixed(2)}</p>
+              <p className={`text-lg font-bold ${getGradeColor(getLetterGrade(avgScore))}`}>
+                {getLetterGrade(avgScore)}
+              </p>
               <p className="text-xs text-muted-foreground">ציון ממוצע</p>
             </div>
-            <div className="text-right">
-              <h1 className="text-3xl font-bold text-foreground">{player.display_name}</h1>
-              <p className="text-muted-foreground">{player.position} · גיל {player.age} · {player.team}</p>
+            <div className="text-right flex items-center gap-3">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">{player.display_name}</h1>
+                <p className="text-muted-foreground">{player.position} · גיל {player.age} · {player.team}</p>
+              </div>
+              <div className="flex items-center justify-center h-10 w-10 rounded-xl gradient-accent shrink-0">
+                <span className="text-lg font-black text-accent-foreground">I2</span>
+              </div>
             </div>
           </div>
         </div>
@@ -168,6 +178,11 @@ const PlayerProfile = () => {
           <PlayerRatings playerId={id} isCoach={auth.role === 'coach'} />
         </div>
 
+        {/* Technique Videos */}
+        <div className="mb-6">
+          <TechniqueVideos playerId={id} isOwnProfile={auth.role === 'player'} />
+        </div>
+
         {/* Team Coach Feedback */}
         <div className="mb-6">
           <TeamCoachFeedbackSection playerId={id} isPlayer={auth.role === 'player'} />
@@ -189,6 +204,9 @@ const PlayerProfile = () => {
                 >
                   <span className={`text-xl font-bold ${Number(s.overall_score) > 0 ? 'text-success' : Number(s.overall_score) < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
                     {Number(s.overall_score).toFixed(2)}
+                    <span className={`ml-2 text-sm ${getGradeColor(getLetterGrade(Number(s.overall_score)))}`}>
+                      {getLetterGrade(Number(s.overall_score))}
+                    </span>
                   </span>
                   <div>
                     <p className="font-medium text-foreground">נגד {s.opponent}</p>

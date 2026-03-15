@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { ACTION_TYPES } from '@/lib/types';
 import VideoMeeting from '@/components/VideoMeeting';
 import { useSession, usePlayer } from '@/hooks/useSupabaseData';
+import { getLetterGrade, getGradeColor } from '@/lib/gradeUtils';
 
 const SessionDetail = () => {
   const { sessionId } = useParams();
@@ -44,6 +45,9 @@ const SessionDetail = () => {
             <div className="stat-glow rounded-xl bg-secondary p-4 text-center">
               <p className={`text-3xl font-bold ${Number(session.overall_score) > 0 ? 'text-success' : Number(session.overall_score) < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
                 {Number(session.overall_score).toFixed(2)}
+              </p>
+              <p className={`text-lg font-bold ${getGradeColor(getLetterGrade(Number(session.overall_score)))}`}>
+                {getLetterGrade(Number(session.overall_score))}
               </p>
               <p className="text-xs text-muted-foreground">ציון כולל</p>
             </div>
