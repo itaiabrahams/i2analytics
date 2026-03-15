@@ -39,7 +39,9 @@ function getCurrentMonthWorkout() {
   const m = now.getMonth() + 1;
   // Find current or most recent unlocked month
   const unlocked = WORKOUT_MONTHS.filter(w => w.year < y || (w.year === y && w.month <= m));
-  return unlocked.length > 0 ? unlocked[unlocked.length - 1] : null;
+  if (unlocked.length > 0) return unlocked[unlocked.length - 1];
+  // If none unlocked yet, show the first upcoming month
+  return WORKOUT_MONTHS[0];
 }
 
 const CurrentMonthWorkout = () => {
