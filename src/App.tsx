@@ -103,10 +103,10 @@ const AppRoutes = () => {
             <Route path="/session/:sessionId" element={<SessionDetail />} />
             <Route path="/player/:playerId/shots" element={<ShotTracker />} />
             <Route path="/player/:playerId/*" element={<PlayerProfile />} />
-            <Route path="/shot-tracker" element={<ShotTracker />} />
-            <Route path="/shot-tracker/*" element={<ShotTracker />} />
-            <Route path="/shot-tracker/:playerId" element={<ShotTracker />} />
-            <Route path="/shot-tracker/:playerId/*" element={<ShotTracker />} />
+            <Route path="/shot-tracker" element={<LegacyShotTrackerRedirect />} />
+            <Route path="/shot-tracker/*" element={<LegacyShotTrackerRedirect />} />
+            <Route path="/shot-tracker/:playerId" element={<LegacyShotTrackerRedirect />} />
+            <Route path="/shot-tracker/:playerId/*" element={<LegacyShotTrackerRedirect />} />
             <Route path="/shots" element={<ShotTracker />} />
             <Route path="/manage-users" element={<UserManagement />} />
             <Route path="/challenges" element={<ChallengesPage />} />
