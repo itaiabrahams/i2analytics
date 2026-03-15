@@ -66,13 +66,12 @@ const CoachDashboard = () => {
     return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
   }
 
-  const renderPlayerCards = (playersToShow: PlayerDataItem[], navigateTo: (userId: string) => string) => (
+  const renderPlayerCards = (playersToShow: PlayerDataItem[]) => (
     <div className="grid gap-4 md:grid-cols-2">
       {playersToShow.map((p, i) => (
-        <button
+        <div
           key={p.id}
-          onClick={() => navigate(navigateTo(p.user_id))}
-          className="gradient-card rounded-xl p-6 text-right transition-all hover:scale-[1.02] hover:shadow-lg animate-fade-in"
+          className="gradient-card rounded-xl p-6 text-right transition-all hover:shadow-lg animate-fade-in border border-accent/20"
           style={{ animationDelay: `${i * 100}ms` }}
         >
           <div className="flex items-start justify-between">
@@ -103,7 +102,16 @@ const CoachDashboard = () => {
               <p className="text-xs text-muted-foreground">גיל</p>
             </div>
           </div>
-        </button>
+          <div className="mt-4 flex items-center justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate(`/player/${p.user_id}/shots`)} className="text-muted-foreground">
+              <Target className="ml-1 h-4 w-4" />
+              מעקב קליעה
+            </Button>
+            <Button size="sm" onClick={() => navigate(`/player/${p.user_id}`)} className="gradient-accent text-accent-foreground">
+              פרופיל שחקן
+            </Button>
+          </div>
+        </div>
       ))}
     </div>
   );
