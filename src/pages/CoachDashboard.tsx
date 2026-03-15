@@ -123,7 +123,7 @@ const CoachDashboard = () => {
           <div className="flex items-center gap-3">
             <div>
               <h1 className="text-3xl font-bold text-foreground">לוח בקרה</h1>
-              <p className="text-muted-foreground">ניהול שחקנים וסשנים</p>
+              <p className="text-muted-foreground">כל השחקנים במקום אחד: פרופיל + מעקב קליעה</p>
             </div>
           </div>
           <div className="flex gap-3 items-center flex-wrap justify-end">
@@ -145,7 +145,7 @@ const CoachDashboard = () => {
             </Button>
             <div className="flex items-center gap-2 rounded-lg bg-card px-4 py-2">
               <Users className="h-5 w-5 text-accent" />
-              <span className="font-semibold text-foreground">{myPlayers.length} שחקנים</span>
+              <span className="font-semibold text-foreground">{allPlayers.length} שחקנים</span>
             </div>
             <NotificationBell />
             <Button variant="ghost" onClick={logout} className="text-muted-foreground hover:text-foreground">
@@ -155,11 +155,10 @@ const CoachDashboard = () => {
           </div>
         </div>
 
-        {/* ===== Section 1: ליווי אישי מלא ===== */}
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-5">
-            <Users className="h-6 w-6 text-accent" />
-            <h2 className="text-2xl font-black text-foreground">ליווי אישי מלא</h2>
+            <Target className="h-6 w-6 text-accent" />
+            <h2 className="text-2xl font-black text-foreground">מעקב שחקנים לפי גיל</h2>
           </div>
 
           {selectedCategory === null ? (
@@ -184,7 +183,7 @@ const CoachDashboard = () => {
                   );
                 })}
               </div>
-              {myPlayers.length === 0 && (
+              {allPlayers.length === 0 && (
                 <div className="gradient-card rounded-xl p-8 text-center mt-4">
                   <p className="text-muted-foreground">אין שחקנים עדיין. לחץ על "הוסף שחקן" כדי להוסיף שחקן חדש.</p>
                 </div>
@@ -202,52 +201,7 @@ const CoachDashboard = () => {
                   </Button>
                 </div>
               </div>
-              {renderPlayerCards(groupedPlayers[selectedCategory], (userId) => `/player/${userId}`)}
-            </>
-          )}
-        </div>
-
-        {/* ===== Section 2: מעקב קליעה & Court IQ ===== */}
-        <div>
-          <div className="flex items-center gap-3 mb-5">
-            <Target className="h-6 w-6 text-accent" />
-            <h2 className="text-2xl font-black text-foreground">מעקב קליעה & Court IQ</h2>
-          </div>
-
-          {selectedShotCategory === null ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {SHOT_CATEGORIES.filter(cat => cat.key !== 'לא מוגדר' || shotGroupedPlayers['לא מוגדר'].length > 0).map((cat, i) => {
-                const catPlayers = shotGroupedPlayers[cat.key];
-                const isEmpty = catPlayers.length === 0;
-                return (
-                  <button
-                    key={cat.key}
-                    onClick={() => setSelectedShotCategory(cat.key)}
-                    className={`gradient-card rounded-2xl p-6 text-center transition-all hover:scale-[1.03] hover:shadow-xl animate-fade-in border ${isEmpty ? 'border-border/30 opacity-70' : 'border-accent/30'}`}
-                    style={{ animationDelay: `${i * 80}ms` }}
-                  >
-                    <span className="text-4xl block mb-3">{cat.emoji}</span>
-                    <h3 className="text-2xl font-black text-foreground mb-1">{cat.label}</h3>
-                    <Badge variant={isEmpty ? 'outline' : 'secondary'} className="text-sm font-bold">
-                      {catPlayers.length} שחקנים
-                    </Badge>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-between mb-6">
-                <div />
-                <div className="flex items-center gap-3">
-                  <h3 className="text-2xl font-bold text-foreground">{selectedShotCategory}</h3>
-                  <Button variant="ghost" size="sm" onClick={() => setSelectedShotCategory(null)} className="text-muted-foreground">
-                    חזרה לקטגוריות
-                    <ArrowRight className="mr-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              {renderPlayerCards(shotGroupedPlayers[selectedShotCategory], (userId) => `/player/${userId}`)}
+              {renderPlayerCards(groupedPlayers[selectedCategory])}
             </>
           )}
         </div>
