@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight } from 'lucide-react';
+import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight, Dumbbell } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
 import AddPlayerDialog from '@/components/AddPlayerDialog';
@@ -78,6 +78,10 @@ const CoachDashboard = () => {
             </div>
           </div>
           <div className="flex gap-3 items-center flex-wrap justify-end">
+            <Button variant="outline" onClick={() => navigate('/workout-plans')} className="text-muted-foreground">
+              <Dumbbell className="ml-2 h-4 w-4" />
+              תוכניות עבודה
+            </Button>
             <Button variant="outline" onClick={() => navigate('/courtiq/admin')} className="text-muted-foreground">
               <Brain className="ml-2 h-4 w-4" />
               Court IQ

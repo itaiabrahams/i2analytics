@@ -22,6 +22,7 @@ import CourtIQLeaderboardPage from "./pages/CourtIQLeaderboardPage";
 import CourtIQProfilePage from "./pages/CourtIQProfilePage";
 import CourtIQAdminPage from "./pages/CourtIQAdminPage";
 import RoleSwitcher from "./components/RoleSwitcher";
+import WorkoutPlansPage from "./pages/WorkoutPlansPage";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const AppRoutes = () => {
             <Route path="/challenges" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ChallengesPage /></div></>} />
             <Route path="/leaderboard" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><Leaderboard /></div></>} />
             <Route path="/courtiq" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><CourtIQPage /></div></>} />
+            <Route path="/workout-plans" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><WorkoutPlansPage /></div></>} />
             <Route path="/courtiq/leaderboard" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><CourtIQLeaderboardPage /></div></>} />
             <Route path="/courtiq/profile" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><CourtIQProfilePage /></div></>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
@@ -90,6 +92,7 @@ const AppRoutes = () => {
             <Route path="/courtiq/leaderboard" element={<CourtIQLeaderboardPage />} />
             <Route path="/courtiq/profile" element={<CourtIQProfilePage />} />
             <Route path="/courtiq/admin" element={<CourtIQAdminPage />} />
+            <Route path="/workout-plans" element={<WorkoutPlansPage />} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
             <Route path="*" element={<NotFound />} />
           </>
