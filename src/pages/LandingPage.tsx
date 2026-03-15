@@ -54,7 +54,7 @@ const LandingPage = () => {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
               <span className="text-lg font-black text-accent-foreground">I2</span>
             </div>
-            <span className="text-xl font-bold tracking-tight">I² Analytics</span>
+            <span className="text-xl font-bold tracking-tight">I2 Analytics</span>
           </div>
           <Button
             onClick={() => setShowLogin(true)}
