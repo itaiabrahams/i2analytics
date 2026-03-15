@@ -204,6 +204,9 @@ const PlayerProfile = () => {
                 >
                   <span className={`text-xl font-bold ${Number(s.overall_score) > 0 ? 'text-success' : Number(s.overall_score) < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
                     {Number(s.overall_score).toFixed(2)}
+                    <span className={`ml-2 text-sm ${getGradeColor(getLetterGrade(Number(s.overall_score)))}`}>
+                      {getLetterGrade(Number(s.overall_score))}
+                    </span>
                   </span>
                   <div>
                     <p className="font-medium text-foreground">נגד {s.opponent}</p>
