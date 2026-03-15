@@ -202,6 +202,7 @@ const LoginPage = () => {
                   dir="ltr"
                   maxLength={15}
                 />
+              </div>
               <div className="space-y-2">
                 <Label>אימייל</Label>
                 <Input
