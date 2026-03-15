@@ -46,6 +46,9 @@ const SessionDetail = () => {
               <p className={`text-3xl font-bold ${Number(session.overall_score) > 0 ? 'text-success' : Number(session.overall_score) < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
                 {Number(session.overall_score).toFixed(2)}
               </p>
+              <p className={`text-lg font-bold ${getGradeColor(getLetterGrade(Number(session.overall_score)))}`}>
+                {getLetterGrade(Number(session.overall_score))}
+              </p>
               <p className="text-xs text-muted-foreground">ציון כולל</p>
             </div>
             <div className="text-right">
