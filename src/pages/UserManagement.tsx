@@ -88,24 +88,18 @@ const UserManagement = () => {
   };
 
   const handleReject = async (profileId: string, userId: string) => {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ is_approved: false })
-      .eq('id', profileId);
-    if (error) {
-      toast.error('שגיאה בדחיית המשתמש');
-      return;
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        body: { userId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success('המשתמש נמחק — יוכל להירשם מחדש עם אותו אימייל');
+      fetchUsers();
+    } catch (err: any) {
+      console.error('Delete user error:', err);
+      toast.error('שגיאה במחיקת המשתמש');
     }
-
-    await supabase.from('notifications').insert({
-      user_id: userId,
-      title: 'הגישה שלך נדחתה',
-      message: 'המאמן דחה את בקשת הגישה שלך למערכת. פנה למאמן לפרטים נוספים.',
-      type: 'approval',
-    });
-
-    toast.success('המשתמש נדחה');
-    fetchUsers();
   };
 
   const handleTogglePayment = async (profileId: string, currentStatus: string) => {
