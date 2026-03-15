@@ -99,11 +99,11 @@ function arcPath(a1: number, a2: number, r: number, sweep = 1) {
 // === ZONE PATHS ===
 const ZONE_PATHS: Record<ZoneId, string> = {
   // 3PT ZONES - extend to court boundaries
-  corner_r_3: `M ${corner3R_x} ${baseY} L ${W} ${baseY} L ${W} ${H} L ${eB.x > cx ? eB.x : W} ${H} L ${pA.x} ${pA.y} A ${threeR} ${threeR} 0 0 0 ${corner3R_x} ${baseY} Z`,
+  corner_r_3: `M ${corner3R_x} ${baseY} L ${W} ${baseY} L ${W} ${H} L ${eB.x > cx ? eB.x : W} ${H} L ${pA.x} ${pA.y} L ${corner3R_x} ${baseY} Z`,
   wing_r_3: `M ${pA.x} ${pA.y} L ${eB.x > cx ? eB.x : W} ${H} L ${eB.x} ${eB.y > H ? H : eB.y} L ${pB.x} ${pB.y} A ${threeR} ${threeR} 0 0 0 ${pA.x} ${pA.y} Z`,
   top_3: `M ${pB.x} ${pB.y} L ${eB.x} ${eB.y > H ? H : eB.y} L ${eC.x} ${eC.y > H ? H : eC.y} L ${pC.x} ${pC.y} A ${threeR} ${threeR} 0 0 0 ${pB.x} ${pB.y} Z`,
   wing_l_3: `M ${pC.x} ${pC.y} L ${eC.x} ${eC.y > H ? H : eC.y} L ${eC.x < cx ? 0 : eC.x} ${H} L ${pD.x} ${pD.y} A ${threeR} ${threeR} 0 0 0 ${pC.x} ${pC.y} Z`,
-  corner_l_3: `M ${corner3L} ${baseY} L 0 ${baseY} L 0 ${H} L ${eC.x < cx ? 0 : eC.x} ${H} L ${pD.x} ${pD.y} A ${threeR} ${threeR} 0 0 1 ${corner3L} ${baseY} Z`,
+  corner_l_3: `M ${corner3L} ${baseY} L 0 ${baseY} L 0 ${H} L ${eC.x < cx ? 0 : eC.x} ${H} L ${pD.x} ${pD.y} L ${corner3L} ${baseY} Z`,
 
   // MID-RANGE ZONES
   corner_r_mid: `M ${paintR} ${baseY} L ${corner3R_x} ${baseY} L ${corner3R_x} ${arcCornerY} L ${pA.x} ${pA.y} L ${exitB.x} ${exitB.y} L ${paintR} ${exitB.y > paintB ? paintB : exitB.y} Z`,

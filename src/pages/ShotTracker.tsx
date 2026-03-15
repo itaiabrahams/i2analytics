@@ -16,6 +16,7 @@ import PlayerChallenges from '@/components/challenges/PlayerChallenges';
 import { ZoneId, ZoneStats, ZONES, ShotType, Element, FinishType } from '@/lib/shotZones';
 import { usePlayer } from '@/hooks/useSupabaseData';
 import TechniqueVideos from '@/components/TechniqueVideos';
+import CurrentMonthWorkout from '@/components/CurrentMonthWorkout';
 
 const ShotTracker = () => {
   const { playerId } = useParams();
@@ -221,8 +222,8 @@ const ShotTracker = () => {
             <TechniqueVideos playerId={id} isOwnProfile={!isCoach} />
           </div>
 
-          {/* Right side: Court */}
-          <div className="lg:col-span-3 order-1 lg:order-2">
+          {/* Right side: Court + Workout */}
+          <div className="lg:col-span-3 order-1 lg:order-2 space-y-4">
             <div className="gradient-card rounded-xl p-4">
               <BasketballCourt
                 zoneStats={activeSessionId ? zoneStats : allTimeStats}
@@ -234,6 +235,9 @@ const ShotTracker = () => {
                 לחץ על אזור במגרש כדי להזין זריקות
               </p>
             </div>
+
+            {/* Current Month Workout Plan */}
+            <CurrentMonthWorkout />
           </div>
         </div>
       </div>
