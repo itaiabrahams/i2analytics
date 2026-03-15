@@ -34,6 +34,11 @@ const BasicPlayerNav = () => {
             <span className="hidden xs:inline">שדרג לליווי אישי</span>
             <span className="xs:hidden">שדרג</span>
           </Button>
+          <a href="https://wa.me/972526124759" target="_blank" rel="noopener noreferrer" className="text-success text-xs font-medium flex items-center gap-1 hover:underline">
+            <span>💬</span>
+            <span className="hidden sm:inline">לשאלות — 052-6124759</span>
+            <span className="sm:hidden">💬</span>
+          </a>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="text-xs sm:text-sm font-bold text-foreground">I2 Analytics</span>
