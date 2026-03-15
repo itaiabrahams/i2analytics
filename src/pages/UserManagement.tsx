@@ -46,7 +46,7 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('id, user_id, display_name, role, team, position, is_approved, created_at, subscription_tier, payment_status')
+      .select('id, user_id, display_name, role, team, position, is_approved, created_at, subscription_tier, payment_status, phone_number')
       .neq('user_id', user?.id ?? '')
       .order('created_at', { ascending: false });
     if (data) setUsers(data as PendingUser[]);
