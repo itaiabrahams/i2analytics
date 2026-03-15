@@ -72,13 +72,18 @@ const exitC = paintExit(angC);
 const pA = pt(angA);
 const pB = pt(angB);
 const pC = pt(angC);
-const pD = pt(angD);
+// Inner arc points (on 3pt line) - compute right side, mirror for left
+const pA = pt(angA);
+const pB = pt(angB);
+// Mirror for perfect symmetry
+const pC = { x: cx - (pB.x - cx), y: pB.y };
+const pD = { x: cx - (pA.x - cx), y: pA.y };
 
-// Outer arc points (3pt zone outer boundary)
+// Outer arc points (3pt zone outer boundary) - same mirror approach
 const oA = pt(angA, outerR);
 const oB = pt(angB, outerR);
-const oC = pt(angC, outerR);
-const oD = pt(angD, outerR);
+const oC = { x: cx - (oB.x - cx), y: oB.y };
+const oD = { x: cx - (oA.x - cx), y: oA.y };
 
 // === ZONE PATHS ===
 const ZONE_PATHS: Record<ZoneId, string> = {
