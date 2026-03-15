@@ -464,7 +464,7 @@ const LandingPage = () => {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
-              <span className="text-sm font-black text-accent-foreground">I²</span>
+              <span className="text-sm font-black text-accent-foreground">I2</span>
             </div>
             <span className="font-bold">I² Analytics</span>
           </div>
