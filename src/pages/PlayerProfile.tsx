@@ -109,6 +109,14 @@ const PlayerProfile = () => {
     score: Number(s.overall_score),
   }));
 
+  const statsData = sessions.map(s => ({
+    date: new Date(s.date).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit' }),
+    נקודות: s.points,
+    אסיסטים: s.assists,
+    ריבאונדים: s.rebounds,
+    טורנוברים: s.turnovers,
+  }));
+
   const courtIQAccuracy = courtIQStats.totalAnswered > 0
     ? Math.round((courtIQStats.totalCorrect / courtIQStats.totalAnswered) * 100)
     : 0;
