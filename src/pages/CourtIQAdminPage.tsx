@@ -327,9 +327,9 @@ const CourtIQAdminPage = () => {
     if (isExcel) {
       try {
         const buffer = await file.arrayBuffer();
-        const wb = XLSX.read(buffer, { type: 'array' });
+        const wb = XLSX.read(new Uint8Array(buffer), { type: 'array', codepage: 65001, raw: false });
         const ws = wb.Sheets[wb.SheetNames[0]];
-        const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
 
         // Map Hebrew correct answers to a/b/c/d
         const hebrewToLetter: Record<string, string> = { 'א': 'a', 'ב': 'b', 'ג': 'c', 'ד': 'd', 'a': 'a', 'b': 'b', 'c': 'c', 'd': 'd' };
