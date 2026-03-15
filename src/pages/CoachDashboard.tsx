@@ -9,6 +9,7 @@ import AddPlayerDialog from '@/components/AddPlayerDialog';
 import { Badge } from '@/components/ui/badge';
 
 type AgeCategory = 'U14' | 'U15' | 'U16' | 'U18' | 'SENIOR' | 'לא מוגדר';
+type ShotCategory = 'U14' | 'U15' | 'U16' | 'U18';
 
 const AGE_CATEGORIES: { key: AgeCategory; label: string; minAge: number; maxAge: number; emoji: string }[] = [
   { key: 'U14', label: 'U14', minAge: 0, maxAge: 13, emoji: '🏀' },
@@ -19,6 +20,13 @@ const AGE_CATEGORIES: { key: AgeCategory; label: string; minAge: number; maxAge:
   { key: 'לא מוגדר', label: 'לא מוגדר', minAge: -1, maxAge: -1, emoji: '❓' },
 ];
 
+const SHOT_CATEGORIES: { key: ShotCategory; label: string; minAge: number; maxAge: number; emoji: string }[] = [
+  { key: 'U14', label: 'U14', minAge: 0, maxAge: 14, emoji: '🎯' },
+  { key: 'U15', label: 'U15', minAge: 15, maxAge: 15, emoji: '🎯' },
+  { key: 'U16', label: 'U16', minAge: 16, maxAge: 16, emoji: '🎯' },
+  { key: 'U18', label: 'U18', minAge: 17, maxAge: 18, emoji: '🎯' },
+];
+
 function getAgeCategory(age: number | null): AgeCategory {
   if (age == null) return 'לא מוגדר';
   for (const cat of AGE_CATEGORIES) {
@@ -26,6 +34,14 @@ function getAgeCategory(age: number | null): AgeCategory {
     if (age >= cat.minAge && age <= cat.maxAge) return cat.key;
   }
   return 'SENIOR';
+}
+
+function getShotCategory(age: number | null): ShotCategory | null {
+  if (age == null) return null;
+  for (const cat of SHOT_CATEGORIES) {
+    if (age >= cat.minAge && age <= cat.maxAge) return cat.key;
+  }
+  return null;
 }
 
 const CoachDashboard = () => {
