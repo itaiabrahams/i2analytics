@@ -19,6 +19,8 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [phone, setPhone] = useState('');
+  const [team, setTeam] = useState('');
+  const [age, setAge] = useState('');
   const [role, setRole] = useState<'coach' | 'player'>('player');
   const [coachId, setCoachId] = useState('');
   const [teamCoachApproved, setTeamCoachApproved] = useState(false);
