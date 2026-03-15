@@ -38,12 +38,13 @@ function getAgeCategory(age: number | null): AgeCategory {
   return 'SENIOR';
 }
 
-function getShotCategory(age: number | null): ShotCategory | null {
-  if (age == null) return null;
+function getShotCategory(age: number | null): ShotCategory {
+  if (age == null) return 'לא מוגדר';
   for (const cat of SHOT_CATEGORIES) {
+    if (cat.key === 'לא מוגדר') continue;
     if (age >= cat.minAge && age <= cat.maxAge) return cat.key;
   }
-  return null;
+  return 'SENIOR';
 }
 
 const CoachDashboard = () => {
