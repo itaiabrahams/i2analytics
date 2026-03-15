@@ -28,6 +28,19 @@ import MobileTopBar from "./components/MobileTopBar";
 
 const queryClient = new QueryClient();
 
+const LegacyShotTrackerRedirect = () => {
+  const location = useLocation();
+  const { playerId } = useParams();
+  const queryPlayerId = new URLSearchParams(location.search).get('player');
+  const targetPlayerId = playerId ?? queryPlayerId;
+
+  if (targetPlayerId) {
+    return <Navigate to={`/player/${targetPlayerId}/shots`} replace />;
+  }
+
+  return <ShotTracker />;
+};
+
 const AppRoutes = () => {
   const { role, loading, isApproved, profile } = useAuth();
 
