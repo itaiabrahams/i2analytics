@@ -8,14 +8,14 @@ interface Props {
   interactive?: boolean;
 }
 
-// Court dimensions (wider aspect ratio like a real half court)
+// Court dimensions
 const W = 560;
-const H = 480;
+const H = 520;
 const cx = W / 2;
-const baseY = 30; // baseline (top of court - basket side)
+const baseY = 30;
 const basketY = baseY + 18;
 
-// Paint dimensions (realistic proportions)
+// Paint
 const paintW = 160;
 const paintH = 170;
 const paintL = cx - paintW / 2;
@@ -27,16 +27,15 @@ const ftR = paintW / 2;
 
 // 3pt arc
 const threeR = 218;
-const corner3Dist = 125; // corner 3 distance from sideline
-const corner3L = corner3Dist;
-const corner3R_x = W - corner3Dist;
+const corner3L = 125;
+const corner3R_x = W - 125;
 
-// Where corner lines meet the arc
+// Corner/arc intersection
 const arcCornerDx = corner3R_x - cx;
 const arcCornerDy = Math.sqrt(threeR * threeR - arcCornerDx * arcCornerDx);
 const arcCornerY = basketY + arcCornerDy;
 
-// Angular divisions for arc zones
+// Angular divisions
 const cornerAngle = Math.acos(arcCornerDx / threeR);
 const arcSpan = Math.PI - 2 * cornerAngle;
 const sector = arcSpan / 3;
@@ -45,19 +44,13 @@ const angB = cornerAngle + sector;
 const angC = cornerAngle + 2 * sector;
 const angD = Math.PI - cornerAngle;
 
-// Mid-range boundary (between paint and 3pt)
-const midBand = 36;
-const outerR = threeR + midBand;
-
-// Paint mid-line (divides under-basket from free-throw)
+// Paint mid-line
 const paintMidY = baseY + paintH * 0.45;
 
-// Helper: point on circle from basket center
 function pt(angle: number, r: number = threeR) {
   return { x: cx + r * Math.cos(angle), y: basketY + r * Math.sin(angle) };
 }
 
-// Helper: where a radial from basket exits the paint
 function paintExit(angle: number) {
   const c = Math.cos(angle);
   const s = Math.sin(angle);
@@ -77,60 +70,78 @@ const pB = pt(angB);
 const pC = pt(angC);
 const pD = pt(angD);
 
-const oA = pt(angA, outerR);
-const oB = pt(angB, outerR);
-const oC = pt(angC, outerR);
-const oD = pt(angD, outerR);
+// Extend 3pt zone dividers to court edges
+function extendToEdge(angle: number): { x: number; y: number } {
+  const c = Math.cos(angle);
+  const s = Math.sin(angle);
+  const candidates: { x: number; y: number; t: number }[] = [];
+  // Right wall
+  if (c > 0.001) { const t = (W - cx) / c; candidates.push({ x: W, y: basketY + t * s, t }); }
+  // Left wall
+  if (c < -0.001) { const t = (0 - cx) / c; candidates.push({ x: 0, y: basketY + t * s, t }); }
+  // Bottom wall
+  if (s > 0.001) { const t = (H - basketY) / s; candidates.push({ x: cx + t * c, y: H, t }); }
+  candidates.sort((a, b) => a.t - b.t);
+  return candidates[0] || { x: cx, y: H };
+}
+
+const eB = extendToEdge(angB);
+const eC = extendToEdge(angC);
+
+// Sweeping arc from angle1 to angle2 at radius r
+function arcPath(a1: number, a2: number, r: number, sweep = 1) {
+  const p1 = pt(a1, r);
+  const p2 = pt(a2, r);
+  const largeArc = Math.abs(a2 - a1) > Math.PI ? 1 : 0;
+  return `A ${r} ${r} 0 ${largeArc} ${sweep} ${p2.x} ${p2.y}`;
+}
 
 // === ZONE PATHS ===
 const ZONE_PATHS: Record<ZoneId, string> = {
-  // 3PT ZONES (1-5)
-  corner_r_3: `M ${corner3R_x} ${baseY} L ${W} ${baseY} L ${W} ${arcCornerY} L ${pA.x} ${pA.y} A ${threeR} ${threeR} 0 0 0 ${corner3R_x} ${baseY} Z`,
-  wing_r_3: `M ${pA.x} ${pA.y} L ${oA.x} ${oA.y} A ${outerR} ${outerR} 0 0 1 ${oB.x} ${oB.y} L ${pB.x} ${pB.y} A ${threeR} ${threeR} 0 0 0 ${pA.x} ${pA.y} Z`,
-  top_3: `M ${pB.x} ${pB.y} L ${oB.x} ${oB.y} A ${outerR} ${outerR} 0 0 1 ${oC.x} ${oC.y} L ${pC.x} ${pC.y} A ${threeR} ${threeR} 0 0 0 ${pB.x} ${pB.y} Z`,
-  wing_l_3: `M ${pC.x} ${pC.y} L ${oC.x} ${oC.y} A ${outerR} ${outerR} 0 0 1 ${oD.x} ${oD.y} L ${pD.x} ${pD.y} A ${threeR} ${threeR} 0 0 0 ${pC.x} ${pC.y} Z`,
-  corner_l_3: `M ${corner3L} ${baseY} L 0 ${baseY} L 0 ${arcCornerY} L ${pD.x} ${pD.y} A ${threeR} ${threeR} 0 0 1 ${corner3L} ${baseY} Z`,
+  // 3PT ZONES - extend to court boundaries
+  corner_r_3: `M ${corner3R_x} ${baseY} L ${W} ${baseY} L ${W} ${H} L ${eB.x > cx ? eB.x : W} ${H} L ${pA.x} ${pA.y} A ${threeR} ${threeR} 0 0 0 ${corner3R_x} ${baseY} Z`,
+  wing_r_3: `M ${pA.x} ${pA.y} L ${eB.x > cx ? eB.x : W} ${H} L ${eB.x} ${eB.y > H ? H : eB.y} L ${pB.x} ${pB.y} A ${threeR} ${threeR} 0 0 0 ${pA.x} ${pA.y} Z`,
+  top_3: `M ${pB.x} ${pB.y} L ${eB.x} ${eB.y > H ? H : eB.y} L ${eC.x} ${eC.y > H ? H : eC.y} L ${pC.x} ${pC.y} A ${threeR} ${threeR} 0 0 0 ${pB.x} ${pB.y} Z`,
+  wing_l_3: `M ${pC.x} ${pC.y} L ${eC.x} ${eC.y > H ? H : eC.y} L ${eC.x < cx ? 0 : eC.x} ${H} L ${pD.x} ${pD.y} A ${threeR} ${threeR} 0 0 0 ${pC.x} ${pC.y} Z`,
+  corner_l_3: `M ${corner3L} ${baseY} L 0 ${baseY} L 0 ${H} L ${eC.x < cx ? 0 : eC.x} ${H} L ${pD.x} ${pD.y} A ${threeR} ${threeR} 0 0 1 ${corner3L} ${baseY} Z`,
 
-  // MID-RANGE ZONES (6-10)
+  // MID-RANGE ZONES
   corner_r_mid: `M ${paintR} ${baseY} L ${corner3R_x} ${baseY} L ${corner3R_x} ${arcCornerY} L ${pA.x} ${pA.y} L ${exitB.x} ${exitB.y} L ${paintR} ${exitB.y > paintB ? paintB : exitB.y} Z`,
   wing_r_mid: (() => {
     const exitA = paintExit(angA);
     if (exitB.y <= paintB) {
       return `M ${exitA.x} ${exitA.y} L ${pA.x} ${pA.y} A ${threeR} ${threeR} 0 0 1 ${pB.x} ${pB.y} L ${exitB.x} ${exitB.y} Z`;
-    } else {
-      return `M ${exitA.x} ${exitA.y} L ${pA.x} ${pA.y} A ${threeR} ${threeR} 0 0 1 ${pB.x} ${pB.y} L ${exitB.x} ${exitB.y} L ${paintR} ${paintB} L ${paintR} ${exitA.y} Z`;
     }
+    return `M ${exitA.x} ${exitA.y} L ${pA.x} ${pA.y} A ${threeR} ${threeR} 0 0 1 ${pB.x} ${pB.y} L ${exitB.x} ${exitB.y} L ${paintR} ${paintB} L ${paintR} ${exitA.y} Z`;
   })(),
   top_mid: `M ${exitB.x} ${exitB.y} L ${pB.x} ${pB.y} A ${threeR} ${threeR} 0 0 1 ${pC.x} ${pC.y} L ${exitC.x} ${exitC.y} Z`,
   wing_l_mid: (() => {
     const exitD = paintExit(angD);
     if (exitC.y <= paintB) {
       return `M ${exitC.x} ${exitC.y} L ${pC.x} ${pC.y} A ${threeR} ${threeR} 0 0 1 ${pD.x} ${pD.y} L ${exitD.x} ${exitD.y} Z`;
-    } else {
-      return `M ${exitC.x} ${exitC.y} L ${pC.x} ${pC.y} A ${threeR} ${threeR} 0 0 1 ${pD.x} ${pD.y} L ${exitD.x} ${exitD.y} L ${paintL} ${exitD.y} L ${paintL} ${paintB} Z`;
     }
+    return `M ${exitC.x} ${exitC.y} L ${pC.x} ${pC.y} A ${threeR} ${threeR} 0 0 1 ${pD.x} ${pD.y} L ${exitD.x} ${exitD.y} L ${paintL} ${exitD.y} L ${paintL} ${paintB} Z`;
   })(),
   corner_l_mid: `M ${paintL} ${baseY} L ${corner3L} ${baseY} L ${corner3L} ${arcCornerY} L ${pD.x} ${pD.y} L ${exitC.x} ${exitC.y} L ${paintL} ${exitC.y > paintB ? paintB : exitC.y} Z`,
 
-  // PAINT ZONES (11-12)
+  // PAINT ZONES
   under_basket: `M ${paintL} ${baseY} L ${paintR} ${baseY} L ${paintR} ${paintMidY} L ${paintL} ${paintMidY} Z`,
   free_throw: `M ${paintL} ${paintMidY} L ${paintR} ${paintMidY} L ${paintR} ${paintB} L ${paintL} ${paintB} Z`,
 };
 
-// Zone numbers matching the user's diagram
 const ZONE_NUMBERS: Record<ZoneId, number> = {
   corner_r_3: 1, wing_r_3: 2, top_3: 3, wing_l_3: 4, corner_l_3: 5,
   corner_l_mid: 6, wing_l_mid: 7, top_mid: 8, wing_r_mid: 9, corner_r_mid: 10,
   free_throw: 11, under_basket: 12,
 };
 
-// Label positions
+// Label positions (adjusted for full-court zones)
 const LABEL_POS: Record<ZoneId, { x: number; y: number }> = {
-  corner_r_3: { x: (corner3R_x + W) / 2, y: baseY + arcCornerDy * 0.35 },
-  wing_r_3: { x: pt((angA + angB) / 2, threeR + midBand / 2).x, y: pt((angA + angB) / 2, threeR + midBand / 2).y },
-  top_3: { x: cx, y: pt(Math.PI / 2, threeR + midBand / 2).y },
-  wing_l_3: { x: pt((angC + angD) / 2, threeR + midBand / 2).x, y: pt((angC + angD) / 2, threeR + midBand / 2).y },
-  corner_l_3: { x: corner3L / 2, y: baseY + arcCornerDy * 0.35 },
+  corner_r_3: { x: (corner3R_x + W) / 2, y: baseY + 80 },
+  wing_r_3: { x: pt((angA + angB) / 2, threeR + 50).x, y: pt((angA + angB) / 2, threeR + 50).y },
+  top_3: { x: cx, y: pt(Math.PI / 2, threeR + 50).y },
+  wing_l_3: { x: pt((angC + angD) / 2, threeR + 50).x, y: pt((angC + angD) / 2, threeR + 50).y },
+  corner_l_3: { x: corner3L / 2, y: baseY + 80 },
   corner_r_mid: { x: (paintR + corner3R_x) / 2, y: baseY + arcCornerDy * 0.35 },
   wing_r_mid: { x: pt((angA + angB) / 2, threeR * 0.55).x, y: pt((angA + angB) / 2, threeR * 0.55).y },
   top_mid: { x: cx, y: (paintB + pt(Math.PI / 2).y) / 2 },
@@ -138,13 +149,6 @@ const LABEL_POS: Record<ZoneId, { x: number; y: number }> = {
   corner_l_mid: { x: (paintL + corner3L) / 2, y: baseY + arcCornerDy * 0.35 },
   free_throw: { x: cx, y: (paintMidY + paintB) / 2 },
   under_basket: { x: cx, y: (baseY + paintMidY) / 2 },
-};
-
-// Zone type colors for category badges
-const TYPE_COLORS = {
-  '3pt': { bg: 'hsla(0, 70%, 60%, 0.2)', text: 'hsl(0, 70%, 65%)' },
-  'mid': { bg: 'hsla(45, 80%, 55%, 0.2)', text: 'hsl(45, 80%, 60%)' },
-  'paint': { bg: 'hsla(220, 70%, 60%, 0.2)', text: 'hsl(220, 70%, 65%)' },
 };
 
 const BasketballCourt = ({ zoneStats, onZoneClick, showHeatMap = false, interactive = true }: Props) => {
@@ -168,8 +172,6 @@ const BasketballCourt = ({ zoneStats, onZoneClick, showHeatMap = false, interact
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" style={{ filter: 'drop-shadow(0 4px 20px hsla(220, 60%, 10%, 0.5))' }}>
         {/* Court background */}
         <rect x="0" y="0" width={W} height={H} rx="8" fill="hsl(30, 20%, 92%)" />
-        
-        {/* Court surface */}
         <rect x="4" y="4" width={W - 8} height={H - 8} rx="6" fill="hsl(30, 15%, 96%)" stroke="hsl(220, 20%, 30%)" strokeWidth="3" />
 
         {/* Zone fills */}
@@ -188,7 +190,6 @@ const BasketballCourt = ({ zoneStats, onZoneClick, showHeatMap = false, interact
         ))}
 
         {/* Court lines */}
-        {/* Baseline */}
         <line x1="4" y1={baseY} x2={W - 4} y2={baseY} stroke="hsl(220, 20%, 20%)" strokeWidth="3" />
 
         {/* 3pt corner lines */}
@@ -204,17 +205,14 @@ const BasketballCourt = ({ zoneStats, onZoneClick, showHeatMap = false, interact
         {/* Paint */}
         <rect x={paintL} y={baseY} width={paintW} height={paintH} fill="none" stroke="hsl(220, 20%, 20%)" strokeWidth="2.5" />
         
-        {/* Paint mid-line (under basket / free throw divider) */}
+        {/* Paint mid-line */}
         <line x1={paintL} y1={paintMidY} x2={paintR} y2={paintMidY} stroke="hsl(220, 20%, 20%)" strokeWidth="1.5" strokeDasharray="6 4" />
 
         {/* Free throw circle */}
         <circle cx={cx} cy={paintB} r={ftR} fill="none" stroke="hsl(220, 20%, 20%)" strokeWidth="1.5" strokeDasharray="6 4" />
 
-        {/* Restricted area arc */}
-        <path
-          d={`M ${cx - 30} ${baseY} A 30 30 0 0 0 ${cx + 30} ${baseY}`}
-          fill="none" stroke="hsl(220, 20%, 25%)" strokeWidth="1.5"
-        />
+        {/* Restricted area */}
+        <path d={`M ${cx - 30} ${baseY} A 30 30 0 0 0 ${cx + 30} ${baseY}`} fill="none" stroke="hsl(220, 20%, 25%)" strokeWidth="1.5" />
 
         {/* Backboard */}
         <line x1={cx - 25} y1={baseY} x2={cx + 25} y2={baseY} stroke="hsl(220, 15%, 35%)" strokeWidth="4" />
@@ -222,34 +220,18 @@ const BasketballCourt = ({ zoneStats, onZoneClick, showHeatMap = false, interact
         {/* Rim */}
         <circle cx={cx} cy={basketY} r="9" fill="none" stroke="hsl(25, 90%, 50%)" strokeWidth="3" />
 
-        {/* Radial dividers between mid-range zones */}
+        {/* Radial dividers - mid range */}
         {[angB, angC].map((ang, i) => {
           const exit = i === 0 ? exitB : exitC;
           const arcPt = pt(ang);
-          return (
-            <line
-              key={`div-${i}`}
-              x1={exit.x} y1={exit.y}
-              x2={arcPt.x} y2={arcPt.y}
-              stroke="hsl(220, 20%, 20%)" strokeWidth="2"
-            />
-          );
+          return <line key={`div-${i}`} x1={exit.x} y1={exit.y} x2={arcPt.x} y2={arcPt.y} stroke="hsl(220, 20%, 20%)" strokeWidth="2" />;
         })}
 
-        {/* Extend dividers through 3pt band */}
-        {[angA, angB, angC, angD].map((ang, i) => {
-          // Only draw inner dividers (angB, angC) through the 3pt band
-          if (i === 0 || i === 3) return null;
+        {/* Radial dividers - through 3pt to court edge */}
+        {[angB, angC].map((ang, i) => {
           const inner = pt(ang);
-          const outer = pt(ang, outerR);
-          return (
-            <line
-              key={`ext-${i}`}
-              x1={inner.x} y1={inner.y}
-              x2={outer.x} y2={outer.y}
-              stroke="hsl(220, 20%, 20%)" strokeWidth="2"
-            />
-          );
+          const edge = i === 0 ? eB : eC;
+          return <line key={`ext-${i}`} x1={inner.x} y1={inner.y} x2={edge.x} y2={edge.y > H ? H : edge.y} stroke="hsl(220, 20%, 20%)" strokeWidth="2" />;
         })}
 
         {/* Labels */}
@@ -257,11 +239,9 @@ const BasketballCourt = ({ zoneStats, onZoneClick, showHeatMap = false, interact
           const stat = getZoneStat(zone.id);
           const pos = LABEL_POS[zone.id];
           const num = ZONE_NUMBERS[zone.id];
-          const zoneType = ZONES.find(z => z.id === zone.id)?.type || 'mid';
           
           return (
             <g key={`lbl-${zone.id}`} style={{ pointerEvents: 'none' }}>
-              {/* Zone number circle */}
               <circle cx={pos.x} cy={pos.y - 14} r="10" fill="hsla(220, 30%, 15%, 0.85)" stroke="hsla(0, 0%, 100%, 0.3)" strokeWidth="1" />
               <text x={pos.x} y={pos.y - 10} textAnchor="middle" fill="hsl(0, 0%, 100%)" fontSize="10" fontWeight="800">
                 {num}
