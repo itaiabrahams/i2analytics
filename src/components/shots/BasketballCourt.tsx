@@ -66,7 +66,8 @@ function paintExit(angle: number) {
 }
 
 const exitB = paintExit(angB);
-const exitC = paintExit(angC);
+// Mirror exitC for perfect symmetry
+const exitC = { x: cx - (exitB.x - cx), y: exitB.y };
 
 // Inner arc points - compute right side, mirror left for perfect symmetry
 const pA = pt(angA);
