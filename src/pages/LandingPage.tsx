@@ -466,7 +466,7 @@ const LandingPage = () => {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
               <span className="text-sm font-black text-accent-foreground">I2</span>
             </div>
-            <span className="font-bold">I² Analytics</span>
+            <span className="font-bold">I2 Analytics</span>
           </div>
           <p className="text-sm text-muted-foreground">© 2026 I² Analytics. כל הזכויות שמורות.</p>
         </div>
