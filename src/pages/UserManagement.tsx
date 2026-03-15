@@ -18,6 +18,7 @@ interface PendingUser {
   created_at: string;
   subscription_tier: string;
   payment_status: string;
+  phone_number: string | null;
 }
 
 const TIER_LABELS: Record<string, string> = {
