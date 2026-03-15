@@ -200,22 +200,24 @@ const PlayerProfile = () => {
         </div>
 
         {/* Upcoming meetings */}
-        <UpcomingMeetings playerId={id} />
+        {!isBasicPlan && <UpcomingMeetings playerId={id} />}
 
         {/* Aggregate stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          {[
-            { label: 'סה"כ סשנים', value: totalSessions, color: 'text-foreground' },
-            { label: 'ממוצע נקודות', value: avgPoints, color: 'text-success' },
-            { label: 'ממוצע אסיסטים', value: avgAssists, color: 'text-accent' },
-            { label: 'ממוצע ריבאונדים', value: avgRebounds, color: 'text-accent' },
-          ].map((stat, i) => (
-            <div key={i} className="gradient-card rounded-xl p-4 text-center animate-fade-in" style={{ animationDelay: `${i * 80}ms` }}>
-              <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
-            </div>
-          ))}
-        </div>
+        {!isBasicPlan && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            {[
+              { label: 'סה"כ סשנים', value: totalSessions, color: 'text-foreground' },
+              { label: 'ממוצע נקודות', value: avgPoints, color: 'text-success' },
+              { label: 'ממוצע אסיסטים', value: avgAssists, color: 'text-accent' },
+              { label: 'ממוצע ריבאונדים', value: avgRebounds, color: 'text-accent' },
+            ].map((stat, i) => (
+              <div key={i} className="gradient-card rounded-xl p-4 text-center animate-fade-in" style={{ animationDelay: `${i * 80}ms` }}>
+                <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                <p className="text-xs text-muted-foreground">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Shot Tracker + Court IQ summary */}
         <div className="gradient-card rounded-xl p-4 mb-6">
