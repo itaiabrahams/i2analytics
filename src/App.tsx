@@ -63,6 +63,7 @@ const AppRoutes = () => {
 
   return (
     <BrowserRouter>
+      <MobileTopBar />
       <FloatingLogo />
       <RoleSwitcher />
       <Routes>
