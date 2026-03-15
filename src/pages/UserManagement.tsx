@@ -126,13 +126,39 @@ const UserManagement = () => {
   const approved = users.filter(u => u.is_approved);
   const displayed = tab === 'pending' ? pending : approved;
 
+  const handleExportExcel = () => {
+    const data = users.map(u => ({
+      'שם': u.display_name,
+      'תפקיד': u.role === 'coach' ? 'מאמן' : 'שחקן',
+      'אימייל': u.user_id,
+      'טלפון': u.phone_number || '',
+      'קבוצה': u.team || '',
+      'עמדה': u.position || '',
+      'מנוי': TIER_LABELS[u.subscription_tier] || u.subscription_tier,
+      'תשלום': PAYMENT_LABELS[u.payment_status] || u.payment_status,
+      'מאושר': u.is_approved ? 'כן' : 'לא',
+      'תאריך הרשמה': new Date(u.created_at).toLocaleDateString('he-IL'),
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'משתמשים');
+    XLSX.writeFile(wb, 'users_export.xlsx');
+    toast.success('הקובץ הורד בהצלחה');
+  };
+
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="mx-auto max-w-3xl">
-        <Button variant="ghost" onClick={() => navigate('/')} className="mb-4 text-muted-foreground">
-          חזרה ללוח בקרה
-          <ArrowRight className="mr-2 h-4 w-4" />
-        </Button>
+        <div className="flex items-center justify-between mb-4">
+          <Button variant="ghost" onClick={() => navigate('/')} className="text-muted-foreground">
+            חזרה ללוח בקרה
+            <ArrowRight className="mr-2 h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-2 border-accent/30 text-accent">
+            <Download className="h-4 w-4" />
+            ייצוא לאקסל
+          </Button>
+        </div>
 
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
