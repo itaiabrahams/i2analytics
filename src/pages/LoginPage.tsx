@@ -96,7 +96,8 @@ const LoginPage = () => {
       displayName.trim(),
       role,
       role === 'player' && subscriptionTier === 'premium' ? coachId : undefined,
-      role === 'player' ? subscriptionTier : 'free'
+      role === 'player' ? subscriptionTier : 'free',
+      phone.trim() || undefined
     );
     if (result.error) {
       setError(result.error);
