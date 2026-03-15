@@ -18,6 +18,7 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [phone, setPhone] = useState('');
   const [role, setRole] = useState<'coach' | 'player'>('player');
   const [coachId, setCoachId] = useState('');
   const [teamCoachApproved, setTeamCoachApproved] = useState(false);
@@ -44,6 +45,7 @@ const LoginPage = () => {
     setEmail('');
     setPassword('');
     setDisplayName('');
+    setPhone('');
     setRole('player');
     setCoachId('');
     setTeamCoachApproved(false);
@@ -66,8 +68,8 @@ const LoginPage = () => {
   };
 
   const handleSignup = async () => {
-    if (!email.trim() || !password || !displayName.trim()) {
-      setError('יש למלא את כל השדות');
+    if (!email.trim() || !password || !displayName.trim() || !phone.trim()) {
+      setError('יש למלא את כל השדות כולל מספר טלפון');
       return;
     }
     if (password.length < 6) {
@@ -94,7 +96,8 @@ const LoginPage = () => {
       displayName.trim(),
       role,
       role === 'player' && subscriptionTier === 'premium' ? coachId : undefined,
-      role === 'player' ? subscriptionTier : 'free'
+      role === 'player' ? subscriptionTier : 'free',
+      phone.trim() || undefined
     );
     if (result.error) {
       setError(result.error);
@@ -186,6 +189,18 @@ const LoginPage = () => {
                   onChange={e => { setDisplayName(e.target.value); setError(''); }}
                   className="h-12 bg-secondary border-border text-foreground"
                   maxLength={100}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>מספר טלפון</Label>
+                <Input
+                  type="tel"
+                  placeholder="050-1234567"
+                  value={phone}
+                  onChange={e => { setPhone(e.target.value); setError(''); }}
+                  className="h-12 bg-secondary border-border text-foreground"
+                  dir="ltr"
+                  maxLength={15}
                 />
               </div>
               <div className="space-y-2">

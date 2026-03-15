@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRight, Check, X, UserCheck, UserX, Shield, Clock, CreditCard, Crown, Target } from 'lucide-react';
+import { ArrowRight, Check, X, UserCheck, UserX, Shield, Clock, CreditCard, Crown, Target, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 
 interface PendingUser {
   id: string;
@@ -17,6 +18,7 @@ interface PendingUser {
   created_at: string;
   subscription_tier: string;
   payment_status: string;
+  phone_number: string | null;
 }
 
 const TIER_LABELS: Record<string, string> = {
@@ -44,7 +46,7 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('id, user_id, display_name, role, team, position, is_approved, created_at, subscription_tier, payment_status')
+      .select('id, user_id, display_name, role, team, position, is_approved, created_at, subscription_tier, payment_status, phone_number')
       .neq('user_id', user?.id ?? '')
       .order('created_at', { ascending: false });
     if (data) setUsers(data as PendingUser[]);
@@ -124,13 +126,38 @@ const UserManagement = () => {
   const approved = users.filter(u => u.is_approved);
   const displayed = tab === 'pending' ? pending : approved;
 
+  const handleExportExcel = () => {
+    const data = users.map(u => ({
+      'שם': u.display_name,
+      'תפקיד': u.role === 'coach' ? 'מאמן' : 'שחקן',
+      'טלפון': u.phone_number || '',
+      'קבוצה': u.team || '',
+      'עמדה': u.position || '',
+      'מנוי': TIER_LABELS[u.subscription_tier] || u.subscription_tier,
+      'תשלום': PAYMENT_LABELS[u.payment_status] || u.payment_status,
+      'מאושר': u.is_approved ? 'כן' : 'לא',
+      'תאריך הרשמה': new Date(u.created_at).toLocaleDateString('he-IL'),
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'משתמשים');
+    XLSX.writeFile(wb, 'users_export.xlsx');
+    toast.success('הקובץ הורד בהצלחה');
+  };
+
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="mx-auto max-w-3xl">
-        <Button variant="ghost" onClick={() => navigate('/')} className="mb-4 text-muted-foreground">
-          חזרה ללוח בקרה
-          <ArrowRight className="mr-2 h-4 w-4" />
-        </Button>
+        <div className="flex items-center justify-between mb-4">
+          <Button variant="ghost" onClick={() => navigate('/')} className="text-muted-foreground">
+            חזרה ללוח בקרה
+            <ArrowRight className="mr-2 h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-2 border-accent/30 text-accent">
+            <Download className="h-4 w-4" />
+            ייצוא לאקסל
+          </Button>
+        </div>
 
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">

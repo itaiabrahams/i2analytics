@@ -569,6 +569,7 @@ export type Database = {
           is_approved: boolean
           is_demo: boolean
           payment_status: string
+          phone_number: string | null
           position: string | null
           role: Database["public"]["Enums"]["app_role"]
           subscription_note: string | null
@@ -588,6 +589,7 @@ export type Database = {
           is_approved?: boolean
           is_demo?: boolean
           payment_status?: string
+          phone_number?: string | null
           position?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           subscription_note?: string | null
@@ -607,6 +609,7 @@ export type Database = {
           is_approved?: boolean
           is_demo?: boolean
           payment_status?: string
+          phone_number?: string | null
           position?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           subscription_note?: string | null
