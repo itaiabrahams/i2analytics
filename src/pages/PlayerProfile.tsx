@@ -217,6 +217,17 @@ const PlayerProfile = () => {
             )}
           </div>
         </div>
+
+        {/* WhatsApp contact */}
+        {auth.role === 'player' && (
+          <div className="mt-6 text-center">
+            <a href="https://wa.me/972526124759" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-success hover:underline text-sm font-medium">
+              <span className="text-lg">💬</span>
+              לשאלות והתייעצויות — 052-6124759
+            </a>
+          </div>
+        )}
+
         {auth.role === 'coach' && (
           <ScheduleMeetingDialog open={meetingOpen} onOpenChange={setMeetingOpen} playerId={id} playerName={player.display_name} />
         )}

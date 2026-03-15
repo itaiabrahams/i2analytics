@@ -477,14 +477,20 @@ const LandingPage = () => {
 
       {/* Footer */}
       <footer className="border-t border-border py-8 px-6 md:px-12">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
-              <span className="text-sm font-black text-accent-foreground">I2</span>
+        <div className="max-w-6xl mx-auto flex flex-col items-center gap-4">
+          <a href="https://wa.me/972526124759" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-success hover:underline text-sm font-medium">
+            <span className="text-lg">💬</span>
+            לשאלות והתייעצויות — 052-6124759
+          </a>
+          <div className="flex flex-col md:flex-row items-center justify-between w-full gap-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
+                <span className="text-sm font-black text-accent-foreground">I2</span>
+              </div>
+              <span className="font-bold">I2 Analytics</span>
             </div>
-            <span className="font-bold">I2 Analytics</span>
+            <p className="text-sm text-muted-foreground">© 2026 I2 Analytics. כל הזכויות שמורות.</p>
           </div>
-          <p className="text-sm text-muted-foreground">© 2026 I2 Analytics. כל הזכויות שמורות.</p>
         </div>
       </footer>
     </div>
