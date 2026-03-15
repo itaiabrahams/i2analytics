@@ -130,7 +130,6 @@ const UserManagement = () => {
     const data = users.map(u => ({
       'שם': u.display_name,
       'תפקיד': u.role === 'coach' ? 'מאמן' : 'שחקן',
-      'אימייל': u.user_id,
       'טלפון': u.phone_number || '',
       'קבוצה': u.team || '',
       'עמדה': u.position || '',
