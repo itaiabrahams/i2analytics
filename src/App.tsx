@@ -70,6 +70,7 @@ const AppRoutes = () => {
             <Route path="/challenges" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ChallengesPage /></div></>} />
             <Route path="/leaderboard" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><Leaderboard /></div></>} />
             <Route path="/courtiq" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><CourtIQPage /></div></>} />
+            <Route path="/workout-plans" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><WorkoutPlansPage /></div></>} />
             <Route path="/courtiq/leaderboard" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><CourtIQLeaderboardPage /></div></>} />
             <Route path="/courtiq/profile" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><CourtIQProfilePage /></div></>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
