@@ -15,6 +15,7 @@ import WeeklyChallenges from '@/components/challenges/WeeklyChallenges';
 import PlayerChallenges from '@/components/challenges/PlayerChallenges';
 import { ZoneId, ZoneStats, ZONES, ShotType, Element, FinishType } from '@/lib/shotZones';
 import { usePlayer } from '@/hooks/useSupabaseData';
+import TechniqueVideos from '@/components/TechniqueVideos';
 
 const ShotTracker = () => {
   const { playerId } = useParams();
@@ -215,6 +216,9 @@ const ShotTracker = () => {
             {sessions.length > 1 && (
               <ShotProgressChart sessions={sessions} allShots={allShots} />
             )}
+
+            {/* Technique Videos - visible to coaches viewing a player */}
+            <TechniqueVideos playerId={id} isOwnProfile={!isCoach} />
           </div>
 
           {/* Right side: Court */}

@@ -22,11 +22,11 @@ const TechniqueVideos = ({ playerId, isOwnProfile }: TechniqueVideosProps) => {
 
   const fetchVideos = async () => {
     const { data } = await supabase
-      .from('player_technique_videos' as any)
+      .from('player_technique_videos')
       .select('*')
       .eq('player_id', playerId)
       .order('created_at', { ascending: false });
-    if (data) setVideos(data as any[]);
+    if (data) setVideos(data);
   };
 
   useEffect(() => { fetchVideos(); }, [playerId]);
@@ -61,10 +61,10 @@ const TechniqueVideos = ({ playerId, isOwnProfile }: TechniqueVideosProps) => {
     // Delete old video for this category
     const existing = videos.find(v => v.category === category);
     if (existing) {
-      await supabase.from('player_technique_videos' as any).delete().eq('id', existing.id);
+      await supabase.from('player_technique_videos').delete().eq('id', existing.id);
     }
 
-    await (supabase.from('player_technique_videos' as any) as any).insert({
+    await supabase.from('player_technique_videos').insert({
       player_id: playerId,
       category,
       video_url: urlData.publicUrl,
@@ -76,7 +76,7 @@ const TechniqueVideos = ({ playerId, isOwnProfile }: TechniqueVideosProps) => {
   };
 
   const handleDelete = async (id: string) => {
-    await supabase.from('player_technique_videos' as any).delete().eq('id', id);
+    await supabase.from('player_technique_videos').delete().eq('id', id);
     toast.success('הסרטון נמחק');
     fetchVideos();
   };
