@@ -417,6 +417,14 @@ const CourtIQPage = () => {
                 </motion.div>
               )}
 
+              {/* Countdown to next question */}
+              {nextQuestionCountdown && (
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  <span>השאלה הבאה בעוד <span className="font-mono text-accent font-bold">{nextQuestionCountdown}</span></span>
+                </div>
+              )}
+
               {/* Action buttons */}
               <div className="flex gap-2 sm:gap-3 justify-center pt-2 sm:pt-4">
                 <Button onClick={handleShare} variant="outline" size="sm" className="gap-1.5 h-9">
@@ -424,9 +432,6 @@ const CourtIQPage = () => {
                 </Button>
                 <Button onClick={() => navigate('/courtiq/leaderboard')} variant="outline" size="sm" className="gap-1.5 h-9">
                   <Trophy className="h-3.5 w-3.5" /> דירוג
-                </Button>
-                <Button onClick={handleNextQuestion} size="sm" className="gradient-accent text-accent-foreground gap-1.5 h-9">
-                  המשך
                 </Button>
               </div>
             </motion.div>
