@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight, Dumbbell, Target, Crown } from 'lucide-react';
+import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight, Dumbbell, Target, Crown, Menu, X, Crosshair } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
 import AddPlayerDialog from '@/components/AddPlayerDialog';
@@ -36,6 +36,7 @@ const CoachDashboard = () => {
   const [addPlayerOpen, setAddPlayerOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<AgeCategory | null>(null);
   const [activeSection, setActiveSection] = useState<'premium' | 'basic'>('premium');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const buildPlayerData = (list: typeof players) => list.map(p => {
     const sc = sessionCounts[p.user_id] || { count: 0, avgScore: 0, latestScores: [] };
@@ -117,6 +118,13 @@ const CoachDashboard = () => {
     </div>
   );
 
+  const menuItems = [
+    { label: 'מעקב קליעה כללי', icon: Crosshair, onClick: () => navigate('/shot-tracker') },
+    { label: 'תוכניות עבודה', icon: Dumbbell, onClick: () => navigate('/workout-plans') },
+    { label: 'Court IQ', icon: Brain, onClick: () => navigate('/courtiq/admin') },
+    { label: 'ניהול משתמשים', icon: Shield, onClick: () => navigate('/manage-users') },
+  ];
+
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="mx-auto max-w-5xl">
@@ -127,32 +135,43 @@ const CoachDashboard = () => {
               <p className="text-muted-foreground">ניהול שחקנים לפי מסלול ותפקיד</p>
             </div>
           </div>
-          <div className="flex gap-3 items-center flex-wrap justify-end">
-            <Button variant="outline" onClick={() => navigate('/workout-plans')} className="text-muted-foreground">
-              <Dumbbell className="ml-2 h-4 w-4" />
-              תוכניות עבודה
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/courtiq/admin')} className="text-muted-foreground">
-              <Brain className="ml-2 h-4 w-4" />
-              Court IQ
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/manage-users')} className="text-muted-foreground">
-              <Shield className="ml-2 h-4 w-4" />
-              ניהול משתמשים
-            </Button>
+          <div className="flex gap-2 items-center">
             <Button onClick={() => setAddPlayerOpen(true)} className="gradient-accent text-accent-foreground">
               <Plus className="ml-2 h-4 w-4" />
               הוסף שחקן
             </Button>
-            <div className="flex items-center gap-2 rounded-lg bg-card px-4 py-2">
-              <Users className="h-5 w-5 text-accent" />
-              <span className="font-semibold text-foreground">{players.length} שחקנים</span>
+            <div className="flex items-center gap-2 rounded-lg bg-card px-3 py-2">
+              <Users className="h-4 w-4 text-accent" />
+              <span className="font-semibold text-foreground text-sm">{players.length}</span>
             </div>
             <NotificationBell />
-            <Button variant="ghost" onClick={logout} className="text-muted-foreground hover:text-foreground">
-              <LogOut className="ml-2 h-4 w-4" />
-              יציאה
-            </Button>
+            <div className="relative">
+              <Button variant="ghost" size="icon" onClick={() => setMenuOpen(!menuOpen)} className="text-muted-foreground hover:text-foreground">
+                {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+              {menuOpen && (
+                <div className="absolute left-0 top-full mt-2 w-56 rounded-xl border border-border bg-card shadow-xl z-50 overflow-hidden animate-fade-in">
+                  {menuItems.map((item) => (
+                    <button
+                      key={item.label}
+                      onClick={() => { item.onClick(); setMenuOpen(false); }}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-right text-sm text-foreground hover:bg-accent/10 transition-colors"
+                    >
+                      <item.icon className="h-4 w-4 text-accent flex-shrink-0" />
+                      {item.label}
+                    </button>
+                  ))}
+                  <div className="border-t border-border" />
+                  <button
+                    onClick={() => { logout(); setMenuOpen(false); }}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-right text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                  >
+                    <LogOut className="h-4 w-4 flex-shrink-0" />
+                    יציאה
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
