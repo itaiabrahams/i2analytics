@@ -21,10 +21,10 @@ const AGE_CATEGORIES: { key: AgeCategory; label: string; minAge: number; maxAge:
 ];
 
 const SHOT_CATEGORIES: { key: ShotCategory; label: string; minAge: number; maxAge: number; emoji: string }[] = [
-  { key: 'U14', label: 'U14', minAge: 0, maxAge: 14, emoji: '🎯' },
-  { key: 'U15', label: 'U15', minAge: 15, maxAge: 15, emoji: '🎯' },
-  { key: 'U16', label: 'U16', minAge: 16, maxAge: 16, emoji: '🎯' },
-  { key: 'U18', label: 'U18', minAge: 17, maxAge: 18, emoji: '🎯' },
+  { key: 'U14', label: 'U14', minAge: 0, maxAge: 14, emoji: '🏀' },
+  { key: 'U15', label: 'U15', minAge: 15, maxAge: 15, emoji: '🏀' },
+  { key: 'U16', label: 'U16', minAge: 16, maxAge: 16, emoji: '🏀' },
+  { key: 'U18', label: 'U18', minAge: 17, maxAge: 18, emoji: '🏀' },
 ];
 
 function getAgeCategory(age: number | null): AgeCategory {
