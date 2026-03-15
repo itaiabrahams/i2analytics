@@ -240,8 +240,8 @@ const CoachDashboard = () => {
           </div>
 
           {selectedShotCategory === null ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {SHOT_CATEGORIES.map((cat, i) => {
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {SHOT_CATEGORIES.filter(cat => cat.key !== 'לא מוגדר' || shotGroupedPlayers['לא מוגדר'].length > 0).map((cat, i) => {
                 const catPlayers = shotGroupedPlayers[cat.key];
                 const isEmpty = catPlayers.length === 0;
                 return (
