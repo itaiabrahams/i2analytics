@@ -237,17 +237,18 @@ const CourtIQProfilePage = () => {
   const appLink = 'https://i2analytics.lovable.app/courtiq';
 
   const handleShareCard = async () => {
-    const text = `🏀 COURT IQ | כרטיס שחקן\n\n` +
-      `👤 ${profile?.display_name}\n` +
-      `🏀 ${profile?.position || 'שחקן'} · ${profile?.team || ''}\n` +
+    const tierInfo = getPlayerTier(monthlyAttempts);
+    const text = `🏀 I2 Analytics | כרטיס שחקן\n\n` +
+      `👤 ${profile?.display_name} [${tierInfo.label}]\n` +
+      `🏀 ${profile?.position || 'שחקן'} · ${profile?.team || ''}\n\n` +
+      `📊 Court IQ:\n` +
       `🔥 Streak: ${stats?.current_streak || 0} ימים\n` +
       `⭐ ${stats?.total_points || 0} נקודות\n` +
       `🎯 דיוק: ${accuracy}%\n` +
-      `📊 שאלות שנענו: ${stats?.total_answered || 0}\n` +
-      `✅ תשובות נכונות: ${stats?.total_correct || 0}\n` +
-      `🏆 מקום ${weeklyRank || '?'} בדירוג השבועי\n` +
-      `⚡ רצף נכונות: ${stats?.correct_streak || 0}\n` +
-      `🔥 Streak שיא: ${stats?.longest_streak || 0}\n\n` +
+      `🏆 מקום ${weeklyRank || '?'} בדירוג השבועי\n\n` +
+      `🏀 מעקב קליעות:\n` +
+      `🎯 ${totalShotsAttempts} זריקות · ${totalShotsMade} קלועות · ${shotAccuracy}% דיוק\n` +
+      `📅 ${monthlyAttempts} זריקות החודש\n\n` +
       `${getAchievementPhrase()}\n\n` +
       `🏀 בוא לשחק גם! 👇\n` +
       appLink;
