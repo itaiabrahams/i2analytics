@@ -41,6 +41,17 @@ const UserManagement = () => {
 
   const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
 
+  const fetchUsers = async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, user_id, display_name, role, team, position, is_approved, created_at, subscription_tier, payment_status')
+      .neq('user_id', user?.id ?? '')
+      .order('created_at', { ascending: false });
+    if (data) setUsers(data as PendingUser[]);
+  };
+
+  useEffect(() => { if (isAdmin) fetchUsers(); }, [user?.id, isAdmin]);
+
   if (!isAdmin) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
@@ -52,17 +63,6 @@ const UserManagement = () => {
       </div>
     );
   }
-
-  const fetchUsers = async () => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('id, user_id, display_name, role, team, position, is_approved, created_at, subscription_tier, payment_status')
-      .neq('user_id', user?.id ?? '')
-      .order('created_at', { ascending: false });
-    if (data) setUsers(data as PendingUser[]);
-  };
-
-  useEffect(() => { fetchUsers(); }, [user?.id]);
 
   const handleApprove = async (profileId: string, userId: string) => {
     const { error } = await supabase
