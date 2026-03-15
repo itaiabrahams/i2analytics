@@ -327,9 +327,13 @@ const CourtIQAdminPage = () => {
     if (isExcel) {
       try {
         const buffer = await file.arrayBuffer();
-        const wb = XLSX.read(buffer, { type: 'array' });
+        const data = new Uint8Array(buffer);
+        const wb = XLSX.read(data, { type: 'array' });
         const ws = wb.Sheets[wb.SheetNames[0]];
-        const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        
+        console.log('Excel headers:', rows[0]);
+        console.log('Excel first data row:', rows[1]);
 
         // Map Hebrew correct answers to a/b/c/d
         const hebrewToLetter: Record<string, string> = { 'א': 'a', 'ב': 'b', 'ג': 'c', 'ד': 'd', 'a': 'a', 'b': 'b', 'c': 'c', 'd': 'd' };
@@ -371,12 +375,22 @@ const CourtIQAdminPage = () => {
         setBulkText(lines.join('\n'));
         toast.success(`הקובץ "${file.name}" נטען · ${lines.length} שאלות`);
       } catch (err) {
+        console.error('Excel parse error:', err);
         toast.error('שגיאה בקריאת הקובץ');
       }
     } else {
-      const text = await file.text();
-      setBulkText(text);
-      toast.success(`הקובץ "${file.name}" נטען · ${text.trim().split('\n').length} שורות`);
+      // For non-Excel files, try reading as UTF-8 text
+      try {
+        const text = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsText(file, 'UTF-8');
+        });
+        setBulkText(text);
+        toast.success(`הקובץ "${file.name}" נטען · ${text.trim().split('\n').length} שורות`);
+      } catch {
+        toast.error('שגיאה בקריאת הקובץ');
+      }
     }
 
     e.target.value = '';
