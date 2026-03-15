@@ -52,9 +52,9 @@ const LandingPage = () => {
         >
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
-              <span className="text-lg font-black text-accent-foreground">I²</span>
+              <span className="text-lg font-black text-accent-foreground">I2</span>
             </div>
-            <span className="text-xl font-bold tracking-tight">I² Analytics</span>
+            <span className="text-xl font-bold tracking-tight">I2 Analytics</span>
           </div>
           <Button
             onClick={() => setShowLogin(true)}
@@ -98,7 +98,7 @@ const LandingPage = () => {
               custom={2}
               className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
             >
-              I² Analytics היא פלטפורמה מקצועית לניתוח משחקי כדורסל, מעקב ביצועים והגדרת יעדים, 
+              I2 Analytics היא פלטפורמה מקצועית לניתוח משחקי כדורסל, מעקב ביצועים והגדרת יעדים, 
               מותאמת במיוחד לשחקנים צעירים ומאמנים שרוצים להתפתח.
             </motion.p>
 
@@ -464,11 +464,11 @@ const LandingPage = () => {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
-              <span className="text-sm font-black text-accent-foreground">I²</span>
+              <span className="text-sm font-black text-accent-foreground">I2</span>
             </div>
-            <span className="font-bold">I² Analytics</span>
+            <span className="font-bold">I2 Analytics</span>
           </div>
-          <p className="text-sm text-muted-foreground">© 2026 I² Analytics. כל הזכויות שמורות.</p>
+          <p className="text-sm text-muted-foreground">© 2026 I2 Analytics. כל הזכויות שמורות.</p>
         </div>
       </footer>
     </div>
