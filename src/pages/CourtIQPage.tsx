@@ -91,14 +91,17 @@ const CourtIQPage = () => {
 
   // Countdown to next hour
   useEffect(() => {
-    if (currentQuestion) return;
+    // Show countdown when no unanswered question available
+    const shouldShowCountdown = !currentQuestion || result;
+    if (!shouldShowCountdown) {
+      setNextQuestionCountdown('');
+      return;
+    }
     const updateCountdown = () => {
       const now = new Date();
-      const h = now.getHours();
-      let nextH = h < 8 ? 8 : h >= 23 ? 8 : h + 1;
+      // Next full hour
       const next = new Date(now);
-      if (nextH <= h && h >= 23) next.setDate(next.getDate() + 1);
-      next.setHours(nextH, 0, 0, 0);
+      next.setHours(next.getHours() + 1, 0, 0, 0);
       const diff = next.getTime() - now.getTime();
       const mins = Math.floor(diff / 60000);
       const secs = Math.floor((diff % 60000) / 1000);
@@ -107,7 +110,7 @@ const CourtIQPage = () => {
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
-  }, [currentQuestion]);
+  }, [currentQuestion, result]);
 
   const handleAnswer = async (option: string) => {
     if (answering || result || !currentQuestion) return;
