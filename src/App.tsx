@@ -62,6 +62,7 @@ const AppRoutes = () => {
 
   return (
     <BrowserRouter>
+      <FloatingLogo />
       <RoleSwitcher />
       <Routes>
         {isBasicPlayer ? (
