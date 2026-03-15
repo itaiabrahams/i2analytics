@@ -34,6 +34,11 @@ const AddPlayerDialog = ({ open, onOpenChange, onSaved }: Props) => {
       setError('סיסמה חייבת להכיל לפחות 6 תווים');
       return;
     }
+    const ageNum = parseInt(age);
+    if (!age || isNaN(ageNum) || ageNum < 5 || ageNum > 50) {
+      setError('יש למלא גיל (5-50)');
+      return;
+    }
 
     setIsLoading(true);
     setError('');
