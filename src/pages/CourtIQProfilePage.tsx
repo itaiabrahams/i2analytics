@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { Flame, Star, Target, Brain, Trophy, Share2, ChevronLeft, TrendingUp, Zap, Award, Camera, Pencil } from 'lucide-react';
+import { Flame, Star, Target, Brain, Trophy, Share2, ChevronLeft, TrendingUp, Zap, Award, Camera, Pencil, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import Cropper from 'react-easy-crop';
 import type { CourtIQStats, LeaderboardEntry } from '@/lib/courtiq-types';
 import type { Area } from 'react-easy-crop';
+import { getPlayerTier, getTierBadgeStyle } from '@/lib/gradeUtils';
 
 interface Achievement {
   id: string;
