@@ -375,12 +375,22 @@ const CourtIQAdminPage = () => {
         setBulkText(lines.join('\n'));
         toast.success(`הקובץ "${file.name}" נטען · ${lines.length} שאלות`);
       } catch (err) {
+        console.error('Excel parse error:', err);
         toast.error('שגיאה בקריאת הקובץ');
       }
     } else {
-      const text = await file.text();
-      setBulkText(text);
-      toast.success(`הקובץ "${file.name}" נטען · ${text.trim().split('\n').length} שורות`);
+      // For non-Excel files, try reading as UTF-8 text
+      try {
+        const text = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsText(file, 'UTF-8');
+        });
+        setBulkText(text);
+        toast.success(`הקובץ "${file.name}" נטען · ${text.trim().split('\n').length} שורות`);
+      } catch {
+        toast.error('שגיאה בקריאת הקובץ');
+      }
     }
 
     e.target.value = '';
