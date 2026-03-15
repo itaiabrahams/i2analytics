@@ -9,7 +9,7 @@ import AddPlayerDialog from '@/components/AddPlayerDialog';
 import { Badge } from '@/components/ui/badge';
 
 type AgeCategory = 'U14' | 'U15' | 'U16' | 'U18' | 'SENIOR' | 'לא מוגדר';
-type ShotCategory = 'U14' | 'U15' | 'U16' | 'U18';
+type ShotCategory = 'U14' | 'U15' | 'U16' | 'U18' | 'SENIOR' | 'לא מוגדר';
 
 const AGE_CATEGORIES: { key: AgeCategory; label: string; minAge: number; maxAge: number; emoji: string }[] = [
   { key: 'U14', label: 'U14', minAge: 0, maxAge: 13, emoji: '🏀' },
@@ -21,10 +21,12 @@ const AGE_CATEGORIES: { key: AgeCategory; label: string; minAge: number; maxAge:
 ];
 
 const SHOT_CATEGORIES: { key: ShotCategory; label: string; minAge: number; maxAge: number; emoji: string }[] = [
-  { key: 'U14', label: 'U14', minAge: 0, maxAge: 14, emoji: '🏀' },
-  { key: 'U15', label: 'U15', minAge: 15, maxAge: 15, emoji: '🏀' },
-  { key: 'U16', label: 'U16', minAge: 16, maxAge: 16, emoji: '🏀' },
-  { key: 'U18', label: 'U18', minAge: 17, maxAge: 18, emoji: '🏀' },
+  { key: 'U14', label: 'U14', minAge: 0, maxAge: 13, emoji: '🏀' },
+  { key: 'U15', label: 'U15', minAge: 14, maxAge: 14, emoji: '🏀' },
+  { key: 'U16', label: 'U16', minAge: 15, maxAge: 15, emoji: '🏀' },
+  { key: 'U18', label: 'U18', minAge: 16, maxAge: 17, emoji: '🏀' },
+  { key: 'SENIOR', label: 'SENIOR', minAge: 18, maxAge: 99, emoji: '⭐' },
+  { key: 'לא מוגדר', label: 'לא מוגדר', minAge: -1, maxAge: -1, emoji: '❓' },
 ];
 
 function getAgeCategory(age: number | null): AgeCategory {
