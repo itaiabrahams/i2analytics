@@ -73,9 +73,6 @@ const CoachDashboard = () => {
               <h1 className="text-3xl font-bold text-foreground">לוח בקרה</h1>
               <p className="text-muted-foreground">ניהול שחקנים וסשנים</p>
             </div>
-            <div className="flex items-center justify-center h-10 w-10 rounded-xl gradient-accent shrink-0">
-              <span className="text-lg font-black text-accent-foreground">I2</span>
-            </div>
           </div>
           <div className="flex gap-3 items-center flex-wrap justify-end">
             <Button variant="outline" onClick={() => navigate('/workout-plans')} className="text-muted-foreground">
