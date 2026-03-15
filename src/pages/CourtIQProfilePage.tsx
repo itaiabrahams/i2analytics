@@ -32,6 +32,10 @@ const CourtIQProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [monthlyAttempts, setMonthlyAttempts] = useState(0);
+  const [totalShotsMade, setTotalShotsMade] = useState(0);
+  const [totalShotsAttempts, setTotalShotsAttempts] = useState(0);
+  const [shotAccuracy, setShotAccuracy] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
