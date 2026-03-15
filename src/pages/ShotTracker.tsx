@@ -38,6 +38,12 @@ const ShotTracker = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchSessions = useCallback(async () => {
+    if (!id) {
+      setSessions([]);
+      setLoading(false);
+      return;
+    }
+
     const { data } = await supabase
       .from('shot_sessions')
       .select('*')
