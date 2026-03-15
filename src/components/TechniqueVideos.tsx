@@ -76,7 +76,7 @@ const TechniqueVideos = ({ playerId, isOwnProfile }: TechniqueVideosProps) => {
   };
 
   const handleDelete = async (id: string) => {
-    await supabase.from('player_technique_videos' as any).delete().eq('id', id);
+    await supabase.from('player_technique_videos').delete().eq('id', id);
     toast.success('הסרטון נמחק');
     fetchVideos();
   };
