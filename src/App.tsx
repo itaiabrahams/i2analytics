@@ -24,6 +24,7 @@ import CourtIQAdminPage from "./pages/CourtIQAdminPage";
 import RoleSwitcher from "./components/RoleSwitcher";
 import WorkoutPlansPage from "./pages/WorkoutPlansPage";
 import FloatingLogo from "./components/FloatingLogo";
+import MobileTopBar from "./components/MobileTopBar";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ const AppRoutes = () => {
 
   return (
     <BrowserRouter>
+      <MobileTopBar />
       <FloatingLogo />
       <RoleSwitcher />
       <Routes>
