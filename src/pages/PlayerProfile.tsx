@@ -161,14 +161,18 @@ const PlayerProfile = () => {
                 <Target className="ml-2 h-4 w-4" />
                 מעקב קליעות
               </Button>
-              <Button variant="outline" onClick={() => setMeetingOpen(true)} className="text-muted-foreground">
-                <Video className="ml-2 h-4 w-4" />
-                תזמן פגישה
-              </Button>
-              <Button onClick={() => navigate(`/player/${id}/new-session`)} className="gradient-accent text-accent-foreground">
-                <Plus className="ml-2 h-4 w-4" />
-                סשן חדש
-              </Button>
+              {!isBasicPlan && (
+                <>
+                  <Button variant="outline" onClick={() => setMeetingOpen(true)} className="text-muted-foreground">
+                    <Video className="ml-2 h-4 w-4" />
+                    תזמן פגישה
+                  </Button>
+                  <Button onClick={() => navigate(`/player/${id}/new-session`)} className="gradient-accent text-accent-foreground">
+                    <Plus className="ml-2 h-4 w-4" />
+                    סשן חדש
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </div>
