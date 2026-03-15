@@ -382,7 +382,11 @@ const CourtIQProfilePage = () => {
           <Share2 className="h-4 w-4" /> שתף כרטיס שחקן
         </Button>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Court IQ + Shot Tracker */}
+        <h3 className="font-bold text-foreground text-right flex items-center gap-2 justify-end">
+          <span>Court IQ</span>
+          <Brain className="h-4 w-4 text-accent" />
+        </h3>
         <div className="grid grid-cols-2 gap-3">
           {[
             { icon: <TrendingUp className="h-5 w-5 mx-auto mb-1 text-accent" />, value: stats?.total_answered || 0, label: 'שאלות שנענו' },
@@ -405,6 +409,42 @@ const CourtIQProfilePage = () => {
               </Card>
             </motion.div>
           ))}
+        </div>
+
+        {/* Shot Tracker Stats */}
+        <h3 className="font-bold text-foreground text-right flex items-center gap-2 justify-end pt-2">
+          <span>מעקב קליעות</span>
+          <BarChart3 className="h-4 w-4 text-accent" />
+        </h3>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { icon: <Target className="h-5 w-5 mx-auto mb-1 text-accent" />, value: totalShotsAttempts, label: 'סה"כ זריקות' },
+            { icon: <Star className="h-5 w-5 mx-auto mb-1 text-success" />, value: totalShotsMade, label: 'קלועות' },
+            { icon: <TrendingUp className="h-5 w-5 mx-auto mb-1 text-yellow-500" />, value: `${shotAccuracy}%`, label: 'דיוק קליעה' },
+          ].map((item, i) => (
+            <motion.div
+              key={item.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 + i * 0.1 }}
+            >
+              <Card>
+                <CardContent className="p-3 text-center">
+                  {item.icon}
+                  <p className="text-xl font-black text-foreground">{item.value}</p>
+                  <p className="text-[10px] text-muted-foreground">{item.label}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+        <div className="text-center">
+          <p className="text-xs text-muted-foreground">
+            {monthlyAttempts} זריקות החודש · 
+            <span className={`font-bold ${getPlayerTier(monthlyAttempts).color}`}> {getPlayerTier(monthlyAttempts).label}</span>
+            {monthlyAttempts < 2000 && <span className="text-muted-foreground/70"> · עוד {2000 - monthlyAttempts} לדרגה הבאה</span>}
+            {monthlyAttempts >= 2000 && monthlyAttempts < 4000 && <span className="text-muted-foreground/70"> · עוד {4000 - monthlyAttempts} ל-ELITE</span>}
+          </p>
         </div>
 
         {/* Achievements */}
