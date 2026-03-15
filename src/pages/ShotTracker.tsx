@@ -215,6 +215,9 @@ const ShotTracker = () => {
             {sessions.length > 1 && (
               <ShotProgressChart sessions={sessions} allShots={allShots} />
             )}
+
+            {/* Technique Videos - visible to coaches viewing a player */}
+            <TechniqueVideos playerId={id} isOwnProfile={!isCoach} />
           </div>
 
           {/* Right side: Court */}
