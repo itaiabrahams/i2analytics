@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRight, Check, X, UserCheck, UserX, Shield, Clock, CreditCard, Crown, Target } from 'lucide-react';
+import { ArrowRight, Check, X, UserCheck, UserX, Shield, Clock, CreditCard, Crown, Target, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 
 interface PendingUser {
   id: string;
