@@ -26,6 +26,31 @@ const PlayerProfile = () => {
   const { sessions, loading: sessionsLoading } = usePlayerSessions(id);
   const avgScore = usePlayerAvgScore(id);
 
+  // Fetch monthly shot attempts for tier badge
+  useEffect(() => {
+    const fetchMonthlyAttempts = async () => {
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+      const { data: sessions } = await supabase
+        .from('shot_sessions')
+        .select('id, date')
+        .eq('player_id', id)
+        .gte('date', monthStart)
+        .lte('date', monthEnd);
+      if (sessions && sessions.length > 0) {
+        const { data: shots } = await supabase
+          .from('shots')
+          .select('attempts')
+          .in('session_id', sessions.map(s => s.id));
+        if (shots) {
+          setMonthlyAttempts(shots.reduce((s, sh) => s + sh.attempts, 0));
+        }
+      }
+    };
+    if (id) fetchMonthlyAttempts();
+  }, [id]);
+
   if (playerLoading || sessionsLoading) {
     return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
   }
