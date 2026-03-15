@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -20,12 +20,14 @@ import CurrentMonthWorkout from '@/components/CurrentMonthWorkout';
 
 const ShotTracker = () => {
   const { playerId } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { auth, user } = useAuth();
   const isCoach = auth.role === 'coach';
 
-  const id = isCoach ? playerId! : auth.playerId!;
-  const { player } = usePlayer(id);
+  const queryPlayerId = new URLSearchParams(location.search).get('player');
+  const id = isCoach ? (playerId ?? queryPlayerId ?? '') : (auth.playerId ?? '');
+  const { player } = usePlayer(id || undefined);
 
   const [sessions, setSessions] = useState<any[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -36,6 +38,12 @@ const ShotTracker = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchSessions = useCallback(async () => {
+    if (!id) {
+      setSessions([]);
+      setLoading(false);
+      return;
+    }
+
     const { data } = await supabase
       .from('shot_sessions')
       .select('*')

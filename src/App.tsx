@@ -71,6 +71,7 @@ const AppRoutes = () => {
           <>
             <Route path="/" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ShotTracker /></div></>} />
             <Route path="/shots" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ShotTracker /></div></>} />
+            <Route path="/shot-tracker" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ShotTracker /></div></>} />
             <Route path="/challenges" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ChallengesPage /></div></>} />
             <Route path="/leaderboard" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><Leaderboard /></div></>} />
             <Route path="/courtiq" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><CourtIQPage /></div></>} />
@@ -87,6 +88,8 @@ const AppRoutes = () => {
             <Route path="/player/:playerId/new-session" element={<NewSession />} />
             <Route path="/session/:sessionId" element={<SessionDetail />} />
             <Route path="/player/:playerId/shots" element={<ShotTracker />} />
+            <Route path="/shot-tracker" element={<ShotTracker />} />
+            <Route path="/shot-tracker/:playerId" element={<ShotTracker />} />
             <Route path="/shots" element={<ShotTracker />} />
             <Route path="/manage-users" element={<UserManagement />} />
             <Route path="/challenges" element={<ChallengesPage />} />

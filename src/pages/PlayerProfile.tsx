@@ -21,34 +21,75 @@ const PlayerProfile = () => {
   const navigate = useNavigate();
   const [meetingOpen, setMeetingOpen] = useState(false);
   const [monthlyAttempts, setMonthlyAttempts] = useState(0);
+  const [shotTotals, setShotTotals] = useState({ attempts: 0, made: 0 });
+  const [courtIQStats, setCourtIQStats] = useState({ totalPoints: 0, totalAnswered: 0, totalCorrect: 0, currentStreak: 0 });
   const id = auth.role === 'player' ? auth.playerId! : playerId!;
   const { player, loading: playerLoading } = usePlayer(id);
   const { sessions, loading: sessionsLoading } = usePlayerSessions(id);
   const avgScore = usePlayerAvgScore(id);
 
-  // Fetch monthly shot attempts for tier badge
+  // Fetch shot tracker + Court IQ summary
   useEffect(() => {
-    const fetchMonthlyAttempts = async () => {
+    const fetchPerformanceData = async () => {
+      if (!id) return;
+
       const now = new Date();
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-      const { data: sessions } = await supabase
-        .from('shot_sessions')
-        .select('id, date')
-        .eq('player_id', id)
-        .gte('date', monthStart)
-        .lte('date', monthEnd);
-      if (sessions && sessions.length > 0) {
-        const { data: shots } = await supabase
-          .from('shots')
-          .select('attempts')
-          .in('session_id', sessions.map(s => s.id));
-        if (shots) {
-          setMonthlyAttempts(shots.reduce((s, sh) => s + sh.attempts, 0));
-        }
+
+      const [{ data: shotSessions }, { data: courtiqData }] = await Promise.all([
+        supabase.from('shot_sessions').select('id, date').eq('player_id', id),
+        supabase
+          .from('courtiq_player_stats')
+          .select('total_points, total_answered, total_correct, current_streak')
+          .eq('player_id', id)
+          .maybeSingle(),
+      ]);
+
+      setCourtIQStats({
+        totalPoints: courtiqData?.total_points ?? 0,
+        totalAnswered: courtiqData?.total_answered ?? 0,
+        totalCorrect: courtiqData?.total_correct ?? 0,
+        currentStreak: courtiqData?.current_streak ?? 0,
+      });
+
+      if (!shotSessions || shotSessions.length === 0) {
+        setMonthlyAttempts(0);
+        setShotTotals({ attempts: 0, made: 0 });
+        return;
       }
+
+      const allSessionIds = shotSessions.map(s => s.id);
+      const monthlySessionIds = shotSessions
+        .filter(s => s.date >= monthStart && s.date <= monthEnd)
+        .map(s => s.id);
+
+      const { data: allShots } = await supabase
+        .from('shots')
+        .select('attempts, made')
+        .in('session_id', allSessionIds);
+
+      if (allShots) {
+        setShotTotals({
+          attempts: allShots.reduce((sum, shot) => sum + shot.attempts, 0),
+          made: allShots.reduce((sum, shot) => sum + shot.made, 0),
+        });
+      }
+
+      if (monthlySessionIds.length === 0) {
+        setMonthlyAttempts(0);
+        return;
+      }
+
+      const { data: monthlyShots } = await supabase
+        .from('shots')
+        .select('attempts')
+        .in('session_id', monthlySessionIds);
+
+      setMonthlyAttempts((monthlyShots ?? []).reduce((sum, shot) => sum + shot.attempts, 0));
     };
-    if (id) fetchMonthlyAttempts();
+
+    fetchPerformanceData();
   }, [id]);
 
   if (playerLoading || sessionsLoading) {
@@ -56,6 +97,8 @@ const PlayerProfile = () => {
   }
 
   if (!player) return <div className="p-8 text-center text-foreground">שחקן לא נמצא</div>;
+
+  const isBasicPlan = (player as any).subscription_tier === 'basic';
 
   // Aggregate stats
   const totalSessions = sessions.length;
@@ -75,6 +118,11 @@ const PlayerProfile = () => {
     ריבאונדים: s.rebounds,
     טורנוברים: s.turnovers,
   }));
+
+  const courtIQAccuracy = courtIQStats.totalAnswered > 0
+    ? Math.round((courtIQStats.totalCorrect / courtIQStats.totalAnswered) * 100)
+    : 0;
+
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -113,14 +161,18 @@ const PlayerProfile = () => {
                 <Target className="ml-2 h-4 w-4" />
                 מעקב קליעות
               </Button>
-              <Button variant="outline" onClick={() => setMeetingOpen(true)} className="text-muted-foreground">
-                <Video className="ml-2 h-4 w-4" />
-                תזמן פגישה
-              </Button>
-              <Button onClick={() => navigate(`/player/${id}/new-session`)} className="gradient-accent text-accent-foreground">
-                <Plus className="ml-2 h-4 w-4" />
-                סשן חדש
-              </Button>
+              {!isBasicPlan && (
+                <>
+                  <Button variant="outline" onClick={() => setMeetingOpen(true)} className="text-muted-foreground">
+                    <Video className="ml-2 h-4 w-4" />
+                    תזמן פגישה
+                  </Button>
+                  <Button onClick={() => navigate(`/player/${id}/new-session`)} className="gradient-accent text-accent-foreground">
+                    <Plus className="ml-2 h-4 w-4" />
+                    סשן חדש
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -148,25 +200,46 @@ const PlayerProfile = () => {
         </div>
 
         {/* Upcoming meetings */}
-        <UpcomingMeetings playerId={id} />
+        {!isBasicPlan && <UpcomingMeetings playerId={id} />}
 
         {/* Aggregate stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          {[
-            { label: 'סה"כ סשנים', value: totalSessions, color: 'text-foreground' },
-            { label: 'ממוצע נקודות', value: avgPoints, color: 'text-success' },
-            { label: 'ממוצע אסיסטים', value: avgAssists, color: 'text-accent' },
-            { label: 'ממוצע ריבאונדים', value: avgRebounds, color: 'text-accent' },
-          ].map((stat, i) => (
-            <div key={i} className="gradient-card rounded-xl p-4 text-center animate-fade-in" style={{ animationDelay: `${i * 80}ms` }}>
-              <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
-            </div>
-          ))}
+        {!isBasicPlan && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            {[
+              { label: 'סה"כ סשנים', value: totalSessions, color: 'text-foreground' },
+              { label: 'ממוצע נקודות', value: avgPoints, color: 'text-success' },
+              { label: 'ממוצע אסיסטים', value: avgAssists, color: 'text-accent' },
+              { label: 'ממוצע ריבאונדים', value: avgRebounds, color: 'text-accent' },
+            ].map((stat, i) => (
+              <div key={i} className="gradient-card rounded-xl p-4 text-center animate-fade-in" style={{ animationDelay: `${i * 80}ms` }}>
+                <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                <p className="text-xs text-muted-foreground">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Shot Tracker + Court IQ summary */}
+        <div className="gradient-card rounded-xl p-4 mb-6">
+          <h3 className="mb-3 text-right font-semibold text-foreground">מעקב קליעה + Court IQ</h3>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {[
+              { label: 'זריקות החודש', value: monthlyAttempts, color: 'text-accent' },
+              { label: 'ניסיונות קליעה', value: shotTotals.attempts, color: 'text-foreground' },
+              { label: 'קליעות מוצלחות', value: shotTotals.made, color: 'text-success' },
+              { label: 'נקודות חידון', value: courtIQStats.totalPoints, color: 'text-accent' },
+              { label: 'דיוק חידון', value: `${courtIQAccuracy}%`, color: 'text-foreground' },
+            ].map((stat, i) => (
+              <div key={i} className="rounded-lg bg-secondary p-3 text-center">
+                <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
+                <p className="text-xs text-muted-foreground">{stat.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Charts */}
-        {sessions.length > 1 && (
+        {!isBasicPlan && sessions.length > 1 && (
           <div className="grid gap-4 md:grid-cols-2 mb-6">
             <div className="gradient-card rounded-xl p-4">
               <h3 className="mb-4 text-right font-semibold text-foreground">התקדמות ציון וידאו</h3>
@@ -199,50 +272,58 @@ const PlayerProfile = () => {
         )}
 
         {/* Ratings, Goals & Team Coach Feedback */}
-        <div className="grid gap-4 md:grid-cols-2 mb-6">
-          <PlayerGoals playerId={id} isCoach={auth.role === 'coach'} />
-          <PlayerRatings playerId={id} isCoach={auth.role === 'coach'} />
-        </div>
+        {!isBasicPlan && (
+          <div className="grid gap-4 md:grid-cols-2 mb-6">
+            <PlayerGoals playerId={id} isCoach={auth.role === 'coach'} />
+            <PlayerRatings playerId={id} isCoach={auth.role === 'coach'} />
+          </div>
+        )}
 
         {/* Technique Videos */}
-        <div className="mb-6">
-          <TechniqueVideos playerId={id} isOwnProfile={auth.role === 'player'} />
-        </div>
+        {!isBasicPlan && (
+          <div className="mb-6">
+            <TechniqueVideos playerId={id} isOwnProfile={auth.role === 'player'} />
+          </div>
+        )}
 
         {/* Team Coach Feedback */}
-        <div className="mb-6">
-          <TeamCoachFeedbackSection playerId={id} isPlayer={auth.role === 'player'} />
-        </div>
+        {!isBasicPlan && (
+          <div className="mb-6">
+            <TeamCoachFeedbackSection playerId={id} isPlayer={auth.role === 'player'} />
+          </div>
+        )}
 
         {/* Session history */}
-        <div className="gradient-card rounded-xl p-4">
-          <h3 className="mb-4 text-right font-semibold text-foreground">היסטוריית סשנים</h3>
-          <div className="space-y-2">
-            {sessions.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">אין סשנים עדיין</p>
-            ) : (
-              [...sessions].reverse().map((s, i) => (
-                <button
-                  key={s.id}
-                  onClick={() => navigate(`/session/${s.id}`)}
-                  className="w-full rounded-lg bg-secondary p-4 text-right transition-colors hover:bg-muted animate-fade-in flex items-center justify-between"
-                  style={{ animationDelay: `${i * 50}ms` }}
-                >
-                  <span className={`text-xl font-bold ${Number(s.overall_score) > 0 ? 'text-success' : Number(s.overall_score) < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                    {Number(s.overall_score).toFixed(2)}
-                    <span className={`ml-2 text-sm ${getGradeColor(getLetterGrade(Number(s.overall_score)))}`}>
-                      {getLetterGrade(Number(s.overall_score))}
+        {!isBasicPlan && (
+          <div className="gradient-card rounded-xl p-4">
+            <h3 className="mb-4 text-right font-semibold text-foreground">היסטוריית סשנים</h3>
+            <div className="space-y-2">
+              {sessions.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">אין סשנים עדיין</p>
+              ) : (
+                [...sessions].reverse().map((s, i) => (
+                  <button
+                    key={s.id}
+                    onClick={() => navigate(`/session/${s.id}`)}
+                    className="w-full rounded-lg bg-secondary p-4 text-right transition-colors hover:bg-muted animate-fade-in flex items-center justify-between"
+                    style={{ animationDelay: `${i * 50}ms` }}
+                  >
+                    <span className={`text-xl font-bold ${Number(s.overall_score) > 0 ? 'text-success' : Number(s.overall_score) < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                      {Number(s.overall_score).toFixed(2)}
+                      <span className={`ml-2 text-sm ${getGradeColor(getLetterGrade(Number(s.overall_score)))}`}>
+                        {getLetterGrade(Number(s.overall_score))}
+                      </span>
                     </span>
-                  </span>
-                  <div>
-                    <p className="font-medium text-foreground">נגד {s.opponent}</p>
-                    <p className="text-sm text-muted-foreground">{new Date(s.date).toLocaleDateString('he-IL')}</p>
-                  </div>
-                </button>
-              ))
-            )}
+                    <div>
+                      <p className="font-medium text-foreground">נגד {s.opponent}</p>
+                      <p className="text-sm text-muted-foreground">{new Date(s.date).toLocaleDateString('he-IL')}</p>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* WhatsApp contact */}
         {auth.role === 'player' && (
