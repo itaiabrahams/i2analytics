@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import * as XLSX from 'xlsx';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -320,10 +321,64 @@ const CourtIQAdminPage = () => {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const text = await file.text();
-    setBulkText(text);
-    toast.success(`הקובץ "${file.name}" נטען · ${text.trim().split('\n').length} שורות`);
-    // Reset input so same file can be re-uploaded
+
+    const isExcel = file.name.match(/\.(xlsx|xls)$/i);
+
+    if (isExcel) {
+      try {
+        const buffer = await file.arrayBuffer();
+        const wb = XLSX.read(buffer, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+        // Map Hebrew correct answers to a/b/c/d
+        const hebrewToLetter: Record<string, string> = { 'א': 'a', 'ב': 'b', 'ג': 'c', 'ד': 'd', 'a': 'a', 'b': 'b', 'c': 'c', 'd': 'd' };
+
+        // Find column indices by header names
+        const header = rows[0]?.map((h: any) => String(h).trim()) || [];
+        const qIdx = header.findIndex((h: string) => h.includes('שאלה'));
+        const aIdx = header.findIndex((h: string) => h.includes('תשובה א') || h === 'א');
+        const bIdx = header.findIndex((h: string) => h.includes('תשובה ב') || h === 'ב');
+        const cIdx = header.findIndex((h: string) => h.includes('תשובה ג') || h === 'ג');
+        const dIdx = header.findIndex((h: string) => h.includes('תשובה ד') || h === 'ד');
+        const correctIdx = header.findIndex((h: string) => h.includes('נכונה') || h.toLowerCase() === 'correct');
+        const explainIdx = header.findIndex((h: string) => h.includes('הסבר') || h.toLowerCase().includes('explain'));
+
+        if (qIdx === -1 || aIdx === -1 || bIdx === -1) {
+          toast.error('לא נמצאו עמודות שאלה ותשובות בקובץ');
+          e.target.value = '';
+          return;
+        }
+
+        const lines: string[] = [];
+        for (let i = 1; i < rows.length; i++) {
+          const row = rows[i];
+          if (!row || !row[qIdx]) continue;
+          const question = String(row[qIdx] || '').trim();
+          const optA = String(row[aIdx] || '').trim();
+          const optB = String(row[bIdx] || '').trim();
+          const optC = String(row[cIdx !== -1 ? cIdx : ''] || '').trim();
+          const optD = String(row[dIdx !== -1 ? dIdx : ''] || '').trim();
+          const rawCorrect = String(row[correctIdx !== -1 ? correctIdx : ''] || '').trim().toLowerCase();
+          const correct = hebrewToLetter[rawCorrect] || rawCorrect;
+          const explanation = explainIdx !== -1 ? String(row[explainIdx] || '').trim() : '';
+
+          if (question && optA && optB) {
+            lines.push([question, optA, optB, optC || '-', optD || '-', correct || 'a', explanation].join('|'));
+          }
+        }
+
+        setBulkText(lines.join('\n'));
+        toast.success(`הקובץ "${file.name}" נטען · ${lines.length} שאלות`);
+      } catch (err) {
+        toast.error('שגיאה בקריאת הקובץ');
+      }
+    } else {
+      const text = await file.text();
+      setBulkText(text);
+      toast.success(`הקובץ "${file.name}" נטען · ${text.trim().split('\n').length} שורות`);
+    }
+
     e.target.value = '';
   };
 
