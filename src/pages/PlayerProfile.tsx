@@ -10,7 +10,9 @@ import UpcomingMeetings from '@/components/UpcomingMeetings';
 import PlayerRatings from '@/components/PlayerRatings';
 import PlayerGoals from '@/components/PlayerGoals';
 import TeamCoachFeedbackSection from '@/components/TeamCoachFeedbackSection';
+import TechniqueVideos from '@/components/TechniqueVideos';
 import { usePlayer, usePlayerSessions, usePlayerAvgScore } from '@/hooks/useSupabaseData';
+import { getLetterGrade, getGradeColor } from '@/lib/gradeUtils';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
