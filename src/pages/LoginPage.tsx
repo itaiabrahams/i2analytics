@@ -45,6 +45,7 @@ const LoginPage = () => {
     setEmail('');
     setPassword('');
     setDisplayName('');
+    setPhone('');
     setRole('player');
     setCoachId('');
     setTeamCoachApproved(false);
