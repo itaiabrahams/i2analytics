@@ -68,8 +68,8 @@ const LoginPage = () => {
   };
 
   const handleSignup = async () => {
-    if (!email.trim() || !password || !displayName.trim()) {
-      setError('יש למלא את כל השדות');
+    if (!email.trim() || !password || !displayName.trim() || !phone.trim()) {
+      setError('יש למלא את כל השדות כולל מספר טלפון');
       return;
     }
     if (password.length < 6) {
