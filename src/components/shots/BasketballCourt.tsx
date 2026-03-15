@@ -10,7 +10,7 @@ interface Props {
 
 // Court dimensions
 const W = 560;
-const H = 520;
+const H = 310;
 const cx = W / 2;
 const baseY = 30;
 const basketY = baseY + 18;
