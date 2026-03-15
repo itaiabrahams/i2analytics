@@ -61,7 +61,7 @@ const TechniqueVideos = ({ playerId, isOwnProfile }: TechniqueVideosProps) => {
     // Delete old video for this category
     const existing = videos.find(v => v.category === category);
     if (existing) {
-      await supabase.from('player_technique_videos' as any).delete().eq('id', existing.id);
+      await supabase.from('player_technique_videos').delete().eq('id', existing.id);
     }
 
     await (supabase.from('player_technique_videos' as any) as any).insert({
