@@ -9,7 +9,7 @@ import AddPlayerDialog from '@/components/AddPlayerDialog';
 import { Badge } from '@/components/ui/badge';
 
 type AgeCategory = 'U14' | 'U15' | 'U16' | 'U18' | 'SENIOR' | 'לא מוגדר';
-type ShotCategory = 'U14' | 'U15' | 'U16' | 'U18';
+type ShotCategory = 'U14' | 'U15' | 'U16' | 'U18' | 'SENIOR' | 'לא מוגדר';
 
 const AGE_CATEGORIES: { key: AgeCategory; label: string; minAge: number; maxAge: number; emoji: string }[] = [
   { key: 'U14', label: 'U14', minAge: 0, maxAge: 13, emoji: '🏀' },
@@ -21,10 +21,12 @@ const AGE_CATEGORIES: { key: AgeCategory; label: string; minAge: number; maxAge:
 ];
 
 const SHOT_CATEGORIES: { key: ShotCategory; label: string; minAge: number; maxAge: number; emoji: string }[] = [
-  { key: 'U14', label: 'U14', minAge: 0, maxAge: 14, emoji: '🏀' },
-  { key: 'U15', label: 'U15', minAge: 15, maxAge: 15, emoji: '🏀' },
-  { key: 'U16', label: 'U16', minAge: 16, maxAge: 16, emoji: '🏀' },
-  { key: 'U18', label: 'U18', minAge: 17, maxAge: 18, emoji: '🏀' },
+  { key: 'U14', label: 'U14', minAge: 0, maxAge: 13, emoji: '🏀' },
+  { key: 'U15', label: 'U15', minAge: 14, maxAge: 14, emoji: '🏀' },
+  { key: 'U16', label: 'U16', minAge: 15, maxAge: 15, emoji: '🏀' },
+  { key: 'U18', label: 'U18', minAge: 16, maxAge: 17, emoji: '🏀' },
+  { key: 'SENIOR', label: 'SENIOR', minAge: 18, maxAge: 99, emoji: '⭐' },
+  { key: 'לא מוגדר', label: 'לא מוגדר', minAge: -1, maxAge: -1, emoji: '❓' },
 ];
 
 function getAgeCategory(age: number | null): AgeCategory {
@@ -36,12 +38,13 @@ function getAgeCategory(age: number | null): AgeCategory {
   return 'SENIOR';
 }
 
-function getShotCategory(age: number | null): ShotCategory | null {
-  if (age == null) return null;
+function getShotCategory(age: number | null): ShotCategory {
+  if (age == null) return 'לא מוגדר';
   for (const cat of SHOT_CATEGORIES) {
+    if (cat.key === 'לא מוגדר') continue;
     if (age >= cat.minAge && age <= cat.maxAge) return cat.key;
   }
-  return null;
+  return 'SENIOR';
 }
 
 const CoachDashboard = () => {
@@ -84,10 +87,10 @@ const CoachDashboard = () => {
 
   const shotGroupedPlayers = useMemo(() => {
     const groups: Record<ShotCategory, PlayerDataItem[]> = {
-      'U14': [], 'U15': [], 'U16': [], 'U18': [],
+      'U14': [], 'U15': [], 'U16': [], 'U18': [], 'SENIOR': [], 'לא מוגדר': [],
     };
     allPlayerData.forEach(p => {
-      if (p.shotCategory) groups[p.shotCategory].push(p);
+      groups[p.shotCategory].push(p);
     });
     return groups;
   }, [allPlayerData]);
@@ -237,8 +240,8 @@ const CoachDashboard = () => {
           </div>
 
           {selectedShotCategory === null ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {SHOT_CATEGORIES.map((cat, i) => {
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {SHOT_CATEGORIES.filter(cat => cat.key !== 'לא מוגדר' || shotGroupedPlayers['לא מוגדר'].length > 0).map((cat, i) => {
                 const catPlayers = shotGroupedPlayers[cat.key];
                 const isEmpty = catPlayers.length === 0;
                 return (
