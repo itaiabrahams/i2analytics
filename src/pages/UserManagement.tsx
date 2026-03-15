@@ -31,11 +31,27 @@ const PAYMENT_LABELS: Record<string, string> = {
   expired: 'פג תוקף',
 };
 
+const ADMIN_EMAILS = ['itaiabrahams@gmail.com', 'idan.dank@gmail.com'];
+
 const UserManagement = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState<PendingUser[]>([]);
   const [tab, setTab] = useState<'pending' | 'approved'>('pending');
+
+  const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
+
+  if (!isAdmin) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="text-center">
+          <h1 className="text-xl font-bold text-foreground mb-2">אין הרשאה</h1>
+          <p className="text-muted-foreground mb-4">רק מנהלים יכולים לגשת לדף זה.</p>
+          <Button variant="ghost" onClick={() => navigate('/')}>חזרה לדף הבית</Button>
+        </div>
+      </div>
+    );
+  }
 
   const fetchUsers = async () => {
     const { data } = await supabase
