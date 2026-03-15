@@ -10,7 +10,7 @@ interface Props {
 
 // Court dimensions
 const W = 560;
-const H = 520;
+const H = 310;
 const cx = W / 2;
 const baseY = 30;
 const basketY = baseY + 18;
@@ -135,12 +135,12 @@ const ZONE_NUMBERS: Record<ZoneId, number> = {
   free_throw: 11, under_basket: 12,
 };
 
-// Label positions (adjusted for full-court zones)
+// Label positions
 const LABEL_POS: Record<ZoneId, { x: number; y: number }> = {
   corner_r_3: { x: (corner3R_x + W) / 2, y: baseY + 80 },
-  wing_r_3: { x: pt((angA + angB) / 2, threeR + 50).x, y: pt((angA + angB) / 2, threeR + 50).y },
-  top_3: { x: cx, y: pt(Math.PI / 2, threeR + 50).y },
-  wing_l_3: { x: pt((angC + angD) / 2, threeR + 50).x, y: pt((angC + angD) / 2, threeR + 50).y },
+  wing_r_3: { x: pt((angA + angB) / 2, threeR + 25).x, y: pt((angA + angB) / 2, threeR + 25).y },
+  top_3: { x: cx, y: pt(Math.PI / 2, threeR + 25).y },
+  wing_l_3: { x: pt((angC + angD) / 2, threeR + 25).x, y: pt((angC + angD) / 2, threeR + 25).y },
   corner_l_3: { x: corner3L / 2, y: baseY + 80 },
   corner_r_mid: { x: (paintR + corner3R_x) / 2, y: baseY + arcCornerDy * 0.35 },
   wing_r_mid: { x: pt((angA + angB) / 2, threeR * 0.55).x, y: pt((angA + angB) / 2, threeR * 0.55).y },
