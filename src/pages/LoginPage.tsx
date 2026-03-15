@@ -48,6 +48,8 @@ const LoginPage = () => {
     setPassword('');
     setDisplayName('');
     setPhone('');
+    setTeam('');
+    setAge('');
     setRole('player');
     setCoachId('');
     setTeamCoachApproved(false);
