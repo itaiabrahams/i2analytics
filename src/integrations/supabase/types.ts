@@ -386,9 +386,11 @@ export type Database = {
           challenged_attempts: number | null
           challenged_id: string
           challenged_made: number | null
+          challenged_video_url: string | null
           challenger_attempts: number | null
           challenger_id: string
           challenger_made: number | null
+          challenger_video_url: string | null
           created_at: string
           description: string | null
           expires_at: string
@@ -402,9 +404,11 @@ export type Database = {
           challenged_attempts?: number | null
           challenged_id: string
           challenged_made?: number | null
+          challenged_video_url?: string | null
           challenger_attempts?: number | null
           challenger_id: string
           challenger_made?: number | null
+          challenger_video_url?: string | null
           created_at?: string
           description?: string | null
           expires_at?: string
@@ -418,9 +422,11 @@ export type Database = {
           challenged_attempts?: number | null
           challenged_id?: string
           challenged_made?: number | null
+          challenged_video_url?: string | null
           challenger_attempts?: number | null
           challenger_id?: string
           challenger_made?: number | null
+          challenger_video_url?: string | null
           created_at?: string
           description?: string | null
           expires_at?: string
@@ -525,6 +531,30 @@ export type Database = {
           player_id?: string
           teamwork_rating?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      player_technique_videos: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          player_id: string
+          video_url: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          player_id: string
+          video_url: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          player_id?: string
+          video_url?: string
         }
         Relationships: []
       }
