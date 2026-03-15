@@ -98,6 +98,8 @@ const PlayerProfile = () => {
 
   if (!player) return <div className="p-8 text-center text-foreground">שחקן לא נמצא</div>;
 
+  const isBasicPlan = (player as any).subscription_tier === 'basic';
+
   // Aggregate stats
   const totalSessions = sessions.length;
   const avgPoints = totalSessions > 0 ? (sessions.reduce((s, ses) => s + ses.points, 0) / totalSessions).toFixed(1) : '0';
