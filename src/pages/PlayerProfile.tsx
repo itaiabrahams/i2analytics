@@ -140,8 +140,8 @@ const PlayerProfile = () => {
                 <h1 className="text-3xl font-bold text-foreground">{player.display_name}</h1>
                 <p className="text-muted-foreground">{player.position} · גיל {player.age} · {player.team}</p>
               </div>
-              <div className="flex items-center justify-center h-10 w-10 rounded-xl gradient-accent shrink-0">
-                <span className="text-lg font-black text-accent-foreground">I2</span>
+              <div className={`flex items-center justify-center h-auto px-3 py-1 rounded-xl shrink-0 border ${getTierBadgeStyle(getPlayerTier(monthlyAttempts).tier)}`}>
+                <span className="text-sm font-black">{getPlayerTier(monthlyAttempts).label}</span>
               </div>
             </div>
           </div>
