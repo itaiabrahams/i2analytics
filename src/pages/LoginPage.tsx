@@ -244,6 +244,34 @@ const LoginPage = () => {
                 </Select>
               </div>
 
+              {/* Team and age - for players */}
+              {role === 'player' && (
+                <>
+                  <div className="space-y-2">
+                    <Label>קבוצה</Label>
+                    <Input
+                      placeholder="שם הקבוצה"
+                      value={team}
+                      onChange={e => { setTeam(e.target.value); setError(''); }}
+                      className="h-12 bg-secondary border-border text-foreground"
+                      maxLength={100}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>גיל</Label>
+                    <Input
+                      type="number"
+                      placeholder="הגיל שלך"
+                      value={age}
+                      onChange={e => { setAge(e.target.value); setError(''); }}
+                      className="h-12 bg-secondary border-border text-foreground"
+                      min={8}
+                      max={50}
+                    />
+                  </div>
+                </>
+              )}
+
               {/* Tier selection - only for players */}
               {role === 'player' && (
                 <div className="space-y-3">
