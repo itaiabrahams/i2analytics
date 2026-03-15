@@ -57,6 +57,51 @@ const CourtIQProfilePage = () => {
       setWeeklyRank(rank || 0);
     }
     if (profileRes.data) setAvatarUrl((profileRes.data as any).avatar_url);
+
+    // Fetch shot tracker data
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+
+    // Get all player's shot sessions
+    const { data: shotSessions } = await supabase
+      .from('shot_sessions')
+      .select('id, date')
+      .eq('player_id', user.id);
+
+    if (shotSessions && shotSessions.length > 0) {
+      const allSessionIds = shotSessions.map(s => s.id);
+      const monthlySessionIds = shotSessions
+        .filter(s => s.date >= monthStart && s.date <= monthEnd)
+        .map(s => s.id);
+
+      // All-time shots
+      const { data: allShots } = await supabase
+        .from('shots')
+        .select('attempts, made')
+        .in('session_id', allSessionIds);
+
+      if (allShots) {
+        const totalA = allShots.reduce((s, sh) => s + sh.attempts, 0);
+        const totalM = allShots.reduce((s, sh) => s + sh.made, 0);
+        setTotalShotsAttempts(totalA);
+        setTotalShotsMade(totalM);
+        setShotAccuracy(totalA > 0 ? Math.round((totalM / totalA) * 100) : 0);
+      }
+
+      // Monthly shots for tier
+      if (monthlySessionIds.length > 0) {
+        const { data: monthlyShots } = await supabase
+          .from('shots')
+          .select('attempts')
+          .in('session_id', monthlySessionIds);
+
+        if (monthlyShots) {
+          setMonthlyAttempts(monthlyShots.reduce((s, sh) => s + sh.attempts, 0));
+        }
+      }
+    }
+
     setLoading(false);
   };
 
