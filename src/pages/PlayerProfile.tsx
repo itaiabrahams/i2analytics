@@ -239,7 +239,7 @@ const PlayerProfile = () => {
         </div>
 
         {/* Charts */}
-        {sessions.length > 1 && (
+        {!isBasicPlan && sessions.length > 1 && (
           <div className="grid gap-4 md:grid-cols-2 mb-6">
             <div className="gradient-card rounded-xl p-4">
               <h3 className="mb-4 text-right font-semibold text-foreground">התקדמות ציון וידאו</h3>
@@ -272,50 +272,58 @@ const PlayerProfile = () => {
         )}
 
         {/* Ratings, Goals & Team Coach Feedback */}
-        <div className="grid gap-4 md:grid-cols-2 mb-6">
-          <PlayerGoals playerId={id} isCoach={auth.role === 'coach'} />
-          <PlayerRatings playerId={id} isCoach={auth.role === 'coach'} />
-        </div>
+        {!isBasicPlan && (
+          <div className="grid gap-4 md:grid-cols-2 mb-6">
+            <PlayerGoals playerId={id} isCoach={auth.role === 'coach'} />
+            <PlayerRatings playerId={id} isCoach={auth.role === 'coach'} />
+          </div>
+        )}
 
         {/* Technique Videos */}
-        <div className="mb-6">
-          <TechniqueVideos playerId={id} isOwnProfile={auth.role === 'player'} />
-        </div>
+        {!isBasicPlan && (
+          <div className="mb-6">
+            <TechniqueVideos playerId={id} isOwnProfile={auth.role === 'player'} />
+          </div>
+        )}
 
         {/* Team Coach Feedback */}
-        <div className="mb-6">
-          <TeamCoachFeedbackSection playerId={id} isPlayer={auth.role === 'player'} />
-        </div>
+        {!isBasicPlan && (
+          <div className="mb-6">
+            <TeamCoachFeedbackSection playerId={id} isPlayer={auth.role === 'player'} />
+          </div>
+        )}
 
         {/* Session history */}
-        <div className="gradient-card rounded-xl p-4">
-          <h3 className="mb-4 text-right font-semibold text-foreground">היסטוריית סשנים</h3>
-          <div className="space-y-2">
-            {sessions.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">אין סשנים עדיין</p>
-            ) : (
-              [...sessions].reverse().map((s, i) => (
-                <button
-                  key={s.id}
-                  onClick={() => navigate(`/session/${s.id}`)}
-                  className="w-full rounded-lg bg-secondary p-4 text-right transition-colors hover:bg-muted animate-fade-in flex items-center justify-between"
-                  style={{ animationDelay: `${i * 50}ms` }}
-                >
-                  <span className={`text-xl font-bold ${Number(s.overall_score) > 0 ? 'text-success' : Number(s.overall_score) < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                    {Number(s.overall_score).toFixed(2)}
-                    <span className={`ml-2 text-sm ${getGradeColor(getLetterGrade(Number(s.overall_score)))}`}>
-                      {getLetterGrade(Number(s.overall_score))}
+        {!isBasicPlan && (
+          <div className="gradient-card rounded-xl p-4">
+            <h3 className="mb-4 text-right font-semibold text-foreground">היסטוריית סשנים</h3>
+            <div className="space-y-2">
+              {sessions.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">אין סשנים עדיין</p>
+              ) : (
+                [...sessions].reverse().map((s, i) => (
+                  <button
+                    key={s.id}
+                    onClick={() => navigate(`/session/${s.id}`)}
+                    className="w-full rounded-lg bg-secondary p-4 text-right transition-colors hover:bg-muted animate-fade-in flex items-center justify-between"
+                    style={{ animationDelay: `${i * 50}ms` }}
+                  >
+                    <span className={`text-xl font-bold ${Number(s.overall_score) > 0 ? 'text-success' : Number(s.overall_score) < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                      {Number(s.overall_score).toFixed(2)}
+                      <span className={`ml-2 text-sm ${getGradeColor(getLetterGrade(Number(s.overall_score)))}`}>
+                        {getLetterGrade(Number(s.overall_score))}
+                      </span>
                     </span>
-                  </span>
-                  <div>
-                    <p className="font-medium text-foreground">נגד {s.opponent}</p>
-                    <p className="text-sm text-muted-foreground">{new Date(s.date).toLocaleDateString('he-IL')}</p>
-                  </div>
-                </button>
-              ))
-            )}
+                    <div>
+                      <p className="font-medium text-foreground">נגד {s.opponent}</p>
+                      <p className="text-sm text-muted-foreground">{new Date(s.date).toLocaleDateString('he-IL')}</p>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* WhatsApp contact */}
         {auth.role === 'player' && (
