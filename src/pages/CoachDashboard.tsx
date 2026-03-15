@@ -53,9 +53,12 @@ const CoachDashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState<AgeCategory | null>(null);
   const [selectedShotCategory, setSelectedShotCategory] = useState<ShotCategory | null>(null);
 
+  // Section 1 (ליווי אישי מלא): only coach's own players + demos
   const myPlayers = players.filter(p => p.coach_id === user?.id || p.is_demo);
+  // Section 2 (מעקב קליעה & Court IQ): ALL approved players
+  const allPlayers = players;
 
-  const playerData = myPlayers.map(p => {
+  const buildPlayerData = (list: typeof players) => list.map(p => {
     const sc = sessionCounts[p.user_id] || { count: 0, avgScore: 0, latestScores: [] };
     let trend: 'up' | 'down' | 'neutral' = 'neutral';
     if (sc.latestScores.length >= 2) {
