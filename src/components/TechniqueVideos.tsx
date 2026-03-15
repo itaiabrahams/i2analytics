@@ -22,11 +22,11 @@ const TechniqueVideos = ({ playerId, isOwnProfile }: TechniqueVideosProps) => {
 
   const fetchVideos = async () => {
     const { data } = await supabase
-      .from('player_technique_videos' as any)
+      .from('player_technique_videos')
       .select('*')
       .eq('player_id', playerId)
       .order('created_at', { ascending: false });
-    if (data) setVideos(data as any[]);
+    if (data) setVideos(data);
   };
 
   useEffect(() => { fetchVideos(); }, [playerId]);
