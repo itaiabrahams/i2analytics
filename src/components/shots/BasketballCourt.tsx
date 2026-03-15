@@ -66,19 +66,20 @@ function paintExit(angle: number) {
 }
 
 const exitB = paintExit(angB);
-const exitC = paintExit(angC);
+// Mirror exitC for perfect symmetry
+const exitC = { x: cx - (exitB.x - cx), y: exitB.y };
 
-// Inner arc points (on 3pt line)
+// Inner arc points - compute right side, mirror left for perfect symmetry
 const pA = pt(angA);
 const pB = pt(angB);
-const pC = pt(angC);
-const pD = pt(angD);
+const pC = { x: cx - (pB.x - cx), y: pB.y };
+const pD = { x: cx - (pA.x - cx), y: pA.y };
 
-// Outer arc points (3pt zone outer boundary)
+// Outer arc points (3pt zone outer boundary) - same mirror approach
 const oA = pt(angA, outerR);
 const oB = pt(angB, outerR);
-const oC = pt(angC, outerR);
-const oD = pt(angD, outerR);
+const oC = { x: cx - (oB.x - cx), y: oB.y };
+const oD = { x: cx - (oA.x - cx), y: oA.y };
 
 // === ZONE PATHS ===
 const ZONE_PATHS: Record<ZoneId, string> = {
@@ -119,19 +120,26 @@ const ZONE_NUMBERS: Record<ZoneId, number> = {
   free_throw: 11, under_basket: 12,
 };
 
-// Label positions - centered in each zone
+// Label positions - mirrored for perfect symmetry
 const midR = (threeR + outerR) / 2;
+const wingR3Label = pt((angA + angB) / 2, midR);
+const wingRMidLabel = pt((angA + angB) / 2, threeR * 0.55);
+const cornerR3LabelX = (corner3R_x + oA.x) / 2;
+const cornerRMidLabelX = (paintR + corner3R_x) / 2;
+const cornerLabelY = baseY + (arcCornerY - baseY) * 0.4;
+const cornerMidLabelY = baseY + arcCornerDy * 0.35;
+
 const LABEL_POS: Record<ZoneId, { x: number; y: number }> = {
-  corner_r_3: { x: (corner3R_x + oA.x) / 2, y: baseY + (arcCornerY - baseY) * 0.4 },
-  wing_r_3: { x: pt((angA + angB) / 2, midR).x, y: pt((angA + angB) / 2, midR).y },
+  corner_r_3: { x: cornerR3LabelX, y: cornerLabelY },
+  wing_r_3: { x: wingR3Label.x, y: wingR3Label.y },
   top_3: { x: cx, y: pt(Math.PI / 2, midR).y },
-  wing_l_3: { x: pt((angC + angD) / 2, midR).x, y: pt((angC + angD) / 2, midR).y },
-  corner_l_3: { x: (corner3L + oD.x) / 2, y: baseY + (arcCornerY - baseY) * 0.4 },
-  corner_r_mid: { x: (paintR + corner3R_x) / 2, y: baseY + arcCornerDy * 0.35 },
-  wing_r_mid: { x: pt((angA + angB) / 2, threeR * 0.55).x, y: pt((angA + angB) / 2, threeR * 0.55).y },
+  wing_l_3: { x: cx - (wingR3Label.x - cx), y: wingR3Label.y },
+  corner_l_3: { x: cx - (cornerR3LabelX - cx), y: cornerLabelY },
+  corner_r_mid: { x: cornerRMidLabelX, y: cornerMidLabelY },
+  wing_r_mid: { x: wingRMidLabel.x, y: wingRMidLabel.y },
   top_mid: { x: cx, y: (paintB + pt(Math.PI / 2).y) / 2 },
-  wing_l_mid: { x: pt((angC + angD) / 2, threeR * 0.55).x, y: pt((angC + angD) / 2, threeR * 0.55).y },
-  corner_l_mid: { x: (paintL + corner3L) / 2, y: baseY + arcCornerDy * 0.35 },
+  wing_l_mid: { x: cx - (wingRMidLabel.x - cx), y: wingRMidLabel.y },
+  corner_l_mid: { x: cx - (cornerRMidLabelX - cx), y: cornerMidLabelY },
   free_throw: { x: cx, y: (paintMidY + paintB) / 2 },
   under_basket: { x: cx, y: (baseY + paintMidY) / 2 },
 };
