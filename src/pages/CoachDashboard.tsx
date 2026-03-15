@@ -87,10 +87,10 @@ const CoachDashboard = () => {
 
   const shotGroupedPlayers = useMemo(() => {
     const groups: Record<ShotCategory, PlayerDataItem[]> = {
-      'U14': [], 'U15': [], 'U16': [], 'U18': [],
+      'U14': [], 'U15': [], 'U16': [], 'U18': [], 'SENIOR': [], 'לא מוגדר': [],
     };
     allPlayerData.forEach(p => {
-      if (p.shotCategory) groups[p.shotCategory].push(p);
+      groups[p.shotCategory].push(p);
     });
     return groups;
   }, [allPlayerData]);
