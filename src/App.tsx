@@ -23,6 +23,7 @@ import CourtIQProfilePage from "./pages/CourtIQProfilePage";
 import CourtIQAdminPage from "./pages/CourtIQAdminPage";
 import RoleSwitcher from "./components/RoleSwitcher";
 import WorkoutPlansPage from "./pages/WorkoutPlansPage";
+import FloatingLogo from "./components/FloatingLogo";
 
 const queryClient = new QueryClient();
 
