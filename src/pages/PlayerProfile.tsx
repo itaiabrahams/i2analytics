@@ -178,6 +178,11 @@ const PlayerProfile = () => {
           <PlayerRatings playerId={id} isCoach={auth.role === 'coach'} />
         </div>
 
+        {/* Technique Videos */}
+        <div className="mb-6">
+          <TechniqueVideos playerId={id} isOwnProfile={auth.role === 'player'} />
+        </div>
+
         {/* Team Coach Feedback */}
         <div className="mb-6">
           <TeamCoachFeedbackSection playerId={id} isPlayer={auth.role === 'player'} />
