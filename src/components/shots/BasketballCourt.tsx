@@ -10,7 +10,6 @@ interface Props {
 
 // Court dimensions
 const W = 560;
-const H = 310;
 const cx = W / 2;
 const baseY = 30;
 const basketY = baseY + 18;
@@ -27,15 +26,19 @@ const ftR = paintW / 2;
 
 // 3pt arc
 const threeR = 218;
+const outerR = threeR + 38; // 3pt zone outer boundary
 const corner3L = 125;
 const corner3R_x = W - 125;
+
+// Court height: just enough to contain outer arc + margin
+const H = basketY + outerR + 12;
 
 // Corner/arc intersection
 const arcCornerDx = corner3R_x - cx;
 const arcCornerDy = Math.sqrt(threeR * threeR - arcCornerDx * arcCornerDx);
 const arcCornerY = basketY + arcCornerDy;
 
-// Angular divisions
+// Angular divisions for 3 sectors along the arc
 const cornerAngle = Math.acos(arcCornerDx / threeR);
 const arcSpan = Math.PI - 2 * cornerAngle;
 const sector = arcSpan / 3;
@@ -65,45 +68,26 @@ function paintExit(angle: number) {
 const exitB = paintExit(angB);
 const exitC = paintExit(angC);
 
+// Inner arc points (on 3pt line)
 const pA = pt(angA);
 const pB = pt(angB);
 const pC = pt(angC);
 const pD = pt(angD);
 
-// Extend 3pt zone dividers to court edges
-function extendToEdge(angle: number): { x: number; y: number } {
-  const c = Math.cos(angle);
-  const s = Math.sin(angle);
-  const candidates: { x: number; y: number; t: number }[] = [];
-  // Right wall
-  if (c > 0.001) { const t = (W - cx) / c; candidates.push({ x: W, y: basketY + t * s, t }); }
-  // Left wall
-  if (c < -0.001) { const t = (0 - cx) / c; candidates.push({ x: 0, y: basketY + t * s, t }); }
-  // Bottom wall
-  if (s > 0.001) { const t = (H - basketY) / s; candidates.push({ x: cx + t * c, y: H, t }); }
-  candidates.sort((a, b) => a.t - b.t);
-  return candidates[0] || { x: cx, y: H };
-}
-
-const eB = extendToEdge(angB);
-const eC = extendToEdge(angC);
-
-// Sweeping arc from angle1 to angle2 at radius r
-function arcPath(a1: number, a2: number, r: number, sweep = 1) {
-  const p1 = pt(a1, r);
-  const p2 = pt(a2, r);
-  const largeArc = Math.abs(a2 - a1) > Math.PI ? 1 : 0;
-  return `A ${r} ${r} 0 ${largeArc} ${sweep} ${p2.x} ${p2.y}`;
-}
+// Outer arc points (3pt zone outer boundary)
+const oA = pt(angA, outerR);
+const oB = pt(angB, outerR);
+const oC = pt(angC, outerR);
+const oD = pt(angD, outerR);
 
 // === ZONE PATHS ===
 const ZONE_PATHS: Record<ZoneId, string> = {
-  // 3PT ZONES - extend to court boundaries
-  corner_r_3: `M ${corner3R_x} ${baseY} L ${W} ${baseY} L ${W} ${H} L ${eB.x > cx ? eB.x : W} ${H} L ${pA.x} ${pA.y} L ${corner3R_x} ${baseY} Z`,
-  wing_r_3: `M ${pA.x} ${pA.y} L ${eB.x > cx ? eB.x : W} ${H} L ${eB.x} ${eB.y > H ? H : eB.y} L ${pB.x} ${pB.y} A ${threeR} ${threeR} 0 0 0 ${pA.x} ${pA.y} Z`,
-  top_3: `M ${pB.x} ${pB.y} L ${eB.x} ${eB.y > H ? H : eB.y} L ${eC.x} ${eC.y > H ? H : eC.y} L ${pC.x} ${pC.y} A ${threeR} ${threeR} 0 0 0 ${pB.x} ${pB.y} Z`,
-  wing_l_3: `M ${pC.x} ${pC.y} L ${eC.x} ${eC.y > H ? H : eC.y} L ${eC.x < cx ? 0 : eC.x} ${H} L ${pD.x} ${pD.y} A ${threeR} ${threeR} 0 0 0 ${pC.x} ${pC.y} Z`,
-  corner_l_3: `M ${corner3L} ${baseY} L 0 ${baseY} L 0 ${H} L ${eC.x < cx ? 0 : eC.x} ${H} L ${pD.x} ${pD.y} L ${corner3L} ${baseY} Z`,
+  // 3PT ZONES - uniform strip outside the arc
+  corner_r_3: `M ${corner3R_x} ${baseY} L ${oA.x} ${baseY} L ${oA.x} ${oA.y} L ${pA.x} ${pA.y} L ${corner3R_x} ${baseY} Z`,
+  wing_r_3: `M ${pA.x} ${pA.y} L ${oA.x} ${oA.y} A ${outerR} ${outerR} 0 0 1 ${oB.x} ${oB.y} L ${pB.x} ${pB.y} A ${threeR} ${threeR} 0 0 0 ${pA.x} ${pA.y} Z`,
+  top_3: `M ${pB.x} ${pB.y} L ${oB.x} ${oB.y} A ${outerR} ${outerR} 0 0 1 ${oC.x} ${oC.y} L ${pC.x} ${pC.y} A ${threeR} ${threeR} 0 0 0 ${pB.x} ${pB.y} Z`,
+  wing_l_3: `M ${pC.x} ${pC.y} L ${oC.x} ${oC.y} A ${outerR} ${outerR} 0 0 1 ${oD.x} ${oD.y} L ${pD.x} ${pD.y} A ${threeR} ${threeR} 0 0 0 ${pC.x} ${pC.y} Z`,
+  corner_l_3: `M ${corner3L} ${baseY} L ${oD.x} ${baseY} L ${oD.x} ${oD.y} L ${pD.x} ${pD.y} L ${corner3L} ${baseY} Z`,
 
   // MID-RANGE ZONES
   corner_r_mid: `M ${paintR} ${baseY} L ${corner3R_x} ${baseY} L ${corner3R_x} ${arcCornerY} L ${pA.x} ${pA.y} L ${exitB.x} ${exitB.y} L ${paintR} ${exitB.y > paintB ? paintB : exitB.y} Z`,
@@ -135,13 +119,14 @@ const ZONE_NUMBERS: Record<ZoneId, number> = {
   free_throw: 11, under_basket: 12,
 };
 
-// Label positions
+// Label positions - centered in each zone
+const midR = (threeR + outerR) / 2;
 const LABEL_POS: Record<ZoneId, { x: number; y: number }> = {
-  corner_r_3: { x: (corner3R_x + W) / 2, y: baseY + 80 },
-  wing_r_3: { x: pt((angA + angB) / 2, threeR + 25).x, y: pt((angA + angB) / 2, threeR + 25).y },
-  top_3: { x: cx, y: pt(Math.PI / 2, threeR + 25).y },
-  wing_l_3: { x: pt((angC + angD) / 2, threeR + 25).x, y: pt((angC + angD) / 2, threeR + 25).y },
-  corner_l_3: { x: corner3L / 2, y: baseY + 80 },
+  corner_r_3: { x: (corner3R_x + oA.x) / 2, y: baseY + (arcCornerY - baseY) * 0.4 },
+  wing_r_3: { x: pt((angA + angB) / 2, midR).x, y: pt((angA + angB) / 2, midR).y },
+  top_3: { x: cx, y: pt(Math.PI / 2, midR).y },
+  wing_l_3: { x: pt((angC + angD) / 2, midR).x, y: pt((angC + angD) / 2, midR).y },
+  corner_l_3: { x: (corner3L + oD.x) / 2, y: baseY + (arcCornerY - baseY) * 0.4 },
   corner_r_mid: { x: (paintR + corner3R_x) / 2, y: baseY + arcCornerDy * 0.35 },
   wing_r_mid: { x: pt((angA + angB) / 2, threeR * 0.55).x, y: pt((angA + angB) / 2, threeR * 0.55).y },
   top_mid: { x: cx, y: (paintB + pt(Math.PI / 2).y) / 2 },
@@ -220,18 +205,13 @@ const BasketballCourt = ({ zoneStats, onZoneClick, showHeatMap = false, interact
         {/* Rim */}
         <circle cx={cx} cy={basketY} r="9" fill="none" stroke="hsl(25, 90%, 50%)" strokeWidth="3" />
 
-        {/* Radial dividers - mid range */}
+        {/* Radial dividers - from paint through arc to outer boundary */}
         {[angB, angC].map((ang, i) => {
           const exit = i === 0 ? exitB : exitC;
-          const arcPt = pt(ang);
-          return <line key={`div-${i}`} x1={exit.x} y1={exit.y} x2={arcPt.x} y2={arcPt.y} stroke="hsl(220, 20%, 20%)" strokeWidth="2" />;
-        })}
-
-        {/* Radial dividers - through 3pt to court edge */}
-        {[angB, angC].map((ang, i) => {
-          const inner = pt(ang);
-          const edge = i === 0 ? eB : eC;
-          return <line key={`ext-${i}`} x1={inner.x} y1={inner.y} x2={edge.x} y2={edge.y > H ? H : edge.y} stroke="hsl(220, 20%, 20%)" strokeWidth="2" />;
+          const outer = i === 0 ? oB : oC;
+          return (
+            <line key={`div-${i}`} x1={exit.x} y1={exit.y} x2={outer.x} y2={outer.y} stroke="hsl(220, 20%, 20%)" strokeWidth="2" />
+          );
         })}
 
         {/* Labels */}
