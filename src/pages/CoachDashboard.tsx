@@ -9,18 +9,8 @@ import AddPlayerDialog from '@/components/AddPlayerDialog';
 import { Badge } from '@/components/ui/badge';
 
 type AgeCategory = 'U14' | 'U15' | 'U16' | 'U18' | 'SENIOR' | 'לא מוגדר';
-type ShotCategory = 'U14' | 'U15' | 'U16' | 'U18' | 'SENIOR' | 'לא מוגדר';
 
 const AGE_CATEGORIES: { key: AgeCategory; label: string; minAge: number; maxAge: number; emoji: string }[] = [
-  { key: 'U14', label: 'U14', minAge: 0, maxAge: 13, emoji: '🏀' },
-  { key: 'U15', label: 'U15', minAge: 14, maxAge: 14, emoji: '🏀' },
-  { key: 'U16', label: 'U16', minAge: 15, maxAge: 15, emoji: '🏀' },
-  { key: 'U18', label: 'U18', minAge: 16, maxAge: 17, emoji: '🏀' },
-  { key: 'SENIOR', label: 'SENIOR', minAge: 18, maxAge: 99, emoji: '⭐' },
-  { key: 'לא מוגדר', label: 'לא מוגדר', minAge: -1, maxAge: -1, emoji: '❓' },
-];
-
-const SHOT_CATEGORIES: { key: ShotCategory; label: string; minAge: number; maxAge: number; emoji: string }[] = [
   { key: 'U14', label: 'U14', minAge: 0, maxAge: 13, emoji: '🏀' },
   { key: 'U15', label: 'U15', minAge: 14, maxAge: 14, emoji: '🏀' },
   { key: 'U16', label: 'U16', minAge: 15, maxAge: 15, emoji: '🏀' },
@@ -38,27 +28,15 @@ function getAgeCategory(age: number | null): AgeCategory {
   return 'SENIOR';
 }
 
-function getShotCategory(age: number | null): ShotCategory {
-  if (age == null) return 'לא מוגדר';
-  for (const cat of SHOT_CATEGORIES) {
-    if (cat.key === 'לא מוגדר') continue;
-    if (age >= cat.minAge && age <= cat.maxAge) return cat.key;
-  }
-  return 'SENIOR';
-}
-
 const CoachDashboard = () => {
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const { players, loading, refetch } = usePlayers();
   const sessionCounts = usePlayerSessionCounts();
   const [addPlayerOpen, setAddPlayerOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<AgeCategory | null>(null);
-  const [selectedShotCategory, setSelectedShotCategory] = useState<ShotCategory | null>(null);
 
-  // Section 1 (ליווי אישי מלא): only coach's own players + demos
-  const myPlayers = players.filter(p => p.coach_id === user?.id || p.is_demo);
-  // Section 2 (מעקב קליעה & Court IQ): ALL approved players
+  // Unified player list: all approved players in one clear flow
   const allPlayers = players;
 
   const buildPlayerData = (list: typeof players) => list.map(p => {
@@ -67,10 +45,9 @@ const CoachDashboard = () => {
     if (sc.latestScores.length >= 2) {
       trend = sc.latestScores[0] > sc.latestScores[1] ? 'up' : sc.latestScores[0] < sc.latestScores[1] ? 'down' : 'neutral';
     }
-    return { ...p, sessionsCount: sc.count, avgScore: sc.avgScore, trend, ageCategory: getAgeCategory(p.age), shotCategory: getShotCategory(p.age) };
+    return { ...p, sessionsCount: sc.count, avgScore: sc.avgScore, trend, ageCategory: getAgeCategory(p.age) };
   });
 
-  const myPlayerData = useMemo(() => buildPlayerData(myPlayers), [myPlayers, sessionCounts]);
   const allPlayerData = useMemo(() => buildPlayerData(allPlayers), [allPlayers, sessionCounts]);
 
   type PlayerDataItem = ReturnType<typeof buildPlayerData>[number];
@@ -79,18 +56,8 @@ const CoachDashboard = () => {
     const groups: Record<AgeCategory, PlayerDataItem[]> = {
       'U14': [], 'U15': [], 'U16': [], 'U18': [], 'SENIOR': [], 'לא מוגדר': [],
     };
-    myPlayerData.forEach(p => {
-      groups[p.ageCategory].push(p);
-    });
-    return groups;
-  }, [myPlayerData]);
-
-  const shotGroupedPlayers = useMemo(() => {
-    const groups: Record<ShotCategory, PlayerDataItem[]> = {
-      'U14': [], 'U15': [], 'U16': [], 'U18': [], 'SENIOR': [], 'לא מוגדר': [],
-    };
     allPlayerData.forEach(p => {
-      groups[p.shotCategory].push(p);
+      groups[p.ageCategory].push(p);
     });
     return groups;
   }, [allPlayerData]);
