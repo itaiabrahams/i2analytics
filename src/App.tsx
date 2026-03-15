@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -27,6 +27,19 @@ import FloatingLogo from "./components/FloatingLogo";
 import MobileTopBar from "./components/MobileTopBar";
 
 const queryClient = new QueryClient();
+
+const LegacyShotTrackerRedirect = () => {
+  const location = useLocation();
+  const { playerId } = useParams();
+  const queryPlayerId = new URLSearchParams(location.search).get('player');
+  const targetPlayerId = playerId ?? queryPlayerId;
+
+  if (targetPlayerId) {
+    return <Navigate to={`/player/${targetPlayerId}/shots`} replace />;
+  }
+
+  return <ShotTracker />;
+};
 
 const AppRoutes = () => {
   const { role, loading, isApproved, profile } = useAuth();
@@ -90,10 +103,10 @@ const AppRoutes = () => {
             <Route path="/session/:sessionId" element={<SessionDetail />} />
             <Route path="/player/:playerId/shots" element={<ShotTracker />} />
             <Route path="/player/:playerId/*" element={<PlayerProfile />} />
-            <Route path="/shot-tracker" element={<ShotTracker />} />
-            <Route path="/shot-tracker/*" element={<ShotTracker />} />
-            <Route path="/shot-tracker/:playerId" element={<ShotTracker />} />
-            <Route path="/shot-tracker/:playerId/*" element={<ShotTracker />} />
+            <Route path="/shot-tracker" element={<LegacyShotTrackerRedirect />} />
+            <Route path="/shot-tracker/*" element={<LegacyShotTrackerRedirect />} />
+            <Route path="/shot-tracker/:playerId" element={<LegacyShotTrackerRedirect />} />
+            <Route path="/shot-tracker/:playerId/*" element={<LegacyShotTrackerRedirect />} />
             <Route path="/shots" element={<ShotTracker />} />
             <Route path="/manage-users" element={<UserManagement />} />
             <Route path="/challenges" element={<ChallengesPage />} />
