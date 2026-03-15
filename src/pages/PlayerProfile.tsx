@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,8 @@ import PlayerGoals from '@/components/PlayerGoals';
 import TeamCoachFeedbackSection from '@/components/TeamCoachFeedbackSection';
 import TechniqueVideos from '@/components/TechniqueVideos';
 import { usePlayer, usePlayerSessions, usePlayerAvgScore } from '@/hooks/useSupabaseData';
-import { getLetterGrade, getGradeColor } from '@/lib/gradeUtils';
+import { getLetterGrade, getGradeColor, getPlayerTier, getTierBadgeStyle } from '@/lib/gradeUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
