@@ -98,7 +98,7 @@ const LandingPage = () => {
               custom={2}
               className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
             >
-              I² Analytics היא פלטפורמה מקצועית לניתוח משחקי כדורסל, מעקב ביצועים והגדרת יעדים, 
+              I2 Analytics היא פלטפורמה מקצועית לניתוח משחקי כדורסל, מעקב ביצועים והגדרת יעדים, 
               מותאמת במיוחד לשחקנים צעירים ומאמנים שרוצים להתפתח.
             </motion.p>
 
