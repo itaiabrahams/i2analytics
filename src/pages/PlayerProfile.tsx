@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -12,18 +12,44 @@ import PlayerGoals from '@/components/PlayerGoals';
 import TeamCoachFeedbackSection from '@/components/TeamCoachFeedbackSection';
 import TechniqueVideos from '@/components/TechniqueVideos';
 import { usePlayer, usePlayerSessions, usePlayerAvgScore } from '@/hooks/useSupabaseData';
-import { getLetterGrade, getGradeColor } from '@/lib/gradeUtils';
+import { getLetterGrade, getGradeColor, getPlayerTier, getTierBadgeStyle } from '@/lib/gradeUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const [meetingOpen, setMeetingOpen] = useState(false);
-
+  const [monthlyAttempts, setMonthlyAttempts] = useState(0);
   const id = auth.role === 'player' ? auth.playerId! : playerId!;
   const { player, loading: playerLoading } = usePlayer(id);
   const { sessions, loading: sessionsLoading } = usePlayerSessions(id);
   const avgScore = usePlayerAvgScore(id);
+
+  // Fetch monthly shot attempts for tier badge
+  useEffect(() => {
+    const fetchMonthlyAttempts = async () => {
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+      const { data: sessions } = await supabase
+        .from('shot_sessions')
+        .select('id, date')
+        .eq('player_id', id)
+        .gte('date', monthStart)
+        .lte('date', monthEnd);
+      if (sessions && sessions.length > 0) {
+        const { data: shots } = await supabase
+          .from('shots')
+          .select('attempts')
+          .in('session_id', sessions.map(s => s.id));
+        if (shots) {
+          setMonthlyAttempts(shots.reduce((s, sh) => s + sh.attempts, 0));
+        }
+      }
+    };
+    if (id) fetchMonthlyAttempts();
+  }, [id]);
 
   if (playerLoading || sessionsLoading) {
     return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
@@ -114,8 +140,8 @@ const PlayerProfile = () => {
                 <h1 className="text-3xl font-bold text-foreground">{player.display_name}</h1>
                 <p className="text-muted-foreground">{player.position} · גיל {player.age} · {player.team}</p>
               </div>
-              <div className="flex items-center justify-center h-10 w-10 rounded-xl gradient-accent shrink-0">
-                <span className="text-lg font-black text-accent-foreground">I2</span>
+              <div className={`flex items-center justify-center h-auto px-3 py-1 rounded-xl shrink-0 border ${getTierBadgeStyle(getPlayerTier(monthlyAttempts).tier)}`}>
+                <span className="text-sm font-black">{getPlayerTier(monthlyAttempts).label}</span>
               </div>
             </div>
           </div>
