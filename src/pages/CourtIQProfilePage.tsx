@@ -294,6 +294,17 @@ const CourtIQProfilePage = () => {
 
           <div className="relative z-10 text-center space-y-3">
             <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleFileSelect} />
+            {/* Tier badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1, type: 'spring' }}
+              className="absolute top-0 right-0"
+            >
+              <span className={`text-xs font-black px-3 py-1 rounded-full border ${getTierBadgeStyle(getPlayerTier(monthlyAttempts).tier)}`}>
+                {getPlayerTier(monthlyAttempts).label}
+              </span>
+            </motion.div>
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
