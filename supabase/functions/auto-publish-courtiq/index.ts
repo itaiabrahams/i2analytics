@@ -42,17 +42,28 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Check if there's already an active question right now
+    // Calculate this hour's window: from XX:00:00 to XX+1:00:00 in Israel time
+    const hourStart = new Date(israelTime)
+    hourStart.setMinutes(0, 0, 0)
+    const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000)
+
+    // Convert back to UTC for DB comparison
+    // We need UTC equivalents: calculate the offset
+    const utcOffset = now.getTime() - israelTime.getTime()
+    const publishAt = new Date(hourStart.getTime() + utcOffset)
+    const expiresAt = new Date(hourEnd.getTime() + utcOffset)
+
+    // Check if there's already an active question for this hour
     const { data: activeQ } = await supabase
       .from('courtiq_questions')
       .select('id')
       .neq('status', 'pool')
-      .lte('publish_at', now.toISOString())
-      .gt('expires_at', now.toISOString())
+      .gte('publish_at', publishAt.toISOString())
+      .lt('publish_at', expiresAt.toISOString())
       .limit(1)
 
     if (activeQ && activeQ.length > 0) {
-      return new Response(JSON.stringify({ message: 'Active question already exists', activeId: activeQ[0].id }), {
+      return new Response(JSON.stringify({ message: 'Question already published for this hour', activeId: activeQ[0].id }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
@@ -71,9 +82,6 @@ Deno.serve(async (req) => {
 
     const randomIndex = Math.floor(Math.random() * poolQuestions.length)
     const questionId = poolQuestions[randomIndex].id
-
-    const publishAt = new Date()
-    const expiresAt = new Date(publishAt.getTime() + 55 * 60 * 1000)
 
     const { error } = await supabase
       .from('courtiq_questions')
@@ -96,6 +104,7 @@ Deno.serve(async (req) => {
       questionId, 
       publishAt: publishAt.toISOString(),
       expiresAt: expiresAt.toISOString(),
+      israelHour: currentHour,
       poolRemaining: poolQuestions.length - 1,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

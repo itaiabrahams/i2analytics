@@ -91,14 +91,17 @@ const CourtIQPage = () => {
 
   // Countdown to next hour
   useEffect(() => {
-    if (currentQuestion) return;
+    // Show countdown when no unanswered question available
+    const shouldShowCountdown = !currentQuestion || result;
+    if (!shouldShowCountdown) {
+      setNextQuestionCountdown('');
+      return;
+    }
     const updateCountdown = () => {
       const now = new Date();
-      const h = now.getHours();
-      let nextH = h < 8 ? 8 : h >= 23 ? 8 : h + 1;
+      // Next full hour
       const next = new Date(now);
-      if (nextH <= h && h >= 23) next.setDate(next.getDate() + 1);
-      next.setHours(nextH, 0, 0, 0);
+      next.setHours(next.getHours() + 1, 0, 0, 0);
       const diff = next.getTime() - now.getTime();
       const mins = Math.floor(diff / 60000);
       const secs = Math.floor((diff % 60000) / 1000);
@@ -107,7 +110,7 @@ const CourtIQPage = () => {
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
-  }, [currentQuestion]);
+  }, [currentQuestion, result]);
 
   const handleAnswer = async (option: string) => {
     if (answering || result || !currentQuestion) return;
@@ -414,6 +417,14 @@ const CourtIQPage = () => {
                 </motion.div>
               )}
 
+              {/* Countdown to next question */}
+              {nextQuestionCountdown && (
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  <span>השאלה הבאה בעוד <span className="font-mono text-accent font-bold">{nextQuestionCountdown}</span></span>
+                </div>
+              )}
+
               {/* Action buttons */}
               <div className="flex gap-2 sm:gap-3 justify-center pt-2 sm:pt-4">
                 <Button onClick={handleShare} variant="outline" size="sm" className="gap-1.5 h-9">
@@ -421,9 +432,6 @@ const CourtIQPage = () => {
                 </Button>
                 <Button onClick={() => navigate('/courtiq/leaderboard')} variant="outline" size="sm" className="gap-1.5 h-9">
                   <Trophy className="h-3.5 w-3.5" /> דירוג
-                </Button>
-                <Button onClick={handleNextQuestion} size="sm" className="gradient-accent text-accent-foreground gap-1.5 h-9">
-                  המשך
                 </Button>
               </div>
             </motion.div>
