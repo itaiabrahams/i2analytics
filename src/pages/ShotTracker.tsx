@@ -16,6 +16,7 @@ import PlayerChallenges from '@/components/challenges/PlayerChallenges';
 import { ZoneId, ZoneStats, ZONES, ShotType, Element, FinishType } from '@/lib/shotZones';
 import { usePlayer } from '@/hooks/useSupabaseData';
 import TechniqueVideos from '@/components/TechniqueVideos';
+import CurrentMonthWorkout from '@/components/CurrentMonthWorkout';
 
 const ShotTracker = () => {
   const { playerId } = useParams();
