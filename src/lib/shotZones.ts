@@ -46,20 +46,23 @@ export const FINISH_TYPE_LABELS: Record<FinishType, string> = {
   power_finish: 'Power Finish',
 };
 
-// Distinct color for each zone
+// Zone colors matching court diagram categories
 export const ZONE_COLORS: Record<ZoneId, string> = {
-  corner_r_3: 'hsla(0, 75%, 55%, 0.55)',      // red
-  wing_r_3: 'hsla(25, 85%, 55%, 0.55)',       // orange
-  top_3: 'hsla(45, 85%, 50%, 0.55)',          // gold
-  wing_l_3: 'hsla(80, 60%, 45%, 0.55)',       // lime
-  corner_l_3: 'hsla(150, 60%, 40%, 0.55)',    // green
-  corner_r_mid: 'hsla(180, 55%, 45%, 0.55)',  // teal
-  wing_r_mid: 'hsla(200, 65%, 50%, 0.55)',    // sky blue
-  top_mid: 'hsla(220, 60%, 55%, 0.55)',       // blue
-  wing_l_mid: 'hsla(260, 55%, 55%, 0.55)',    // purple
-  corner_l_mid: 'hsla(290, 50%, 50%, 0.55)',  // magenta
-  free_throw: 'hsla(320, 55%, 50%, 0.55)',    // pink
-  under_basket: 'hsla(340, 60%, 50%, 0.55)',  // rose
+  // 3pt zones (red/pink tones)
+  corner_r_3: 'hsla(0, 65%, 60%, 0.45)',
+  wing_r_3: 'hsla(350, 65%, 58%, 0.45)',
+  top_3: 'hsla(5, 70%, 55%, 0.45)',
+  wing_l_3: 'hsla(350, 65%, 58%, 0.45)',
+  corner_l_3: 'hsla(0, 65%, 60%, 0.45)',
+  // Mid-range zones (yellow tones)
+  corner_r_mid: 'hsla(48, 85%, 60%, 0.45)',
+  wing_r_mid: 'hsla(42, 80%, 55%, 0.45)',
+  top_mid: 'hsla(48, 85%, 60%, 0.45)',
+  wing_l_mid: 'hsla(42, 80%, 55%, 0.45)',
+  corner_l_mid: 'hsla(48, 85%, 60%, 0.45)',
+  // Paint zones (blue tones)
+  free_throw: 'hsla(225, 60%, 60%, 0.45)',
+  under_basket: 'hsla(230, 65%, 55%, 0.45)',
 };
 
 // Get heat color based on shooting percentage
