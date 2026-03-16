@@ -78,36 +78,59 @@ const CurrentMonthWorkout = () => {
 
       {expanded && (
         <div className="px-3 pb-3 animate-fade-in space-y-3">
-          {/* Main workout image */}
-          <div className="rounded-lg overflow-hidden border border-border/50">
-            <img
-              src={workout.image}
-              alt={`${workout.title} - ${workout.subtitle}`}
-              className="w-full h-auto"
-              loading="lazy"
-            />
-          </div>
-
-          {/* Shooting drills page - for combined months */}
-          {hasCombined && (
-            <ShootingDrillsCard monthIndex={workout.index} compact />
+          {/* Page navigation */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => setPage(p => Math.max(0, p - 1))}
+                disabled={page === 0}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <div className="flex items-center gap-1.5">
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setPage(i)}
+                    className={`h-2 w-2 rounded-full transition-colors ${
+                      i === page ? 'bg-accent' : 'bg-muted-foreground/30'
+                    }`}
+                  />
+                ))}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                disabled={page === totalPages - 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                {page === 0 ? (hasCombined ? '📋 שליטה בכדור' : '🎯 תוכנית קליעה') : '🎯 תוכנית קליעה'}
+              </span>
+            </div>
           )}
 
-          {/* Shooting drills inline - for shooting-only months */}
-          {!hasCombined && SHOOTING_DRILLS[workout.index] && (
-            <div className="rounded-lg border border-accent/20 bg-accent/5 p-3 space-y-1.5">
-              <div className="flex items-center gap-1.5 justify-end">
-                <span className="text-xs font-bold text-accent">🎯 תרגילי קליעה לחודש זה</span>
-              </div>
-              <ul className="space-y-1 text-right" dir="rtl">
-                {SHOOTING_DRILLS[workout.index].map((drill, i) => (
-                  <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                    <span className="text-accent mt-0.5">•</span>
-                    <span>{drill}</span>
-                  </li>
-                ))}
-              </ul>
+          {/* Page 0: Workout image */}
+          {page === 0 && (
+            <div className="rounded-lg overflow-hidden border border-border/50">
+              <img
+                src={workout.image}
+                alt={`${workout.title} - ${workout.subtitle}`}
+                className="w-full h-auto"
+                loading="lazy"
+              />
             </div>
+          )}
+
+          {/* Page 1: Shooting drills */}
+          {page === 1 && hasShootingDrills && (
+            <ShootingDrillsCard monthIndex={workout.index} compact={false} />
           )}
 
           <Button
