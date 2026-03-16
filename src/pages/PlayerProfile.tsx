@@ -342,7 +342,20 @@ const PlayerProfile = () => {
         )}
 
         {auth.role === 'coach' && (
-          <ScheduleMeetingDialog open={meetingOpen} onOpenChange={setMeetingOpen} playerId={id} playerName={player.display_name} />
+          <>
+            <ScheduleMeetingDialog open={meetingOpen} onOpenChange={setMeetingOpen} playerId={id} playerName={player.display_name} />
+            {!isBasicPlan && (
+              <ScoutReportDialog
+                open={scoutReportOpen}
+                onOpenChange={setScoutReportOpen}
+                playerName={player.display_name}
+                playerPosition={player.position || ''}
+                playerAge={player.age || 0}
+                playerTeam={player.team || ''}
+                avatarUrl={(player as any).avatar_url}
+              />
+            )}
+          </>
         )}
       </div>
     </div>
