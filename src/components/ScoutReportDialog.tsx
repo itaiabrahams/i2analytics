@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, Trash2 } from 'lucide-react';
 import { generateScoutReportPDF } from '@/lib/scoutReportPdf';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export interface ScoutReportData {
   // Player Info
@@ -178,7 +180,23 @@ const ScoutReportDialog = ({
   const handleGenerate = async () => {
     setGenerating(true);
     try {
-      await generateScoutReportPDF(data);
+      // Translate Hebrew fields to English
+      toast.info('מתרגם לאנגלית...');
+      const { data: result, error } = await supabase.functions.invoke('translate-scout-report', {
+        body: { data },
+      });
+
+      if (error || !result?.translated) {
+        console.error('Translation failed, using original data:', error);
+        toast.warning('התרגום נכשל, מייצר דוח עם הטקסט המקורי');
+        await generateScoutReportPDF(data);
+      } else {
+        await generateScoutReportPDF(result.translated as ScoutReportData);
+      }
+      toast.success('הדוח הורד בהצלחה!');
+    } catch (err) {
+      console.error(err);
+      toast.error('שגיאה ביצירת הדוח');
     } finally {
       setGenerating(false);
     }
