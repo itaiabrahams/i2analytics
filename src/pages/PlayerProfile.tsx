@@ -14,6 +14,7 @@ import TechniqueVideos from '@/components/TechniqueVideos';
 import { usePlayer, usePlayerSessions, usePlayerAvgScore } from '@/hooks/useSupabaseData';
 import { getLetterGrade, getGradeColor, getPlayerTier, getTierBadgeStyle } from '@/lib/gradeUtils';
 import { supabase } from '@/integrations/supabase/client';
+import ScoutReportDialog from '@/components/ScoutReportDialog';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
