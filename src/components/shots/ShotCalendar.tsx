@@ -86,12 +86,21 @@ const ShotCalendar = ({
     if (selected.getTime() === today.getTime()) return true;
     
     // March 2026: allow retroactive logging for any date within March
-    if (now.getFullYear() === 2026 && now.getMonth() === 2) { // March = index 2
+    if (now.getFullYear() === 2026 && now.getMonth() === 2) {
       return selected.getFullYear() === 2026 && selected.getMonth() === 2;
     }
     
     // Otherwise, only today
     return false;
+  };
+
+  // Check if video is required for the selected date
+  // Before March 16, 2026 (retro dates in March) → video optional
+  // March 16 onwards → video required
+  const isVideoRequired = (date: Date): boolean => {
+    const cutoff = new Date(2026, 2, 16); // March 16, 2026
+    const selected = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return selected >= cutoff;
   };
 
   const handleCreateSession = async () => {

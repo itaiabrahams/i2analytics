@@ -128,9 +128,19 @@ const CurrentMonthWorkout = () => {
             </div>
           )}
 
-          {/* Page 1: Shooting drills */}
+          {/* Page 1: Shooting drills image */}
           {page === 1 && hasShootingDrills && (
-            <ShootingDrillsCard monthIndex={workout.index} compact={false} />
+            <div className="rounded-lg overflow-hidden border border-border/50">
+              <img
+                src={workout.image}
+                alt={`תוכנית קליעה - חודש ${workout.index}`}
+                className="w-full h-auto"
+                loading="lazy"
+              />
+              <div className="bg-accent/10 p-2 text-center">
+                <span className="text-xs font-medium text-accent">🎯 תוכנית קליעה - חודש {workout.index}</span>
+              </div>
+            </div>
           )}
 
           <Button
