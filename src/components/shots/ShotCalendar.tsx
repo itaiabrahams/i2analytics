@@ -73,6 +73,27 @@ const ShotCalendar = ({
     setVideoFile(file);
   };
 
+  // Check if retroactive logging is allowed for the selected date
+  const isRetroAllowed = (date: Date): boolean => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const selected = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    
+    // Future dates are never allowed
+    if (selected > today) return false;
+    
+    // Today is always allowed
+    if (selected.getTime() === today.getTime()) return true;
+    
+    // March 2026: allow retroactive logging for any date within March
+    if (now.getFullYear() === 2026 && now.getMonth() === 2) { // March = index 2
+      return selected.getFullYear() === 2026 && selected.getMonth() === 2;
+    }
+    
+    // Otherwise, only today
+    return false;
+  };
+
   const handleCreateSession = async () => {
     if (!newTitle.trim()) {
       toast.error('יש להזין כותרת לאימון');
@@ -83,6 +104,11 @@ const ShotCalendar = ({
       return;
     }
     if (!selectedDate) return;
+    
+    if (!isRetroAllowed(selectedDate)) {
+      toast.error('ניתן לדווח רק על אימונים של היום');
+      return;
+    }
 
     setCreating(true);
     setUploading(true);
