@@ -108,11 +108,14 @@ const ShotCalendar = ({
       toast.error('יש להזין כותרת לאימון');
       return;
     }
-    if (!videoFile) {
+    if (!selectedDate) return;
+
+    const videoRequired = isVideoRequired(selectedDate);
+
+    if (videoRequired && !videoFile) {
       toast.error('יש להעלות סרטון וידאו כהוכחה לאימון');
       return;
     }
-    if (!selectedDate) return;
     
     if (!isRetroAllowed(selectedDate)) {
       toast.error('ניתן לדווח רק על אימונים של היום');
@@ -120,28 +123,32 @@ const ShotCalendar = ({
     }
 
     setCreating(true);
-    setUploading(true);
 
-    // Upload video first
-    const ext = videoFile.name.split('.').pop();
-    const path = `${playerId}/${Date.now()}.${ext}`;
+    let videoUrl: string | null = null;
 
-    const { error: uploadError } = await supabase.storage.from('shot-videos').upload(path, videoFile, {
-      cacheControl: '3600',
-      upsert: true,
-    });
+    if (videoFile) {
+      setUploading(true);
+      const ext = videoFile.name.split('.').pop();
+      const path = `${playerId}/${Date.now()}.${ext}`;
 
-    if (uploadError) {
-      toast.error('שגיאה בהעלאת הסרטון');
-      setCreating(false);
+      const { error: uploadError } = await supabase.storage.from('shot-videos').upload(path, videoFile, {
+        cacheControl: '3600',
+        upsert: true,
+      });
+
+      if (uploadError) {
+        toast.error('שגיאה בהעלאת הסרטון');
+        setCreating(false);
+        setUploading(false);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage.from('shot-videos').getPublicUrl(path);
+      videoUrl = urlData.publicUrl;
       setUploading(false);
-      return;
     }
 
-    const { data: urlData } = supabase.storage.from('shot-videos').getPublicUrl(path);
-    const videoUrl = urlData.publicUrl;
-
-    // Create session with video URL
+    // Create session
     const { error } = await supabase.from('shot_sessions').insert({
       player_id: playerId,
       coach_id: coachId || null,
@@ -153,13 +160,12 @@ const ShotCalendar = ({
     if (error) {
       toast.error('שגיאה ביצירת אימון');
     } else {
-      toast.success('אימון חדש נוצר עם סרטון!');
+      toast.success(videoUrl ? 'אימון חדש נוצר עם סרטון!' : 'אימון חדש נוצר!');
       setNewTitle('');
       setVideoFile(null);
       onSessionCreated();
     }
     setCreating(false);
-    setUploading(false);
   };
 
   return (
