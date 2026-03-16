@@ -134,8 +134,8 @@ const ShotTracker = () => {
   }
 
   const activeSession = sessions.find(s => s.id === activeSessionId);
-
-  return (
+  const displayStats = viewAll ? allTimeStats : zoneStats;
+  const allSessionVideos = sessions.filter(s => s.video_url);
     <div className="min-h-screen p-3 sm:p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
