@@ -292,7 +292,8 @@ const ShotCalendar = ({
                 )}
               </Button>
             </div>
-          )}
+            );
+          })()}
         </div>
       )}
     </div>
