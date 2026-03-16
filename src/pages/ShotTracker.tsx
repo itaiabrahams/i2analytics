@@ -52,12 +52,10 @@ const ShotTracker = () => {
       .order('date', { ascending: false });
     if (data) {
       setSessions(data);
-      if (data.length > 0 && !activeSessionId) {
-        setActiveSessionId(data[0].id);
-      }
+      // Don't auto-select a session; start in "view all" mode
     }
     setLoading(false);
-  }, [id, activeSessionId]);
+  }, [id]);
 
   const fetchShots = useCallback(async () => {
     if (!activeSessionId) { setShots([]); return; }
