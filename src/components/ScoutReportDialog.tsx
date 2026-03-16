@@ -202,13 +202,6 @@ const ScoutReportDialog = ({
     }
   };
 
-  const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-    <h3 className="text-sm font-bold text-accent mt-4 mb-2 border-b border-border pb-1">{children}</h3>
-  );
-
-  const FieldRow = ({ children }: { children: React.ReactNode }) => (
-    <div className="grid grid-cols-2 gap-3 mb-2">{children}</div>
-  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
