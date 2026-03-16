@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Lock, ChevronDown, ChevronUp, Dumbbell, CalendarDays } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { isCombinedWorkout } from '@/lib/shootingDrills';
+import ShootingDrillsCard from '@/components/ShootingDrillsCard';
 
 const HEBREW_MONTHS = [
   'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר',
