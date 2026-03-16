@@ -158,13 +158,17 @@ const PlayerProfile = () => {
             </div>
           )}
           {auth.role === 'coach' && (
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button variant="outline" onClick={() => navigate(`/player/${id}/shots`)} className="text-muted-foreground">
                 <Target className="ml-2 h-4 w-4" />
                 מעקב קליעות
               </Button>
               {!isBasicPlan && (
                 <>
+                  <Button variant="outline" onClick={() => setScoutReportOpen(true)} className="text-muted-foreground">
+                    <FileText className="ml-2 h-4 w-4" />
+                    דוח סקאוט
+                  </Button>
                   <Button variant="outline" onClick={() => setMeetingOpen(true)} className="text-muted-foreground">
                     <Video className="ml-2 h-4 w-4" />
                     תזמן פגישה
