@@ -199,7 +199,7 @@ const PlayerProfile = () => {
                 <h1 className="text-3xl font-bold text-foreground">{player.display_name}</h1>
                 <p className="text-muted-foreground">{player.position} · גיל {player.age} · {player.team}</p>
               </div>
-              {!isBasicPlan && (player as any).avatar_url ? (
+              {(player as any).avatar_url ? (
                 <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-accent shrink-0">
                   <img src={(player as any).avatar_url} alt={player.display_name} className="w-full h-full object-cover" />
                 </div>
