@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { ArrowRight, Flame, BarChart3, Trophy } from 'lucide-react';
+import { ArrowRight, Flame, BarChart3, Trophy, Eye, CalendarDays } from 'lucide-react';
 import { toast } from 'sonner';
 import BasketballCourt from '@/components/shots/BasketballCourt';
 import ShotInputDialog from '@/components/shots/ShotInputDialog';
@@ -36,6 +36,7 @@ const ShotTracker = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showHeatMap, setShowHeatMap] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [viewAll, setViewAll] = useState(true);
 
   const fetchSessions = useCallback(async () => {
     if (!id) {
@@ -51,12 +52,10 @@ const ShotTracker = () => {
       .order('date', { ascending: false });
     if (data) {
       setSessions(data);
-      if (data.length > 0 && !activeSessionId) {
-        setActiveSessionId(data[0].id);
-      }
+      // Don't auto-select a session; start in "view all" mode
     }
     setLoading(false);
-  }, [id, activeSessionId]);
+  }, [id]);
 
   const fetchShots = useCallback(async () => {
     if (!activeSessionId) { setShots([]); return; }
@@ -92,7 +91,21 @@ const ShotTracker = () => {
     return { zone: zone.id, attempts, made, percentage: attempts > 0 ? Math.round((made / attempts) * 100) : 0 };
   });
 
+  const handleSelectSession = (sessionId: string) => {
+    setActiveSessionId(sessionId);
+    setViewAll(false);
+  };
+
+  const handleViewAll = () => {
+    setViewAll(true);
+    setActiveSessionId(null);
+  };
+
   const handleZoneClick = (zoneId: ZoneId) => {
+    if (viewAll) {
+      toast.error('יש לבחור אימון ספציפי כדי להזין זריקות');
+      return;
+    }
     if (!activeSessionId) {
       toast.error('יש ליצור אימון קליעות קודם');
       return;
@@ -121,13 +134,14 @@ const ShotTracker = () => {
   }
 
   const activeSession = sessions.find(s => s.id === activeSessionId);
+  const displayStats = viewAll ? allTimeStats : zoneStats;
+  const allSessionVideos = sessions.filter(s => s.video_url);
 
   return (
     <div className="min-h-screen p-3 sm:p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <div className="mb-4 space-y-3">
-          {/* Title row */}
           <div className="flex items-center justify-between">
             <Button
               variant={showHeatMap ? 'default' : 'outline'}
@@ -151,7 +165,6 @@ const ShotTracker = () => {
               </Button>
             </div>
           </div>
-          {/* Action buttons row */}
           <div className="flex items-center gap-2">
             <Sheet>
               <SheetTrigger asChild>
@@ -181,41 +194,75 @@ const ShotTracker = () => {
 
         {/* Main layout */}
         <div className="grid gap-6 lg:grid-cols-5">
-          {/* Left side: Calendar + Stats */}
+          {/* Left side */}
           <div className="lg:col-span-2 order-2 lg:order-1 space-y-4">
-            {/* Calendar */}
+            {/* View All toggle */}
+            <div className="flex items-center gap-2 justify-end">
+              <Button
+                variant={viewAll ? 'default' : 'outline'}
+                size="sm"
+                onClick={handleViewAll}
+                className={`h-8 text-xs ${viewAll ? 'gradient-accent text-accent-foreground' : 'text-muted-foreground border-accent/30'}`}
+              >
+                <Eye className="ml-1 h-3.5 w-3.5" />
+                כל האימונים
+              </Button>
+              {activeSession && !viewAll && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <CalendarDays className="h-3 w-3" />
+                  {activeSession.title}
+                </span>
+              )}
+            </div>
+
             <ShotCalendar
               sessions={sessions}
               activeSessionId={activeSessionId}
-              onSelectSession={setActiveSessionId}
+              onSelectSession={handleSelectSession}
               onSessionCreated={() => { fetchSessions(); }}
               playerId={id}
               coachId={isCoach ? user?.id : undefined}
               canCreate={true}
             />
 
-            {/* Active session video */}
-            {activeSession?.video_url && (
-              <div className="gradient-card rounded-xl p-4">
-                <h3 className="text-sm font-medium text-muted-foreground mb-2 text-right">סרטון אימון 🎥</h3>
-                <video
-                  src={activeSession.video_url}
-                  controls
-                  className="w-full rounded-lg max-h-48"
-                  preload="metadata"
-                />
-              </div>
+            {/* Videos */}
+            {viewAll ? (
+              allSessionVideos.length > 0 && (
+                <div className="gradient-card rounded-xl p-4 space-y-3">
+                  <h3 className="text-sm font-medium text-muted-foreground text-right">כל סרטוני האימונים 🎥 ({allSessionVideos.length})</h3>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {allSessionVideos.map(s => (
+                      <div key={s.id} className="space-y-1">
+                        <p className="text-xs text-muted-foreground text-right">{s.title} · {new Date(s.date).toLocaleDateString('he-IL')}</p>
+                        <video src={s.video_url} controls className="w-full rounded-lg max-h-36" preload="metadata" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            ) : (
+              activeSession?.video_url && (
+                <div className="gradient-card rounded-xl p-4">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2 text-right">סרטון אימון 🎥</h3>
+                  <video src={activeSession.video_url} controls className="w-full rounded-lg max-h-48" preload="metadata" />
+                </div>
+              )
             )}
 
-            {/* Stats */}
-            {activeSession && (
+            {/* Stats header */}
+            {!viewAll && activeSession && (
               <div className="text-right">
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">אימון: {activeSession.title}</h3>
               </div>
             )}
-            <ShotStats zoneStats={activeSessionId ? zoneStats : allTimeStats} />
+            {viewAll && sessions.length > 0 && (
+              <div className="text-right">
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">סה״כ כל האימונים ({sessions.length})</h3>
+              </div>
+            )}
+            <ShotStats zoneStats={displayStats} />
 
-            {sessions.length > 1 && (
+            {!viewAll && sessions.length > 1 && (
               <div className="gradient-card rounded-xl p-4">
                 <h3 className="font-semibold text-foreground text-right mb-2">סה"כ כל האימונים</h3>
                 <ShotStats zoneStats={allTimeStats} />
@@ -226,25 +273,28 @@ const ShotTracker = () => {
               <ShotProgressChart sessions={sessions} allShots={allShots} />
             )}
 
-            {/* Technique Videos - visible to coaches viewing a player */}
             <TechniqueVideos playerId={id} isOwnProfile={!isCoach} />
           </div>
 
           {/* Right side: Court + Workout */}
           <div className="lg:col-span-3 order-1 lg:order-2 space-y-4">
             <div className="gradient-card rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${viewAll ? 'bg-accent/20 text-accent' : 'bg-primary/20 text-primary'}`}>
+                  {viewAll ? '📊 תצוגה כללית' : `🎯 ${activeSession?.title || 'אימון'}`}
+                </span>
+              </div>
               <BasketballCourt
-                zoneStats={activeSessionId ? zoneStats : allTimeStats}
+                zoneStats={displayStats}
                 onZoneClick={handleZoneClick}
                 showHeatMap={showHeatMap}
                 interactive={true}
               />
               <p className="text-xs text-muted-foreground text-center mt-3">
-                לחץ על אזור במגרש כדי להזין זריקות
+                {viewAll ? 'בחר אימון ספציפי בלוח השנה כדי להזין זריקות' : 'לחץ על אזור במגרש כדי להזין זריקות'}
               </p>
             </div>
 
-            {/* Current Month Workout Plan */}
             <CurrentMonthWorkout />
           </div>
         </div>
