@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Dumbbell, ChevronDown, ChevronUp, ArrowLeft, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SHOOTING_DRILLS, isCombinedWorkout } from '@/lib/shootingDrills';
-import ShootingDrillsCard from '@/components/ShootingDrillsCard';
 
 const WORKOUT_MONTHS = [
   { index: 1, title: 'עקיפה + קליעה', subtitle: 'שליטה בכדור וטכניקת קליעה', year: 2026, month: 4, image: '/workouts/month-01.jpg', emoji: '🏀' },
@@ -128,9 +127,19 @@ const CurrentMonthWorkout = () => {
             </div>
           )}
 
-          {/* Page 1: Shooting drills */}
+          {/* Page 1: Shooting drills image */}
           {page === 1 && hasShootingDrills && (
-            <ShootingDrillsCard monthIndex={workout.index} compact={false} />
+            <div className="rounded-lg overflow-hidden border border-border/50">
+              <img
+                src={workout.image}
+                alt={`תוכנית קליעה - חודש ${workout.index}`}
+                className="w-full h-auto"
+                loading="lazy"
+              />
+              <div className="bg-accent/10 p-2 text-center">
+                <span className="text-xs font-medium text-accent">🎯 תוכנית קליעה - חודש {workout.index}</span>
+              </div>
+            </div>
           )}
 
           <Button

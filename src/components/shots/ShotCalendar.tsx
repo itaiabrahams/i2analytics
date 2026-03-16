@@ -86,7 +86,7 @@ const ShotCalendar = ({
     if (selected.getTime() === today.getTime()) return true;
     
     // March 2026: allow retroactive logging for any date within March
-    if (now.getFullYear() === 2026 && now.getMonth() === 2) { // March = index 2
+    if (now.getFullYear() === 2026 && now.getMonth() === 2) {
       return selected.getFullYear() === 2026 && selected.getMonth() === 2;
     }
     
@@ -94,16 +94,28 @@ const ShotCalendar = ({
     return false;
   };
 
+  // Check if video is required for the selected date
+  // Before March 16, 2026 (retro dates in March) → video optional
+  // March 16 onwards → video required
+  const isVideoRequired = (date: Date): boolean => {
+    const cutoff = new Date(2026, 2, 16); // March 16, 2026
+    const selected = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return selected >= cutoff;
+  };
+
   const handleCreateSession = async () => {
     if (!newTitle.trim()) {
       toast.error('יש להזין כותרת לאימון');
       return;
     }
-    if (!videoFile) {
+    if (!selectedDate) return;
+
+    const videoRequired = isVideoRequired(selectedDate);
+
+    if (videoRequired && !videoFile) {
       toast.error('יש להעלות סרטון וידאו כהוכחה לאימון');
       return;
     }
-    if (!selectedDate) return;
     
     if (!isRetroAllowed(selectedDate)) {
       toast.error('ניתן לדווח רק על אימונים של היום');
@@ -111,28 +123,32 @@ const ShotCalendar = ({
     }
 
     setCreating(true);
-    setUploading(true);
 
-    // Upload video first
-    const ext = videoFile.name.split('.').pop();
-    const path = `${playerId}/${Date.now()}.${ext}`;
+    let videoUrl: string | null = null;
 
-    const { error: uploadError } = await supabase.storage.from('shot-videos').upload(path, videoFile, {
-      cacheControl: '3600',
-      upsert: true,
-    });
+    if (videoFile) {
+      setUploading(true);
+      const ext = videoFile.name.split('.').pop();
+      const path = `${playerId}/${Date.now()}.${ext}`;
 
-    if (uploadError) {
-      toast.error('שגיאה בהעלאת הסרטון');
-      setCreating(false);
+      const { error: uploadError } = await supabase.storage.from('shot-videos').upload(path, videoFile, {
+        cacheControl: '3600',
+        upsert: true,
+      });
+
+      if (uploadError) {
+        toast.error('שגיאה בהעלאת הסרטון');
+        setCreating(false);
+        setUploading(false);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage.from('shot-videos').getPublicUrl(path);
+      videoUrl = urlData.publicUrl;
       setUploading(false);
-      return;
     }
 
-    const { data: urlData } = supabase.storage.from('shot-videos').getPublicUrl(path);
-    const videoUrl = urlData.publicUrl;
-
-    // Create session with video URL
+    // Create session
     const { error } = await supabase.from('shot_sessions').insert({
       player_id: playerId,
       coach_id: coachId || null,
@@ -144,13 +160,12 @@ const ShotCalendar = ({
     if (error) {
       toast.error('שגיאה ביצירת אימון');
     } else {
-      toast.success('אימון חדש נוצר עם סרטון!');
+      toast.success(videoUrl ? 'אימון חדש נוצר עם סרטון!' : 'אימון חדש נוצר!');
       setNewTitle('');
       setVideoFile(null);
       onSessionCreated();
     }
     setCreating(false);
-    setUploading(false);
   };
 
   return (
@@ -215,7 +230,9 @@ const ShotCalendar = ({
           )}
 
           {/* Create new session for this date */}
-          {canCreate && selectedDate && isRetroAllowed(selectedDate) && (
+          {canCreate && selectedDate && isRetroAllowed(selectedDate) && (() => {
+            const videoRequired = isVideoRequired(selectedDate);
+            return (
             <div className="space-y-3 pt-2 border-t border-border">
               <div className="space-y-1">
                 <Label className="text-xs text-right block">כותרת אימון</Label>
@@ -228,10 +245,11 @@ const ShotCalendar = ({
                 />
               </div>
 
-              {/* Video upload - required */}
+              {/* Video upload */}
               <div className="space-y-1">
                 <Label className="text-xs text-right block">
-                  סרטון אימון <span className="text-destructive">*</span>
+                  סרטון אימון {videoRequired && <span className="text-destructive">*</span>}
+                  {!videoRequired && <span className="text-muted-foreground">(אופציונלי)</span>}
                 </Label>
                 {videoFile ? (
                   <div className="flex items-center justify-between rounded-lg bg-secondary p-2 text-sm">
@@ -256,7 +274,7 @@ const ShotCalendar = ({
                     className="w-full border-dashed border-2 border-muted-foreground/30 text-muted-foreground h-10"
                   >
                     <Upload className="ml-2 h-4 w-4" />
-                    העלה סרטון (חובה)
+                    {videoRequired ? 'העלה סרטון (חובה)' : 'העלה סרטון (אופציונלי)'}
                   </Button>
                 )}
               </div>
@@ -264,7 +282,7 @@ const ShotCalendar = ({
               <Button
                 size="sm"
                 onClick={handleCreateSession}
-                disabled={creating || !videoFile}
+                disabled={creating || (videoRequired && !videoFile)}
                 className="w-full gradient-accent text-accent-foreground"
               >
                 {uploading ? (
@@ -274,7 +292,8 @@ const ShotCalendar = ({
                 )}
               </Button>
             </div>
-          )}
+            );
+          })()}
         </div>
       )}
     </div>
