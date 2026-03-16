@@ -15,6 +15,7 @@ import { usePlayer, usePlayerSessions, usePlayerAvgScore } from '@/hooks/useSupa
 import { getLetterGrade, getGradeColor, getPlayerTier, getTierBadgeStyle } from '@/lib/gradeUtils';
 import { supabase } from '@/integrations/supabase/client';
 import ScoutReportDialog from '@/components/ScoutReportDialog';
+import PlayerTrainingScore from '@/components/PlayerTrainingScore';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
@@ -231,24 +232,8 @@ const PlayerProfile = () => {
           </div>
         )}
 
-        {/* Shot Tracker + Court IQ summary */}
-        <div className="gradient-card rounded-xl p-4 mb-6">
-          <h3 className="mb-3 text-right font-semibold text-foreground">מעקב קליעה + Court IQ</h3>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {[
-              { label: 'זריקות החודש', value: monthlyAttempts, color: 'text-accent' },
-              { label: 'ניסיונות קליעה', value: shotTotals.attempts, color: 'text-foreground' },
-              { label: 'קליעות מוצלחות', value: shotTotals.made, color: 'text-success' },
-              { label: 'נקודות חידון', value: courtIQStats.totalPoints, color: 'text-accent' },
-              { label: 'דיוק חידון', value: `${courtIQAccuracy}%`, color: 'text-foreground' },
-            ].map((stat, i) => (
-              <div key={i} className="rounded-lg bg-secondary p-3 text-center">
-                <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
-                <p className="text-xs text-muted-foreground">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Training Score - visible for ALL players */}
+        <PlayerTrainingScore playerId={id} isCoach={auth.role === 'coach'} />
 
         {/* Charts */}
         {!isBasicPlan && sessions.length > 1 && (
