@@ -180,7 +180,23 @@ const ScoutReportDialog = ({
   const handleGenerate = async () => {
     setGenerating(true);
     try {
-      await generateScoutReportPDF(data);
+      // Translate Hebrew fields to English
+      toast.info('מתרגם לאנגלית...');
+      const { data: result, error } = await supabase.functions.invoke('translate-scout-report', {
+        body: { data },
+      });
+
+      if (error || !result?.translated) {
+        console.error('Translation failed, using original data:', error);
+        toast.warning('התרגום נכשל, מייצר דוח עם הטקסט המקורי');
+        await generateScoutReportPDF(data);
+      } else {
+        await generateScoutReportPDF(result.translated as ScoutReportData);
+      }
+      toast.success('הדוח הורד בהצלחה!');
+    } catch (err) {
+      console.error(err);
+      toast.error('שגיאה ביצירת הדוח');
     } finally {
       setGenerating(false);
     }
