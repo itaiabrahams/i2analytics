@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Dumbbell, ChevronDown, ChevronUp, ArrowLeft, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SHOOTING_DRILLS, isCombinedWorkout } from '@/lib/shootingDrills';
-import ShootingDrillsCard from '@/components/ShootingDrillsCard';
 
 const WORKOUT_MONTHS = [
   { index: 1, title: 'עקיפה + קליעה', subtitle: 'שליטה בכדור וטכניקת קליעה', year: 2026, month: 4, image: '/workouts/month-01.jpg', emoji: '🏀' },
