@@ -91,13 +91,31 @@ export async function generateScoutReportPDF(data: ScoutReportData) {
   doc.setDrawColor(200, 200, 200);
   doc.roundedRect(15, y, pageWidth - 30, 38, 3, 3, 'S');
 
-  // Avatar circle
-  doc.setFillColor(...DARK_BG as [number, number, number]);
-  doc.circle(32, y + 15, 10, 'F');
-  doc.setFontSize(16);
-  doc.setTextColor(...WHITE as [number, number, number]);
-  const initial = data.playerName.charAt(0).toUpperCase();
-  doc.text(initial, 32, y + 19, { align: 'center' });
+  // Avatar - try to load player photo, fallback to initial circle
+  let avatarLoaded = false;
+  if (data.avatarUrl) {
+    try {
+      const avatarData = await loadImage(data.avatarUrl);
+      // Clip circle avatar
+      doc.saveGraphicsState();
+      doc.circle(32, y + 15, 10, 'F');  // dark bg as fallback
+      doc.addImage(avatarData, 'JPEG', 22, y + 5, 20, 20);
+      doc.setDrawColor(...DARK_BG as [number, number, number]);
+      doc.circle(32, y + 15, 10, 'S');
+      doc.restoreGraphicsState();
+      avatarLoaded = true;
+    } catch {
+      // fallback below
+    }
+  }
+  if (!avatarLoaded) {
+    doc.setFillColor(...DARK_BG as [number, number, number]);
+    doc.circle(32, y + 15, 10, 'F');
+    doc.setFontSize(16);
+    doc.setTextColor(...WHITE as [number, number, number]);
+    const initial = data.playerName.charAt(0).toUpperCase();
+    doc.text(initial, 32, y + 19, { align: 'center' });
+  }
 
   // Player info
   doc.setFontSize(18);
