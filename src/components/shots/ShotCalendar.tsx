@@ -215,7 +215,7 @@ const ShotCalendar = ({
           )}
 
           {/* Create new session for this date */}
-          {canCreate && (
+          {canCreate && selectedDate && isRetroAllowed(selectedDate) && (
             <div className="space-y-3 pt-2 border-t border-border">
               <div className="space-y-1">
                 <Label className="text-xs text-right block">כותרת אימון</Label>
