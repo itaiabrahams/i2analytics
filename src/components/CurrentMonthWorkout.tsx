@@ -47,6 +47,7 @@ function getCurrentMonthWorkout() {
 const CurrentMonthWorkout = () => {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
+  const [page, setPage] = useState(0);
   const workout = getCurrentMonthWorkout();
 
   if (!workout) return null;
