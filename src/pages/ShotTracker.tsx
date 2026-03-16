@@ -36,6 +36,7 @@ const ShotTracker = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showHeatMap, setShowHeatMap] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [viewAll, setViewAll] = useState(true);
 
   const fetchSessions = useCallback(async () => {
     if (!id) {
