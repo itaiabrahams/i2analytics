@@ -230,7 +230,9 @@ const ShotCalendar = ({
           )}
 
           {/* Create new session for this date */}
-          {canCreate && selectedDate && isRetroAllowed(selectedDate) && (
+          {canCreate && selectedDate && isRetroAllowed(selectedDate) && (() => {
+            const videoRequired = isVideoRequired(selectedDate);
+            return (
             <div className="space-y-3 pt-2 border-t border-border">
               <div className="space-y-1">
                 <Label className="text-xs text-right block">כותרת אימון</Label>
@@ -243,10 +245,11 @@ const ShotCalendar = ({
                 />
               </div>
 
-              {/* Video upload - required */}
+              {/* Video upload */}
               <div className="space-y-1">
                 <Label className="text-xs text-right block">
-                  סרטון אימון <span className="text-destructive">*</span>
+                  סרטון אימון {videoRequired && <span className="text-destructive">*</span>}
+                  {!videoRequired && <span className="text-muted-foreground">(אופציונלי)</span>}
                 </Label>
                 {videoFile ? (
                   <div className="flex items-center justify-between rounded-lg bg-secondary p-2 text-sm">
@@ -271,7 +274,7 @@ const ShotCalendar = ({
                     className="w-full border-dashed border-2 border-muted-foreground/30 text-muted-foreground h-10"
                   >
                     <Upload className="ml-2 h-4 w-4" />
-                    העלה סרטון (חובה)
+                    {videoRequired ? 'העלה סרטון (חובה)' : 'העלה סרטון (אופציונלי)'}
                   </Button>
                 )}
               </div>
@@ -279,7 +282,7 @@ const ShotCalendar = ({
               <Button
                 size="sm"
                 onClick={handleCreateSession}
-                disabled={creating || !videoFile}
+                disabled={creating || (videoRequired && !videoFile)}
                 className="w-full gradient-accent text-accent-foreground"
               >
                 {uploading ? (
