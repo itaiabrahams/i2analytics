@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
+import { Dumbbell, ChevronDown, ChevronUp, ArrowLeft, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SHOOTING_DRILLS, isCombinedWorkout } from '@/lib/shootingDrills';
 import ShootingDrillsCard from '@/components/ShootingDrillsCard';
