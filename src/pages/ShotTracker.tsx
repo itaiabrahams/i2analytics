@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { ArrowRight, Flame, BarChart3, Trophy } from 'lucide-react';
+import { ArrowRight, Flame, BarChart3, Trophy, Eye, CalendarDays } from 'lucide-react';
 import { toast } from 'sonner';
 import BasketballCourt from '@/components/shots/BasketballCourt';
 import ShotInputDialog from '@/components/shots/ShotInputDialog';
