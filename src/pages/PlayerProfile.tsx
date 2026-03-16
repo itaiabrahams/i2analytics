@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Plus, LogOut, Video, Target, Brain, User } from 'lucide-react';
+import { ArrowRight, Plus, LogOut, Video, Target, Brain, User, FileText } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import ScheduleMeetingDialog from '@/components/ScheduleMeetingDialog';
 import NotificationBell from '@/components/NotificationBell';
@@ -14,12 +14,14 @@ import TechniqueVideos from '@/components/TechniqueVideos';
 import { usePlayer, usePlayerSessions, usePlayerAvgScore } from '@/hooks/useSupabaseData';
 import { getLetterGrade, getGradeColor, getPlayerTier, getTierBadgeStyle } from '@/lib/gradeUtils';
 import { supabase } from '@/integrations/supabase/client';
+import ScoutReportDialog from '@/components/ScoutReportDialog';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const [meetingOpen, setMeetingOpen] = useState(false);
+  const [scoutReportOpen, setScoutReportOpen] = useState(false);
   const [monthlyAttempts, setMonthlyAttempts] = useState(0);
   const [shotTotals, setShotTotals] = useState({ attempts: 0, made: 0 });
   const [courtIQStats, setCourtIQStats] = useState({ totalPoints: 0, totalAnswered: 0, totalCorrect: 0, currentStreak: 0 });
@@ -156,13 +158,17 @@ const PlayerProfile = () => {
             </div>
           )}
           {auth.role === 'coach' && (
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button variant="outline" onClick={() => navigate(`/player/${id}/shots`)} className="text-muted-foreground">
                 <Target className="ml-2 h-4 w-4" />
                 מעקב קליעות
               </Button>
               {!isBasicPlan && (
                 <>
+                  <Button variant="outline" onClick={() => setScoutReportOpen(true)} className="text-muted-foreground">
+                    <FileText className="ml-2 h-4 w-4" />
+                    דוח סקאוט
+                  </Button>
                   <Button variant="outline" onClick={() => setMeetingOpen(true)} className="text-muted-foreground">
                     <Video className="ml-2 h-4 w-4" />
                     תזמן פגישה
@@ -336,7 +342,20 @@ const PlayerProfile = () => {
         )}
 
         {auth.role === 'coach' && (
-          <ScheduleMeetingDialog open={meetingOpen} onOpenChange={setMeetingOpen} playerId={id} playerName={player.display_name} />
+          <>
+            <ScheduleMeetingDialog open={meetingOpen} onOpenChange={setMeetingOpen} playerId={id} playerName={player.display_name} />
+            {!isBasicPlan && (
+              <ScoutReportDialog
+                open={scoutReportOpen}
+                onOpenChange={setScoutReportOpen}
+                playerName={player.display_name}
+                playerPosition={player.position || ''}
+                playerAge={player.age || 0}
+                playerTeam={player.team || ''}
+                avatarUrl={(player as any).avatar_url}
+              />
+            )}
+          </>
         )}
       </div>
     </div>
