@@ -15,6 +15,7 @@ import { usePlayer, usePlayerSessions, usePlayerAvgScore } from '@/hooks/useSupa
 import { getLetterGrade, getGradeColor, getPlayerTier, getTierBadgeStyle } from '@/lib/gradeUtils';
 import { supabase } from '@/integrations/supabase/client';
 import ScoutReportDialog from '@/components/ScoutReportDialog';
+import PlayerTrainingScore from '@/components/PlayerTrainingScore';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
