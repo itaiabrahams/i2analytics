@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Lock, ChevronDown, ChevronUp, Dumbbell, CalendarDays } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { isCombinedWorkout } from '@/lib/shootingDrills';
+import ShootingDrillsCard from '@/components/ShootingDrillsCard';
 
 const HEBREW_MONTHS = [
   'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר',
@@ -188,7 +190,8 @@ const WorkoutPlansPage = () => {
 
                   {/* Expanded Content */}
                   {isExpanded && unlocked && (
-                    <div className="px-4 pb-4 md:px-5 md:pb-5 animate-fade-in">
+                    <div className="px-4 pb-4 md:px-5 md:pb-5 animate-fade-in space-y-4">
+                      {/* Ball handling / main workout image */}
                       <div className="rounded-xl overflow-hidden border border-border/50 shadow-inner bg-background">
                         <img
                           src={wm.image}
@@ -197,8 +200,15 @@ const WorkoutPlansPage = () => {
                           loading="lazy"
                         />
                       </div>
+
+                      {/* Shooting drills page - shown for combined months */}
+                      {isCombinedWorkout(wm.title) && (
+                        <ShootingDrillsCard monthIndex={wm.index} />
+                      )}
+
                       <p className="text-xs text-muted-foreground text-center mt-3">
                         📋 תוכנית חודש {wm.index} מתוך {WORKOUT_MONTHS.length}
+                        {isCombinedWorkout(wm.title) && ' · כולל דף קליעה'}
                       </p>
                     </div>
                   )}
