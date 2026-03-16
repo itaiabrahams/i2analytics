@@ -26,10 +26,10 @@ interface TrainingData {
 }
 
 function calcShotScore(pct: number, attempts: number): number {
-  // Shooting score: weighted by accuracy (70%) and volume (30%)
-  const accuracyScore = Math.min(pct, 100);
-  const volumeScore = Math.min((attempts / 2000) * 100, 100); // 2000 attempts = max volume score
-  return Math.round(accuracyScore * 0.7 + volumeScore * 0.3);
+  // Volume-first: effort (70%) + accuracy bonus (30%)
+  const volumeScore = Math.min((attempts / 2000) * 100, 100); // 2000 attempts = max
+  const accuracyBonus = Math.min(pct, 100);
+  return Math.round(volumeScore * 0.7 + accuracyBonus * 0.3);
 }
 
 function calcQuizScore(accuracy: number, points: number, streak: number): number {

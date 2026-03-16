@@ -52,9 +52,10 @@ const RANKING_LABELS: Record<RankingType, { label: string; icon: typeof Trophy }
 };
 
 function calcShotScore(pct: number, attempts: number): number {
-  const accuracyScore = Math.min(pct, 100);
+  // Volume-first: effort (70%) + accuracy bonus (30%)
   const volumeScore = Math.min((attempts / 2000) * 100, 100);
-  return Math.round(accuracyScore * 0.7 + volumeScore * 0.3);
+  const accuracyBonus = Math.min(pct, 100);
+  return Math.round(volumeScore * 0.7 + accuracyBonus * 0.3);
 }
 
 function calcQuizScore(accuracy: number, points: number, streak: number): number {
