@@ -53,7 +53,8 @@ const CurrentMonthWorkout = () => {
   if (!workout) return null;
 
   const hasCombined = isCombinedWorkout(workout.title);
-
+  const hasShootingDrills = !!SHOOTING_DRILLS[workout.index];
+  const totalPages = hasShootingDrills ? 2 : 1;
   return (
     <div className="gradient-card rounded-xl overflow-hidden border border-accent/20">
       <button
