@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "pwa-icon-512.png", "pwa-icon-192.png"],
       workbox: {
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         clientsClaim: true,
         skipWaiting: true,
         cleanupOutdatedCaches: true,
