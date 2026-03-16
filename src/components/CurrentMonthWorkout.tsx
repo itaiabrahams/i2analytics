@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { SHOOTING_DRILLS, isCombinedWorkout } from '@/lib/shootingDrills';
 
 const WORKOUT_MONTHS = [
-  { index: 1, title: 'עקיפה + קליעה', subtitle: 'שליטה בכדור וטכניקת קליעה', year: 2026, month: 4, image: '/workouts/month-01.jpg', emoji: '🏀' },
+  { index: 1, title: 'עקיפה + קליעה', subtitle: 'שליטה בכדור וטכניקת קליעה', year: 2026, month: 4, image: '/workouts/month-01.jpg', shootingImage: '/workouts/shooting-month-01.jpg', emoji: '🏀' },
   { index: 2, title: 'תוכנית קליעה', subtitle: 'טכניקת קליעה בסיסית', year: 2026, month: 5, image: '/workouts/month-02.jpg', emoji: '🎯' },
   { index: 3, title: 'תוכנית קליעה', subtitle: 'מכני קליעה ומכדור', year: 2026, month: 6, image: '/workouts/month-03.jpg', emoji: '📏' },
   { index: 4, title: 'עקיפה + קליעה', subtitle: 'שליטה מתקדמת וקליעה מכדרור', year: 2026, month: 7, image: '/workouts/month-04.jpg', emoji: '⚡' },
@@ -131,14 +131,11 @@ const CurrentMonthWorkout = () => {
           {page === 1 && hasShootingDrills && (
             <div className="rounded-lg overflow-hidden border border-border/50">
               <img
-                src={workout.image}
+                src={workout.shootingImage || workout.image}
                 alt={`תוכנית קליעה - חודש ${workout.index}`}
                 className="w-full h-auto"
                 loading="lazy"
               />
-              <div className="bg-accent/10 p-2 text-center">
-                <span className="text-xs font-medium text-accent">🎯 תוכנית קליעה - חודש {workout.index}</span>
-              </div>
             </div>
           )}
 
