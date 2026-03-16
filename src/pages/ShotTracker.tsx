@@ -91,7 +91,21 @@ const ShotTracker = () => {
     return { zone: zone.id, attempts, made, percentage: attempts > 0 ? Math.round((made / attempts) * 100) : 0 };
   });
 
+  const handleSelectSession = (sessionId: string) => {
+    setActiveSessionId(sessionId);
+    setViewAll(false);
+  };
+
+  const handleViewAll = () => {
+    setViewAll(true);
+    setActiveSessionId(null);
+  };
+
   const handleZoneClick = (zoneId: ZoneId) => {
+    if (viewAll) {
+      toast.error('יש לבחור אימון ספציפי כדי להזין זריקות');
+      return;
+    }
     if (!activeSessionId) {
       toast.error('יש ליצור אימון קליעות קודם');
       return;
