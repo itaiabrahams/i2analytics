@@ -29,13 +29,13 @@ export interface ScoutReportData {
   basketballMetrics: MetricField[];
   physicalMetrics: MetricField[];
   mentalMetrics: MetricField[];
+  nutritionMetrics: MetricField[];
 
   // Keep old fields for backward compat with PDF
   shooting: string; defense: string; decisionMaking: string; ballHandling: string;
   passing: string; rebounds: string; gameReading: string;
   sprint20m: string; verticalJump: string; agility: string; strength: string; endurance: string;
   selfConfidence: string; discipline: string; teamwork: string; pressureHandling: string; errorRecovery: string;
-
   nutritionWeight: string;
   bodyFat: string;
   lastMeasured: string;
