@@ -33,6 +33,7 @@ interface QuestionRow {
   media_url: string | null;
   media_type: string | null;
   is_ai_generated: boolean;
+  is_peak: boolean;
   status: string;
   created_at: string;
 }

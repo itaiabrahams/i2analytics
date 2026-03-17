@@ -36,19 +36,17 @@ Deno.serve(async (req) => {
     const startHour = settings.publish_start_hour ?? 9
     const endHour = settings.publish_end_hour ?? 22
 
-    if (currentHour < startHour || currentHour >= endHour) {
+    if (currentHour < startHour || currentHour > endHour) {
       return new Response(JSON.stringify({ message: `Outside active hours (${startHour}-${endHour}). Current: ${currentHour}` }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Calculate this hour's window: from XX:00:00 to XX+1:00:00 in Israel time
+    // Calculate this hour's window
     const hourStart = new Date(israelTime)
     hourStart.setMinutes(0, 0, 0)
     const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000)
 
-    // Convert back to UTC for DB comparison
-    // We need UTC equivalents: calculate the offset
     const utcOffset = now.getTime() - israelTime.getTime()
     const publishAt = new Date(hourStart.getTime() + utcOffset)
     const expiresAt = new Date(hourEnd.getTime() + utcOffset)
@@ -68,20 +66,52 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Pick random pool question
-    const { data: poolQuestions } = await supabase
-      .from('courtiq_questions')
-      .select('id')
-      .eq('status', 'pool')
+    // At 22:00, publish a peak question if available
+    const isPeakHour = currentHour === 22
 
-    if (!poolQuestions || poolQuestions.length === 0) {
-      return new Response(JSON.stringify({ message: 'No pool questions available' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+    let questionId: string | null = null
+
+    if (isPeakHour) {
+      // Try to find a peak question from the pool
+      const { data: peakQuestions } = await supabase
+        .from('courtiq_questions')
+        .select('id')
+        .eq('status', 'pool')
+        .eq('is_peak', true)
+
+      if (peakQuestions && peakQuestions.length > 0) {
+        const randomIndex = Math.floor(Math.random() * peakQuestions.length)
+        questionId = peakQuestions[randomIndex].id
+      }
     }
 
-    const randomIndex = Math.floor(Math.random() * poolQuestions.length)
-    const questionId = poolQuestions[randomIndex].id
+    // If not peak hour or no peak questions, pick regular pool question
+    if (!questionId) {
+      const { data: poolQuestions } = await supabase
+        .from('courtiq_questions')
+        .select('id')
+        .eq('status', 'pool')
+        .eq('is_peak', false)
+
+      if (!poolQuestions || poolQuestions.length === 0) {
+        // Fallback: try any pool question
+        const { data: anyPool } = await supabase
+          .from('courtiq_questions')
+          .select('id')
+          .eq('status', 'pool')
+
+        if (!anyPool || anyPool.length === 0) {
+          return new Response(JSON.stringify({ message: 'No pool questions available' }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          })
+        }
+        const randomIndex = Math.floor(Math.random() * anyPool.length)
+        questionId = anyPool[randomIndex].id
+      } else {
+        const randomIndex = Math.floor(Math.random() * poolQuestions.length)
+        questionId = poolQuestions[randomIndex].id
+      }
+    }
 
     const { error } = await supabase
       .from('courtiq_questions')
@@ -100,12 +130,12 @@ Deno.serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ 
-      message: 'Question published from pool', 
+      message: isPeakHour ? 'Peak question published!' : 'Question published from pool', 
       questionId, 
       publishAt: publishAt.toISOString(),
       expiresAt: expiresAt.toISOString(),
       israelHour: currentHour,
-      poolRemaining: poolQuestions.length - 1,
+      isPeakHour,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
