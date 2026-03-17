@@ -198,7 +198,7 @@ const ShotCalendar = ({
         <Calendar
           mode="single"
           selected={selectedDate}
-          onSelect={setSelectedDate}
+          onSelect={handleDateChange}
           locale={he}
           modifiers={{
             hasSessions: datesWithSessions,
