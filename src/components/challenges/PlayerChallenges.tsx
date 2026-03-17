@@ -40,7 +40,7 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
   const [challenges, setChallenges] = useState<PlayerChallenge[]>([]);
   const [players, setPlayers] = useState<{ user_id: string; display_name: string }[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ challenged_id: '', zone: 'all', target_attempts: 20, description: '' });
+  const [form, setForm] = useState({ challenged_id: '', zone: 'all', target_attempts: 20, target_made: '', description: '', challenger_note: '' });
   const [submitting, setSubmitting] = useState(false);
 
   const fetchChallenges = async () => {
