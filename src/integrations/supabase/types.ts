@@ -172,6 +172,7 @@ export type Database = {
           explanation: string | null
           id: string
           is_ai_generated: boolean | null
+          is_peak: boolean | null
           media_type: string | null
           media_url: string | null
           option_a: string
@@ -191,6 +192,7 @@ export type Database = {
           explanation?: string | null
           id?: string
           is_ai_generated?: boolean | null
+          is_peak?: boolean | null
           media_type?: string | null
           media_url?: string | null
           option_a: string
@@ -210,6 +212,7 @@ export type Database = {
           explanation?: string | null
           id?: string
           is_ai_generated?: boolean | null
+          is_peak?: boolean | null
           media_type?: string | null
           media_url?: string | null
           option_a?: string

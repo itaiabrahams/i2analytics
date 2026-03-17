@@ -12,6 +12,7 @@ export interface ActiveQuestion {
   expires_at: string;
   created_at: string;
   already_answered: boolean;
+  is_peak: boolean;
   category_name: string | null;
   category_color: string | null;
   category_icon: string | null;
@@ -40,6 +41,8 @@ export interface AnswerResult {
   correct_percentage: number;
   correct_streak: number;
   daily_streak: number;
+  is_peak?: boolean;
+  multiplier?: number;
   error?: string;
 }
 

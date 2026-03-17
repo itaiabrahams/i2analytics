@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Flame, Star, Clock, Brain, Send, Trophy, Share2, Lightbulb, ChevronLeft } from 'lucide-react';
+import { Flame, Star, Clock, Brain, Send, Trophy, Share2, Lightbulb, ChevronLeft, X, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -51,6 +51,17 @@ const CourtIQPage = () => {
   const [suggestCategory, setSuggestCategory] = useState('');
   const [categories, setCategories] = useState<CourtIQCategory[]>([]);
   const [nextQuestionCountdown, setNextQuestionCountdown] = useState('');
+  const [showPeakNotice, setShowPeakNotice] = useState(false);
+
+  // Check if we should show peak notice (first 5 visits)
+  useEffect(() => {
+    const key = 'courtiq_peak_notice_count';
+    const count = parseInt(localStorage.getItem(key) || '0', 10);
+    if (count < 5) {
+      setShowPeakNotice(true);
+      localStorage.setItem(key, String(count + 1));
+    }
+  }, []);
 
   const currentQuestion = questions.find(q => !q.already_answered);
 
@@ -244,6 +255,19 @@ const CourtIQPage = () => {
         </div>
       )}
 
+      {/* Peak question notice - shown for first 5 visits */}
+      {showPeakNotice && (
+        <div className="mx-4 mt-3 px-3 py-2 rounded-lg bg-accent/15 border border-accent/30 text-sm text-accent text-center flex items-center justify-between gap-2">
+          <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => setShowPeakNotice(false)}>
+            <X className="h-3 w-3" />
+          </Button>
+          <span className="flex items-center gap-1">
+            <Zap className="h-4 w-4" />
+            שים לב! שאלת שיא כל יום בשעה 22:00 – ניקוד כפול! ⚡
+          </span>
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col items-center justify-center p-3 sm:p-4 overflow-y-auto">
         <AnimatePresence mode="wait">
           {/* No active question */}
@@ -297,11 +321,16 @@ const CourtIQPage = () => {
                 </div>
               )}
 
-              {/* Category badge */}
-              <div className="flex justify-center">
+              {/* Category badge + peak indicator */}
+              <div className="flex justify-center gap-2">
                 <span className="px-3 py-1 rounded-full text-sm font-semibold text-white" style={{ backgroundColor: currentQuestion.category_color || '#3b82f6' }}>
                   {currentQuestion.category_icon} {currentQuestion.category_name || 'כללי'}
                 </span>
+                {currentQuestion.is_peak && (
+                  <span className="px-3 py-1 rounded-full text-sm font-bold bg-accent text-accent-foreground animate-pulse flex items-center gap-1">
+                    <Zap className="h-3.5 w-3.5" /> שאלת שיא x2
+                  </span>
+                )}
               </div>
 
               {/* Timer */}
@@ -385,6 +414,7 @@ const CourtIQPage = () => {
               {result.points_earned > 0 && (
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2 }} className="text-2xl sm:text-3xl font-black text-accent">
                   +{result.points_earned}
+                  {result.is_peak && result.multiplier === 2 && <span className="text-base text-accent block">⚡ ניקוד כפול – שאלת שיא!</span>}
                   {result.bonus_points > 0 && <span className="text-base text-yellow-500 block">+{result.bonus_points} בונוס יומי! 🎉</span>}
                 </motion.div>
               )}
