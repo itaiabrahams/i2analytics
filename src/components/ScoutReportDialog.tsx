@@ -4,10 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Pencil, Check } from 'lucide-react';
 import { generateScoutReportPDF } from '@/lib/scoutReportPdf';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+export interface MetricField {
+  label: string;
+  value: string;
+}
 
 export interface ScoutReportData {
   playerName: string;
@@ -20,23 +25,17 @@ export interface ScoutReportData {
   status: string;
   category: string;
   avatarUrl?: string;
-  shooting: string;
-  defense: string;
-  decisionMaking: string;
-  ballHandling: string;
-  passing: string;
-  rebounds: string;
-  gameReading: string;
-  sprint20m: string;
-  verticalJump: string;
-  agility: string;
-  strength: string;
-  endurance: string;
-  selfConfidence: string;
-  discipline: string;
-  teamwork: string;
-  pressureHandling: string;
-  errorRecovery: string;
+
+  basketballMetrics: MetricField[];
+  physicalMetrics: MetricField[];
+  mentalMetrics: MetricField[];
+
+  // Keep old fields for backward compat with PDF
+  shooting: string; defense: string; decisionMaking: string; ballHandling: string;
+  passing: string; rebounds: string; gameReading: string;
+  sprint20m: string; verticalJump: string; agility: string; strength: string; endurance: string;
+  selfConfidence: string; discipline: string; teamwork: string; pressureHandling: string; errorRecovery: string;
+
   nutritionWeight: string;
   bodyFat: string;
   lastMeasured: string;
@@ -61,6 +60,32 @@ interface ScoutReportDialogProps {
   avatarUrl?: string;
 }
 
+const DEFAULT_BASKETBALL_METRICS: MetricField[] = [
+  { label: 'קליעה', value: '' },
+  { label: 'הגנה', value: '' },
+  { label: 'קבלת החלטות', value: '' },
+  { label: 'שליטה בכדור', value: '' },
+  { label: 'מסירות', value: '' },
+  { label: 'ריבאונדים', value: '' },
+  { label: 'קריאת משחק', value: '' },
+];
+
+const DEFAULT_PHYSICAL_METRICS: MetricField[] = [
+  { label: 'ספרינט 20 מ\'', value: '' },
+  { label: 'קפיצה אנכית', value: '' },
+  { label: 'זריזות', value: '' },
+  { label: 'כוח', value: '' },
+  { label: 'סיבולת', value: '' },
+];
+
+const DEFAULT_MENTAL_METRICS: MetricField[] = [
+  { label: 'ביטחון עצמי', value: '' },
+  { label: 'משמעת', value: '' },
+  { label: 'עבודת צוות', value: '' },
+  { label: 'התמודדות עם לחץ', value: '' },
+  { label: 'התאוששות משגיאות', value: '' },
+];
+
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   <h3 className="text-sm font-bold text-accent mt-4 mb-2 border-b border-border pb-1">{children}</h3>
 );
@@ -69,13 +94,110 @@ const FieldRow = ({ children }: { children: React.ReactNode }) => (
   <div className="grid grid-cols-2 gap-3 mb-2">{children}</div>
 );
 
-function emptyData(playerName: string, playerPosition: string, playerAge: number, avatarUrl?: string): ScoutReportData {
+// Editable metric row component
+const EditableMetricRow = ({
+  metric,
+  onLabelChange,
+  onValueChange,
+  onRemove,
+  placeholder,
+}: {
+  metric: MetricField;
+  onLabelChange: (label: string) => void;
+  onValueChange: (value: string) => void;
+  onRemove: () => void;
+  placeholder: string;
+}) => {
+  const [editingLabel, setEditingLabel] = useState(false);
+  const [tempLabel, setTempLabel] = useState(metric.label);
+
+  return (
+    <div className="flex items-center gap-2 mb-2">
+      <div className="flex-1 min-w-0">
+        {editingLabel ? (
+          <div className="flex items-center gap-1">
+            <Input
+              value={tempLabel}
+              onChange={e => setTempLabel(e.target.value)}
+              className="h-7 text-xs"
+              autoFocus
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  onLabelChange(tempLabel);
+                  setEditingLabel(false);
+                }
+              }}
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 shrink-0"
+              onClick={() => { onLabelChange(tempLabel); setEditingLabel(false); }}
+            >
+              <Check className="h-3 w-3 text-green-500" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1">
+            <Label className="text-xs truncate">{metric.label}</Label>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-5 w-5 shrink-0 opacity-50 hover:opacity-100"
+              onClick={() => { setTempLabel(metric.label); setEditingLabel(true); }}
+            >
+              <Pencil className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
+      </div>
+      <Input
+        value={metric.value}
+        onChange={e => onValueChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-24 shrink-0"
+      />
+      <Button variant="ghost" size="icon" onClick={onRemove} className="h-8 w-8 shrink-0 text-destructive opacity-50 hover:opacity-100">
+        <Trash2 className="h-3.5 w-3.5" />
+      </Button>
+    </div>
+  );
+};
+
+function syncLegacyFields(data: ScoutReportData): ScoutReportData {
+  // Map dynamic arrays back to legacy fields for PDF backward compat
+  const findVal = (metrics: MetricField[], label: string) =>
+    metrics.find(m => m.label === label)?.value || '';
   return {
-    playerName,
-    position: playerPosition,
-    age: playerAge,
+    ...data,
+    shooting: findVal(data.basketballMetrics, 'קליעה') || data.shooting,
+    defense: findVal(data.basketballMetrics, 'הגנה') || data.defense,
+    decisionMaking: findVal(data.basketballMetrics, 'קבלת החלטות') || data.decisionMaking,
+    ballHandling: findVal(data.basketballMetrics, 'שליטה בכדור') || data.ballHandling,
+    passing: findVal(data.basketballMetrics, 'מסירות') || data.passing,
+    rebounds: findVal(data.basketballMetrics, 'ריבאונדים') || data.rebounds,
+    gameReading: findVal(data.basketballMetrics, 'קריאת משחק') || data.gameReading,
+    sprint20m: findVal(data.physicalMetrics, 'ספרינט 20 מ\'') || data.sprint20m,
+    verticalJump: findVal(data.physicalMetrics, 'קפיצה אנכית') || data.verticalJump,
+    agility: findVal(data.physicalMetrics, 'זריזות') || data.agility,
+    strength: findVal(data.physicalMetrics, 'כוח') || data.strength,
+    endurance: findVal(data.physicalMetrics, 'סיבולת') || data.endurance,
+    selfConfidence: findVal(data.mentalMetrics, 'ביטחון עצמי') || data.selfConfidence,
+    discipline: findVal(data.mentalMetrics, 'משמעת') || data.discipline,
+    teamwork: findVal(data.mentalMetrics, 'עבודת צוות') || data.teamwork,
+    pressureHandling: findVal(data.mentalMetrics, 'התמודדות עם לחץ') || data.pressureHandling,
+    errorRecovery: findVal(data.mentalMetrics, 'התאוששות משגיאות') || data.errorRecovery,
+  };
+}
+
+function createEmptyData(playerName: string, playerPosition: string, playerAge: number, avatarUrl?: string): ScoutReportData {
+  return {
+    playerName, position: playerPosition, age: playerAge, avatarUrl,
     height: '', weight: '', attendance: '', progressIndex: '',
-    status: 'Active', category: 'Diamond', avatarUrl,
+    status: 'Active', category: 'Diamond',
+    basketballMetrics: DEFAULT_BASKETBALL_METRICS.map(m => ({ ...m })),
+    physicalMetrics: DEFAULT_PHYSICAL_METRICS.map(m => ({ ...m })),
+    mentalMetrics: DEFAULT_MENTAL_METRICS.map(m => ({ ...m })),
     shooting: '', defense: '', decisionMaking: '', ballHandling: '',
     passing: '', rebounds: '', gameReading: '',
     sprint20m: '', verticalJump: '', agility: '', strength: '', endurance: '',
@@ -90,19 +212,12 @@ function emptyData(playerName: string, playerPosition: string, playerAge: number
 }
 
 const ScoutReportDialog = ({
-  open,
-  onOpenChange,
-  playerId,
-  playerName,
-  playerPosition,
-  playerAge,
-  avatarUrl,
+  open, onOpenChange, playerId, playerName, playerPosition, playerAge, avatarUrl,
 }: ScoutReportDialogProps) => {
   const [generating, setGenerating] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<ScoutReportData>(emptyData(playerName, playerPosition, playerAge, avatarUrl));
+  const [data, setData] = useState<ScoutReportData>(createEmptyData(playerName, playerPosition, playerAge, avatarUrl));
 
-  // Fetch existing player data and pre-fill when dialog opens
   useEffect(() => {
     if (!open || !playerId) return;
 
@@ -123,14 +238,9 @@ const ScoutReportDialog = ({
           supabase.from('courtiq_player_stats').select('*').eq('player_id', playerId).maybeSingle(),
         ]);
 
-        // Fetch shots for all shot sessions
-        let totalAttempts = 0;
-        let totalMade = 0;
+        let totalAttempts = 0, totalMade = 0;
         if (shotSessions && shotSessions.length > 0) {
-          const { data: shots } = await supabase
-            .from('shots')
-            .select('attempts, made')
-            .in('session_id', shotSessions.map(s => s.id));
+          const { data: shots } = await supabase.from('shots').select('attempts, made').in('session_id', shotSessions.map(s => s.id));
           if (shots) {
             totalAttempts = shots.reduce((s, sh) => s + sh.attempts, 0);
             totalMade = shots.reduce((s, sh) => s + sh.made, 0);
@@ -138,14 +248,9 @@ const ScoutReportDialog = ({
         }
 
         const shootingPct = totalAttempts > 0 ? Math.round((totalMade / totalAttempts) * 100) : 0;
-
-        // Sessions attendance
         const totalSessionCount = sessions?.length || 0;
-
-        // Latest rating
         const latestRating = ratings?.[0];
 
-        // Map goals
         const mappedGoals = goals && goals.length > 0
           ? goals.map(g => ({
               goal: g.title,
@@ -155,61 +260,48 @@ const ScoutReportDialog = ({
             }))
           : [{ goal: '', status: 'In Progress', progress: '', targetDate: '' }];
 
-        const prefilled: ScoutReportData = {
-          playerName,
-          position: playerPosition,
-          age: playerAge,
-          avatarUrl,
-          height: '',
-          weight: '',
-          attendance: totalSessionCount > 0 ? `${totalSessionCount} sessions` : '',
-          progressIndex: '',
-          status: 'Active',
-          category: 'Diamond',
-          // Basketball metrics from latest rating
-          shooting: shootingPct > 0 ? `${shootingPct}%` : (latestRating ? `${latestRating.offense_rating}/10` : ''),
-          defense: latestRating ? `${latestRating.defense_rating}/10` : '',
-          decisionMaking: '',
-          ballHandling: '',
-          passing: '',
-          rebounds: '',
-          gameReading: '',
-          // Physical (empty - coach fills manually)
-          sprint20m: '', verticalJump: '', agility: '', strength: '', endurance: '',
-          // Mental from latest rating
-          selfConfidence: '',
-          discipline: '',
-          teamwork: latestRating ? `${latestRating.teamwork_rating}/10` : '',
-          pressureHandling: '',
-          errorRecovery: '',
-          // Nutrition
-          nutritionWeight: '', bodyFat: '', lastMeasured: '',
-          // Recommendations
-          recommendations: ['', '', ''],
-          // Goals
-          goals: mappedGoals,
-          // Improvements
-          improvements: [{ domain: '', period: '', rating: '', notes: '', coach: '' }],
-          // Training notes
-          trainingNotes: [{ date: '', coach: '', quality: '', notes: '' }],
-          // Attendance
-          totalSessions: totalSessionCount > 0 ? String(totalSessionCount) : '',
-          present: totalSessionCount > 0 ? String(totalSessionCount) : '',
-          absent: '0',
-          attendanceRate: totalSessionCount > 0 ? '100%' : '',
-        };
+        // Build dynamic metrics with pre-filled values
+        const bbMetrics: MetricField[] = [
+          { label: 'קליעה', value: shootingPct > 0 ? `${shootingPct}%` : (latestRating ? `${latestRating.offense_rating}/10` : '') },
+          { label: 'הגנה', value: latestRating ? `${latestRating.defense_rating}/10` : '' },
+          { label: 'קבלת החלטות', value: '' },
+          { label: 'שליטה בכדור', value: '' },
+          { label: 'מסירות', value: '' },
+          { label: 'ריבאונדים', value: '' },
+          { label: 'קריאת משחק', value: '' },
+        ];
 
-        // Add Court IQ data as recommendation if available
+        const physMetrics: MetricField[] = DEFAULT_PHYSICAL_METRICS.map(m => ({ ...m }));
+
+        const menMetrics: MetricField[] = [
+          { label: 'ביטחון עצמי', value: '' },
+          { label: 'משמעת', value: '' },
+          { label: 'עבודת צוות', value: latestRating ? `${latestRating.teamwork_rating}/10` : '' },
+          { label: 'התמודדות עם לחץ', value: '' },
+          { label: 'התאוששות משגיאות', value: '' },
+        ];
+
+        const recs = ['', '', ''];
         if (courtiqStats) {
           const accuracy = courtiqStats.total_answered ? Math.round((courtiqStats.total_correct! / courtiqStats.total_answered) * 100) : 0;
-          prefilled.recommendations = [
-            `Court IQ: ${courtiqStats.total_points} pts, ${accuracy}% accuracy, streak ${courtiqStats.current_streak}`,
-            totalAttempts > 0 ? `Shot Tracker: ${totalAttempts} attempts, ${totalMade} made (${shootingPct}%)` : '',
-            '',
-          ];
+          recs[0] = `Court IQ: ${courtiqStats.total_points} pts, ${accuracy}% accuracy, streak ${courtiqStats.current_streak}`;
+        }
+        if (totalAttempts > 0) {
+          recs[1] = `Shot Tracker: ${totalAttempts} attempts, ${totalMade} made (${shootingPct}%)`;
         }
 
-        // Effort rating from latest rating
+        const prefilled = createEmptyData(playerName, playerPosition, playerAge, avatarUrl);
+        prefilled.basketballMetrics = bbMetrics;
+        prefilled.physicalMetrics = physMetrics;
+        prefilled.mentalMetrics = menMetrics;
+        prefilled.goals = mappedGoals;
+        prefilled.recommendations = recs;
+        prefilled.totalSessions = totalSessionCount > 0 ? String(totalSessionCount) : '';
+        prefilled.present = totalSessionCount > 0 ? String(totalSessionCount) : '';
+        prefilled.absent = '0';
+        prefilled.attendanceRate = totalSessionCount > 0 ? '100%' : '';
+        prefilled.attendance = totalSessionCount > 0 ? `${totalSessionCount} sessions` : '';
+
         if (latestRating) {
           prefilled.progressIndex = `${latestRating.effort_rating}/10`;
           prefilled.improvements = [{
@@ -236,42 +328,44 @@ const ScoutReportDialog = ({
     setData(prev => ({ ...prev, [field]: value }));
   };
 
+  const updateMetric = (section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics', index: number, field: 'label' | 'value', val: string) => {
+    setData(prev => {
+      const arr = [...prev[section]];
+      arr[index] = { ...arr[index], [field]: val };
+      return { ...prev, [section]: arr };
+    });
+  };
+  const removeMetric = (section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics', index: number) => {
+    setData(prev => ({ ...prev, [section]: prev[section].filter((_, i) => i !== index) }));
+  };
+  const addMetric = (section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics') => {
+    setData(prev => ({ ...prev, [section]: [...prev[section], { label: 'מדד חדש', value: '' }] }));
+  };
+
   const updateRecommendation = (index: number, value: string) => {
     const recs = [...data.recommendations];
     recs[index] = value;
     setData(prev => ({ ...prev, recommendations: recs }));
   };
 
-  const addGoal = () => {
-    setData(prev => ({ ...prev, goals: [...prev.goals, { goal: '', status: 'In Progress', progress: '', targetDate: '' }] }));
-  };
-  const removeGoal = (i: number) => {
-    setData(prev => ({ ...prev, goals: prev.goals.filter((_, idx) => idx !== i) }));
-  };
+  const addGoal = () => setData(prev => ({ ...prev, goals: [...prev.goals, { goal: '', status: 'In Progress', progress: '', targetDate: '' }] }));
+  const removeGoal = (i: number) => setData(prev => ({ ...prev, goals: prev.goals.filter((_, idx) => idx !== i) }));
   const updateGoal = (i: number, field: string, value: string) => {
     const goals = [...data.goals];
     (goals[i] as any)[field] = value;
     setData(prev => ({ ...prev, goals }));
   };
 
-  const addImprovement = () => {
-    setData(prev => ({ ...prev, improvements: [...prev.improvements, { domain: '', period: '', rating: '', notes: '', coach: '' }] }));
-  };
-  const removeImprovement = (i: number) => {
-    setData(prev => ({ ...prev, improvements: prev.improvements.filter((_, idx) => idx !== i) }));
-  };
+  const addImprovement = () => setData(prev => ({ ...prev, improvements: [...prev.improvements, { domain: '', period: '', rating: '', notes: '', coach: '' }] }));
+  const removeImprovement = (i: number) => setData(prev => ({ ...prev, improvements: prev.improvements.filter((_, idx) => idx !== i) }));
   const updateImprovement = (i: number, field: string, value: string) => {
     const improvements = [...data.improvements];
     (improvements[i] as any)[field] = value;
     setData(prev => ({ ...prev, improvements }));
   };
 
-  const addTrainingNote = () => {
-    setData(prev => ({ ...prev, trainingNotes: [...prev.trainingNotes, { date: '', coach: '', quality: '', notes: '' }] }));
-  };
-  const removeTrainingNote = (i: number) => {
-    setData(prev => ({ ...prev, trainingNotes: prev.trainingNotes.filter((_, idx) => idx !== i) }));
-  };
+  const addTrainingNote = () => setData(prev => ({ ...prev, trainingNotes: [...prev.trainingNotes, { date: '', coach: '', quality: '', notes: '' }] }));
+  const removeTrainingNote = (i: number) => setData(prev => ({ ...prev, trainingNotes: prev.trainingNotes.filter((_, idx) => idx !== i) }));
   const updateTrainingNote = (i: number, field: string, value: string) => {
     const notes = [...data.trainingNotes];
     (notes[i] as any)[field] = value;
@@ -281,15 +375,16 @@ const ScoutReportDialog = ({
   const handleGenerate = async () => {
     setGenerating(true);
     try {
+      const synced = syncLegacyFields(data);
       toast.info('מתרגם לאנגלית...');
       const { data: result, error } = await supabase.functions.invoke('translate-scout-report', {
-        body: { data },
+        body: { data: synced },
       });
 
       if (error || !result?.translated) {
         console.error('Translation failed, using original data:', error);
         toast.warning('התרגום נכשל, מייצר דוח עם הטקסט המקורי');
-        await generateScoutReportPDF(data);
+        await generateScoutReportPDF(synced);
       } else {
         await generateScoutReportPDF(result.translated as ScoutReportData);
       }
@@ -301,6 +396,29 @@ const ScoutReportDialog = ({
       setGenerating(false);
     }
   };
+
+  const renderMetricsSection = (
+    title: string,
+    section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics',
+    placeholder: string,
+  ) => (
+    <>
+      <SectionTitle>{title}</SectionTitle>
+      {data[section].map((metric, i) => (
+        <EditableMetricRow
+          key={`${section}-${i}`}
+          metric={metric}
+          onLabelChange={label => updateMetric(section, i, 'label', label)}
+          onValueChange={value => updateMetric(section, i, 'value', value)}
+          onRemove={() => removeMetric(section, i)}
+          placeholder={placeholder}
+        />
+      ))}
+      <Button variant="outline" size="sm" onClick={() => addMetric(section)} className="mb-2">
+        <Plus className="h-3 w-3 mr-1" /> הוסף מדד
+      </Button>
+    </>
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -347,96 +465,10 @@ const ScoutReportDialog = ({
             </div>
           </FieldRow>
 
-          {/* Basketball Metrics */}
-          <SectionTitle>מדדי כדורסל</SectionTitle>
-          <FieldRow>
-            <div>
-              <Label className="text-xs">קליעה</Label>
-              <Input value={data.shooting} onChange={e => updateField('shooting', e.target.value)} placeholder="82%" />
-            </div>
-            <div>
-              <Label className="text-xs">הגנה</Label>
-              <Input value={data.defense} onChange={e => updateField('defense', e.target.value)} placeholder="75%" />
-            </div>
-          </FieldRow>
-          <FieldRow>
-            <div>
-              <Label className="text-xs">קבלת החלטות</Label>
-              <Input value={data.decisionMaking} onChange={e => updateField('decisionMaking', e.target.value)} placeholder="78%" />
-            </div>
-            <div>
-              <Label className="text-xs">שליטה בכדור</Label>
-              <Input value={data.ballHandling} onChange={e => updateField('ballHandling', e.target.value)} placeholder="80%" />
-            </div>
-          </FieldRow>
-          <FieldRow>
-            <div>
-              <Label className="text-xs">מסירות</Label>
-              <Input value={data.passing} onChange={e => updateField('passing', e.target.value)} placeholder="76%" />
-            </div>
-            <div>
-              <Label className="text-xs">ריבאונדים</Label>
-              <Input value={data.rebounds} onChange={e => updateField('rebounds', e.target.value)} placeholder="65%" />
-            </div>
-          </FieldRow>
-          <div className="mb-2">
-            <Label className="text-xs">קריאת משחק</Label>
-            <Input value={data.gameReading} onChange={e => updateField('gameReading', e.target.value)} placeholder="77%" />
-          </div>
-
-          {/* Physical Metrics */}
-          <SectionTitle>מדדים פיזיים</SectionTitle>
-          <FieldRow>
-            <div>
-              <Label className="text-xs">ספרינט 20 מ'</Label>
-              <Input value={data.sprint20m} onChange={e => updateField('sprint20m', e.target.value)} placeholder="3.1s" />
-            </div>
-            <div>
-              <Label className="text-xs">קפיצה אנכית</Label>
-              <Input value={data.verticalJump} onChange={e => updateField('verticalJump', e.target.value)} placeholder="62 cm" />
-            </div>
-          </FieldRow>
-          <FieldRow>
-            <div>
-              <Label className="text-xs">זריזות</Label>
-              <Input value={data.agility} onChange={e => updateField('agility', e.target.value)} placeholder="80%" />
-            </div>
-            <div>
-              <Label className="text-xs">כוח</Label>
-              <Input value={data.strength} onChange={e => updateField('strength', e.target.value)} placeholder="73%" />
-            </div>
-          </FieldRow>
-          <div className="mb-2">
-            <Label className="text-xs">סיבולת</Label>
-            <Input value={data.endurance} onChange={e => updateField('endurance', e.target.value)} placeholder="82%" />
-          </div>
-
-          {/* Mental Metrics */}
-          <SectionTitle>מדדים מנטליים</SectionTitle>
-          <FieldRow>
-            <div>
-              <Label className="text-xs">ביטחון עצמי</Label>
-              <Input value={data.selfConfidence} onChange={e => updateField('selfConfidence', e.target.value)} placeholder="78%" />
-            </div>
-            <div>
-              <Label className="text-xs">משמעת</Label>
-              <Input value={data.discipline} onChange={e => updateField('discipline', e.target.value)} placeholder="85%" />
-            </div>
-          </FieldRow>
-          <FieldRow>
-            <div>
-              <Label className="text-xs">עבודת צוות</Label>
-              <Input value={data.teamwork} onChange={e => updateField('teamwork', e.target.value)} placeholder="88%" />
-            </div>
-            <div>
-              <Label className="text-xs">התמודדות עם לחץ</Label>
-              <Input value={data.pressureHandling} onChange={e => updateField('pressureHandling', e.target.value)} placeholder="72%" />
-            </div>
-          </FieldRow>
-          <div className="mb-2">
-            <Label className="text-xs">התאוששות משגיאות</Label>
-            <Input value={data.errorRecovery} onChange={e => updateField('errorRecovery', e.target.value)} placeholder="75%" />
-          </div>
+          {/* Dynamic Metric Sections */}
+          {renderMetricsSection('מדדי כדורסל', 'basketballMetrics', '82%')}
+          {renderMetricsSection('מדדים פיזיים', 'physicalMetrics', '80%')}
+          {renderMetricsSection('מדדים מנטליים', 'mentalMetrics', '78%')}
 
           {/* Nutrition */}
           <SectionTitle>נתוני תזונה</SectionTitle>
@@ -468,116 +500,51 @@ const ScoutReportDialog = ({
           <SectionTitle>יעדים ומטרות</SectionTitle>
           {data.goals.map((goal, i) => (
             <div key={i} className="grid grid-cols-5 gap-2 mb-2 items-end">
-              <div>
-                <Label className="text-xs">יעד</Label>
-                <Input value={goal.goal} onChange={e => updateGoal(i, 'goal', e.target.value)} placeholder="יעד" />
-              </div>
-              <div>
-                <Label className="text-xs">סטטוס</Label>
-                <Input value={goal.status} onChange={e => updateGoal(i, 'status', e.target.value)} placeholder="In Progress" />
-              </div>
-              <div>
-                <Label className="text-xs">התקדמות</Label>
-                <Input value={goal.progress} onChange={e => updateGoal(i, 'progress', e.target.value)} placeholder="65%" />
-              </div>
-              <div>
-                <Label className="text-xs">תאריך יעד</Label>
-                <Input value={goal.targetDate} onChange={e => updateGoal(i, 'targetDate', e.target.value)} placeholder="01/06/2026" />
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => removeGoal(i)} className="h-9 w-9 text-destructive">
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <div><Label className="text-xs">יעד</Label><Input value={goal.goal} onChange={e => updateGoal(i, 'goal', e.target.value)} placeholder="יעד" /></div>
+              <div><Label className="text-xs">סטטוס</Label><Input value={goal.status} onChange={e => updateGoal(i, 'status', e.target.value)} placeholder="In Progress" /></div>
+              <div><Label className="text-xs">התקדמות</Label><Input value={goal.progress} onChange={e => updateGoal(i, 'progress', e.target.value)} placeholder="65%" /></div>
+              <div><Label className="text-xs">תאריך יעד</Label><Input value={goal.targetDate} onChange={e => updateGoal(i, 'targetDate', e.target.value)} placeholder="01/06/2026" /></div>
+              <Button variant="ghost" size="icon" onClick={() => removeGoal(i)} className="h-9 w-9 text-destructive"><Trash2 className="h-4 w-4" /></Button>
             </div>
           ))}
-          <Button variant="outline" size="sm" onClick={addGoal} className="mb-2">
-            <Plus className="h-3 w-3 mr-1" /> הוסף יעד
-          </Button>
+          <Button variant="outline" size="sm" onClick={addGoal} className="mb-2"><Plus className="h-3 w-3 mr-1" /> הוסף יעד</Button>
 
           {/* Improvement Reports */}
           <SectionTitle>דוחות שיפור</SectionTitle>
           {data.improvements.map((imp, i) => (
             <div key={i} className="grid grid-cols-6 gap-2 mb-2 items-end">
-              <div>
-                <Label className="text-xs">תחום</Label>
-                <Input value={imp.domain} onChange={e => updateImprovement(i, 'domain', e.target.value)} placeholder="Basketball" />
-              </div>
-              <div>
-                <Label className="text-xs">תקופה</Label>
-                <Input value={imp.period} onChange={e => updateImprovement(i, 'period', e.target.value)} placeholder="03/03 - 09/03" />
-              </div>
-              <div>
-                <Label className="text-xs">דירוג</Label>
-                <Input value={imp.rating} onChange={e => updateImprovement(i, 'rating', e.target.value)} placeholder="8/10" />
-              </div>
-              <div className="col-span-2">
-                <Label className="text-xs">הערות</Label>
-                <Input value={imp.notes} onChange={e => updateImprovement(i, 'notes', e.target.value)} placeholder="הערות" />
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => removeImprovement(i)} className="h-9 w-9 text-destructive">
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <div><Label className="text-xs">תחום</Label><Input value={imp.domain} onChange={e => updateImprovement(i, 'domain', e.target.value)} placeholder="Basketball" /></div>
+              <div><Label className="text-xs">תקופה</Label><Input value={imp.period} onChange={e => updateImprovement(i, 'period', e.target.value)} placeholder="03/03 - 09/03" /></div>
+              <div><Label className="text-xs">דירוג</Label><Input value={imp.rating} onChange={e => updateImprovement(i, 'rating', e.target.value)} placeholder="8/10" /></div>
+              <div className="col-span-2"><Label className="text-xs">הערות</Label><Input value={imp.notes} onChange={e => updateImprovement(i, 'notes', e.target.value)} placeholder="הערות" /></div>
+              <Button variant="ghost" size="icon" onClick={() => removeImprovement(i)} className="h-9 w-9 text-destructive"><Trash2 className="h-4 w-4" /></Button>
             </div>
           ))}
-          <Button variant="outline" size="sm" onClick={addImprovement} className="mb-2">
-            <Plus className="h-3 w-3 mr-1" /> הוסף דוח שיפור
-          </Button>
+          <Button variant="outline" size="sm" onClick={addImprovement} className="mb-2"><Plus className="h-3 w-3 mr-1" /> הוסף דוח שיפור</Button>
 
           {/* Training Notes */}
           <SectionTitle>הערות אימון</SectionTitle>
           {data.trainingNotes.map((note, i) => (
             <div key={i} className="grid grid-cols-5 gap-2 mb-2 items-end">
-              <div>
-                <Label className="text-xs">תאריך</Label>
-                <Input value={note.date} onChange={e => updateTrainingNote(i, 'date', e.target.value)} placeholder="11/03/2026" />
-              </div>
-              <div>
-                <Label className="text-xs">מאמן</Label>
-                <Input value={note.coach} onChange={e => updateTrainingNote(i, 'coach', e.target.value)} placeholder="Coach" />
-              </div>
-              <div>
-                <Label className="text-xs">איכות</Label>
-                <Input value={note.quality} onChange={e => updateTrainingNote(i, 'quality', e.target.value)} placeholder="9/10" />
-              </div>
-              <div>
-                <Label className="text-xs">הערות</Label>
-                <Input value={note.notes} onChange={e => updateTrainingNote(i, 'notes', e.target.value)} placeholder="הערות" />
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => removeTrainingNote(i)} className="h-9 w-9 text-destructive">
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <div><Label className="text-xs">תאריך</Label><Input value={note.date} onChange={e => updateTrainingNote(i, 'date', e.target.value)} placeholder="11/03/2026" /></div>
+              <div><Label className="text-xs">מאמן</Label><Input value={note.coach} onChange={e => updateTrainingNote(i, 'coach', e.target.value)} placeholder="Coach" /></div>
+              <div><Label className="text-xs">איכות</Label><Input value={note.quality} onChange={e => updateTrainingNote(i, 'quality', e.target.value)} placeholder="9/10" /></div>
+              <div><Label className="text-xs">הערות</Label><Input value={note.notes} onChange={e => updateTrainingNote(i, 'notes', e.target.value)} placeholder="הערות" /></div>
+              <Button variant="ghost" size="icon" onClick={() => removeTrainingNote(i)} className="h-9 w-9 text-destructive"><Trash2 className="h-4 w-4" /></Button>
             </div>
           ))}
-          <Button variant="outline" size="sm" onClick={addTrainingNote} className="mb-2">
-            <Plus className="h-3 w-3 mr-1" /> הוסף הערת אימון
-          </Button>
+          <Button variant="outline" size="sm" onClick={addTrainingNote} className="mb-2"><Plus className="h-3 w-3 mr-1" /> הוסף הערת אימון</Button>
 
           {/* Attendance */}
           <SectionTitle>סיכום נוכחות</SectionTitle>
           <div className="grid grid-cols-4 gap-3 mb-4">
-            <div>
-              <Label className="text-xs">סה"כ אימונים</Label>
-              <Input value={data.totalSessions} onChange={e => updateField('totalSessions', e.target.value)} placeholder="15" />
-            </div>
-            <div>
-              <Label className="text-xs">נוכח</Label>
-              <Input value={data.present} onChange={e => updateField('present', e.target.value)} placeholder="14" />
-            </div>
-            <div>
-              <Label className="text-xs">חסר</Label>
-              <Input value={data.absent} onChange={e => updateField('absent', e.target.value)} placeholder="1" />
-            </div>
-            <div>
-              <Label className="text-xs">אחוז נוכחות</Label>
-              <Input value={data.attendanceRate} onChange={e => updateField('attendanceRate', e.target.value)} placeholder="92%" />
-            </div>
+            <div><Label className="text-xs">סה"כ אימונים</Label><Input value={data.totalSessions} onChange={e => updateField('totalSessions', e.target.value)} placeholder="15" /></div>
+            <div><Label className="text-xs">נוכח</Label><Input value={data.present} onChange={e => updateField('present', e.target.value)} placeholder="14" /></div>
+            <div><Label className="text-xs">חסר</Label><Input value={data.absent} onChange={e => updateField('absent', e.target.value)} placeholder="1" /></div>
+            <div><Label className="text-xs">אחוז נוכחות</Label><Input value={data.attendanceRate} onChange={e => updateField('attendanceRate', e.target.value)} placeholder="92%" /></div>
           </div>
 
-          {/* Generate Button */}
-          <Button
-            onClick={handleGenerate}
-            disabled={generating}
-            className="w-full gradient-accent text-accent-foreground font-bold py-3 mb-4"
-          >
+          <Button onClick={handleGenerate} disabled={generating} className="w-full gradient-accent text-accent-foreground font-bold py-3 mb-4">
             {generating ? 'מייצר דוח...' : 'סיום - הורד דוח סקאוט'}
           </Button>
         </ScrollArea>
