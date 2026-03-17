@@ -130,6 +130,9 @@ const CoachDashboard = () => {
             </div>
           </div>
           <div className="mt-4 flex items-center justify-end gap-2 flex-wrap">
+            <Button variant="ghost" size="sm" onClick={() => setEditPlayer({ user_id: p.user_id, display_name: p.display_name, team: p.team, age: p.age })} className="text-muted-foreground h-8 w-8 p-0">
+              <Pencil className="h-4 w-4" />
+            </Button>
             <Select
               value=""
               onValueChange={(val) => handleMovePlayer(p.user_id, val as AgeCategory)}
