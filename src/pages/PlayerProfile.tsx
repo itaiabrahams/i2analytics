@@ -339,6 +339,7 @@ const PlayerProfile = () => {
               <ScoutReportDialog
                 open={scoutReportOpen}
                 onOpenChange={setScoutReportOpen}
+                playerId={id}
                 playerName={player.display_name}
                 playerPosition={player.position || ''}
                 playerAge={player.age || 0}
