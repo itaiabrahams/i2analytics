@@ -208,24 +208,26 @@ export async function generateScoutReportPDF(data: ScoutReportData) {
   }
 
   // ===== Nutrition Data =====
-  y = checkPageBreak(doc, y, 50);
-  y = addSectionHeader(doc, 'Nutrition Data', y, GREEN);
-  autoTable(doc, {
-    startY: y,
-    margin: { left: 15, right: 15 },
-    head: [['Metric', 'Value']],
-    body: [
-      ['Weight', data.nutritionWeight || '-'],
-      ['Body Fat', data.bodyFat || '-'],
-      ['Last Measured', data.lastMeasured || '-'],
-    ],
-    headStyles: { fillColor: GREEN as [number, number, number], textColor: WHITE as [number, number, number], fontStyle: 'bold', fontSize: 9 },
-    bodyStyles: { fontSize: 9 },
-    alternateRowStyles: { fillColor: LIGHT_BG as [number, number, number] },
-    theme: 'grid',
-  });
-
-  y = (doc as any).lastAutoTable.finalY + 4;
+  const nutMetrics = data.nutritionMetrics?.length ? data.nutritionMetrics : [
+    { label: 'Weight', value: data.nutritionWeight || '-' },
+    { label: 'Body Fat', value: data.bodyFat || '-' },
+    { label: 'Last Measured', value: data.lastMeasured || '-' },
+  ];
+  if (nutMetrics.length > 0) {
+    y = checkPageBreak(doc, y, 50);
+    y = addSectionHeader(doc, 'Nutrition Data', y, GREEN);
+    autoTable(doc, {
+      startY: y,
+      margin: { left: 15, right: 15 },
+      head: [['Metric', 'Value']],
+      body: nutMetrics.map(m => [m.label, m.value || '-']),
+      headStyles: { fillColor: GREEN as [number, number, number], textColor: WHITE as [number, number, number], fontStyle: 'bold', fontSize: 9 },
+      bodyStyles: { fontSize: 9 },
+      alternateRowStyles: { fillColor: LIGHT_BG as [number, number, number] },
+      theme: 'grid',
+    });
+    y = (doc as any).lastAutoTable.finalY + 4;
+  }
 
   // Recommendations
   const validRecs = data.recommendations.filter(r => r.trim());
