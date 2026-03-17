@@ -32,6 +32,7 @@ const ShotCalendar = ({
   activeSessionId,
   onSelectSession,
   onSessionCreated,
+  onDateSelect,
   playerId,
   coachId,
   canCreate,
