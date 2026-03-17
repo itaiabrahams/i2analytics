@@ -50,7 +50,7 @@ const WeeklyChallenges = () => {
   const [form, setForm] = useState({
     title: '', description: '', zone: 'all',
     target_percentage: 50, target_attempts: 20,
-    period_type: 'weekly',
+    bonus_points: 0, period_type: 'weekly',
   });
 
   const fetchChallenges = async () => {
