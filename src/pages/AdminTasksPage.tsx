@@ -10,12 +10,27 @@ import { useNavigate } from 'react-router-dom';
 
 const ADMIN_EMAILS = ['itaiabrahams@gmail.com', 'idan.dank@gmail.com'];
 
+type AssignedTo = 'itai' | 'idan' | 'both';
+
 interface AdminTask {
   id: string;
   content: string;
   is_done: boolean;
+  assigned_to: AssignedTo;
   created_at: string;
 }
+
+const ASSIGN_LABELS: Record<AssignedTo, string> = {
+  itai: 'איתי',
+  idan: 'עידן',
+  both: 'שניהם',
+};
+
+const ASSIGN_COLORS: Record<AssignedTo, string> = {
+  itai: 'bg-primary/20 text-primary-foreground',
+  idan: 'bg-accent/20 text-accent',
+  both: 'bg-secondary text-foreground',
+};
 
 const AdminTasksPage = () => {
   const { user } = useAuth();
@@ -30,6 +45,7 @@ const AdminTasksPage = () => {
     const { data } = await supabase
       .from('admin_tasks')
       .select('*')
+      .order('is_done', { ascending: true })
       .order('created_at', { ascending: false });
     if (data) setTasks(data as AdminTask[]);
     setLoading(false);
@@ -39,14 +55,26 @@ const AdminTasksPage = () => {
 
   const addTask = async () => {
     if (!newTask.trim() || !user) return;
-    const { error } = await supabase.from('admin_tasks').insert({ content: newTask.trim(), created_by: user.id });
+    const { error } = await supabase.from('admin_tasks').insert({ content: newTask.trim(), created_by: user.id, assigned_to: 'both' });
     if (error) { toast.error('שגיאה בהוספת משימה'); return; }
     setNewTask('');
     toast.success('משימה נוספה');
     fetchTasks();
   };
 
-  const toggleTask = async (id: string, currentDone: boolean) => {
+  const cycleAssignment = async (task: AdminTask) => {
+    const order: AssignedTo[] = ['both', 'itai', 'idan'];
+    const nextIdx = (order.indexOf(task.assigned_to) + 1) % order.length;
+    const newAssign = order[nextIdx];
+    await supabase.from('admin_tasks').update({ assigned_to: newAssign } as any).eq('id', task.id);
+    fetchTasks();
+  };
+
+  const toggleTask = async (id: string, currentDone: boolean, assignedTo: AssignedTo) => {
+    if (assignedTo === 'both') {
+      toast.error('קודם בחר למי המשימה (איתי / עידן / שניהם)');
+      return;
+    }
     await supabase.from('admin_tasks').update({ is_done: !currentDone }).eq('id', id);
     fetchTasks();
   };
@@ -93,15 +121,23 @@ const AdminTasksPage = () => {
             {tasks.map(task => (
               <Card key={task.id} className={`transition-all ${task.is_done ? 'opacity-60' : ''}`}>
                 <CardContent className="flex items-start gap-3 p-4">
-                  <button onClick={() => toggleTask(task.id, task.is_done)} className="mt-0.5 shrink-0">
+                  <button onClick={() => toggleTask(task.id, task.is_done, task.assigned_to)} className="mt-0.5 shrink-0">
                     {task.is_done
                       ? <CheckCircle2 className="h-5 w-5 text-success" />
                       : <Circle className="h-5 w-5 text-muted-foreground" />
                     }
                   </button>
-                  <p className={`flex-1 text-sm whitespace-pre-wrap ${task.is_done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                    {task.content}
-                  </p>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm whitespace-pre-wrap ${task.is_done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                      {task.content}
+                    </p>
+                    <button
+                      onClick={() => cycleAssignment(task)}
+                      className={`mt-2 text-xs px-3 py-1 rounded-full font-medium transition-colors ${ASSIGN_COLORS[task.assigned_to]}`}
+                    >
+                      {ASSIGN_LABELS[task.assigned_to]}
+                    </button>
+                  </div>
                   <Button variant="ghost" size="icon" onClick={() => deleteTask(task.id)} className="shrink-0 text-destructive hover:text-destructive h-8 w-8">
                     <Trash2 className="h-4 w-4" />
                   </Button>

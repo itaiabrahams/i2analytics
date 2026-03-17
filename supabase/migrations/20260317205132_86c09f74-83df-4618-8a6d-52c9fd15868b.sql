@@ -1,0 +1,1 @@
+ALTER TABLE public.admin_tasks ADD COLUMN assigned_to text NOT NULL DEFAULT 'both';
