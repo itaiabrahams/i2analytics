@@ -202,6 +202,21 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
               <Label className="text-right block">מינימום ניסיונות</Label>
               <Input type="number" value={form.target_attempts} onChange={e => setForm({ ...form, target_attempts: Number(e.target.value) })} min={5} />
             </div>
+            <div className="space-y-1">
+              <Label className="text-right block">כמות קליעות (אופציונלי)</Label>
+              <Input type="number" value={form.target_made} onChange={e => setForm({ ...form, target_made: e.target.value })} min={0} placeholder="למשל: 15" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-right block">הערה אישית לחבר</Label>
+            <Input
+              value={form.challenger_note}
+              onChange={e => setForm({ ...form, challenger_note: e.target.value })}
+              placeholder='למשל: "בוא נראה מי הקולע הכי טוב! 😎"'
+              className="text-right"
+              maxLength={200}
+            />
+          </div>
           </div>
           <Button onClick={handleCreate} disabled={submitting} className="w-full gradient-accent text-accent-foreground">
             <Send className="ml-1 h-4 w-4" />
