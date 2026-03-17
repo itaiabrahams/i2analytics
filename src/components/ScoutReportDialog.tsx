@@ -335,7 +335,7 @@ const ScoutReportDialog = ({
     setData(prev => ({ ...prev, [field]: value }));
   };
 
-  const updateMetric = (section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics', index: number, field: 'label' | 'value', val: string) => {
+  const updateMetric = (section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics' | 'nutritionMetrics', index: number, field: 'label' | 'value', val: string) => {
     setData(prev => {
       const arr = [...prev[section]];
       arr[index] = { ...arr[index], [field]: val };
