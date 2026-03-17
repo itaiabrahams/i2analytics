@@ -333,9 +333,12 @@ const ChallengeCard = ({
             {entries.map((e, i) => (
               <div key={e.id} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
-                  <span className={`font-bold ${e.percentage >= challenge.target_percentage ? 'text-success' : 'text-foreground'}`}>
+                  <span className={`font-bold ${e.percentage >= challenge.target_percentage && e.attempts >= challenge.target_attempts ? 'text-success' : 'text-foreground'}`}>
                     {e.percentage}% ({e.made}/{e.attempts})
                   </span>
+                  {e.percentage >= challenge.target_percentage && e.attempts >= challenge.target_attempts && challenge.bonus_points > 0 && (
+                    <span className="text-xs text-accent">+{challenge.bonus_points}🎁</span>
+                  )}
                   {e.video_url && (
                     <a href={e.video_url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
                       <Video className="h-3 w-3" />
