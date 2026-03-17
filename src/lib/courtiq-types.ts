@@ -41,6 +41,8 @@ export interface AnswerResult {
   correct_percentage: number;
   correct_streak: number;
   daily_streak: number;
+  is_peak?: boolean;
+  multiplier?: number;
   error?: string;
 }
 
