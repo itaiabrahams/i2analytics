@@ -42,22 +42,29 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Calculate this hour's window
-    const hourStart = new Date(israelTime)
-    hourStart.setMinutes(0, 0, 0)
-    const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000)
-
+    // Calculate exact hour boundaries (no milliseconds - prevents race condition duplicates)
+    const israelHourStart = new Date(israelTime)
+    israelHourStart.setMinutes(0, 0, 0)
     const utcOffset = now.getTime() - israelTime.getTime()
-    const publishAt = new Date(hourStart.getTime() + utcOffset)
-    const expiresAt = new Date(hourEnd.getTime() + utcOffset)
+    
+    // Use exact second-level precision for publish_at and expires_at
+    const publishAt = new Date(israelHourStart.getTime() + utcOffset)
+    publishAt.setMilliseconds(0)
+    const expiresAt = new Date(publishAt.getTime() + 55 * 60 * 1000) // 55 minutes
+    expiresAt.setMilliseconds(0)
 
-    // Check if there's already an active question for this hour
+    // Check if there's already ANY non-pool question published in this hour window
+    // Use a wider check: any question with publish_at in the same UTC hour
+    const hourWindowStart = new Date(publishAt)
+    hourWindowStart.setMinutes(0, 0, 0)
+    const hourWindowEnd = new Date(hourWindowStart.getTime() + 60 * 60 * 1000)
+
     const { data: activeQ } = await supabase
       .from('courtiq_questions')
       .select('id')
       .neq('status', 'pool')
-      .gte('publish_at', publishAt.toISOString())
-      .lt('publish_at', expiresAt.toISOString())
+      .gte('publish_at', hourWindowStart.toISOString())
+      .lt('publish_at', hourWindowEnd.toISOString())
       .limit(1)
 
     if (activeQ && activeQ.length > 0) {
@@ -68,11 +75,9 @@ Deno.serve(async (req) => {
 
     // At 22:00, publish a peak question if available
     const isPeakHour = currentHour === 22
-
     let questionId: string | null = null
 
     if (isPeakHour) {
-      // Try to find a peak question from the pool
       const { data: peakQuestions } = await supabase
         .from('courtiq_questions')
         .select('id')
@@ -94,7 +99,6 @@ Deno.serve(async (req) => {
         .eq('is_peak', false)
 
       if (!poolQuestions || poolQuestions.length === 0) {
-        // Fallback: try any pool question
         const { data: anyPool } = await supabase
           .from('courtiq_questions')
           .select('id')
@@ -113,7 +117,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { error } = await supabase
+    // Update with exact timestamps
+    const { error, data: updated } = await supabase
       .from('courtiq_questions')
       .update({
         status: 'scheduled',
@@ -121,10 +126,19 @@ Deno.serve(async (req) => {
         expires_at: expiresAt.toISOString(),
       })
       .eq('id', questionId)
+      .eq('status', 'pool') // Only update if still in pool (prevents race condition)
+      .select('id')
 
     if (error) {
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // If no rows were updated, another instance already published
+    if (!updated || updated.length === 0) {
+      return new Response(JSON.stringify({ message: 'Race condition avoided - another instance already published' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
