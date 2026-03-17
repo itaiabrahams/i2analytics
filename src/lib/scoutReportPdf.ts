@@ -135,71 +135,77 @@ export async function generateScoutReportPDF(data: ScoutReportData) {
   y = 108;
 
   // ===== Basketball Metrics =====
-  y = addSectionHeader(doc, 'Basketball Metrics', y);
-  autoTable(doc, {
-    startY: y,
-    margin: { left: 15, right: 15 },
-    head: [['Metric', 'Rating']],
-    body: [
-      ['Shooting', data.shooting || '-'],
-      ['Defense', data.defense || '-'],
-      ['Decision Making', data.decisionMaking || '-'],
-      ['Ball Handling', data.ballHandling || '-'],
-      ['Passing', data.passing || '-'],
-      ['Rebounds', data.rebounds || '-'],
-      ['Game Reading', data.gameReading || '-'],
-    ],
-    headStyles: { fillColor: DARK_BG as [number, number, number], textColor: GOLD as [number, number, number], fontStyle: 'bold', fontSize: 9 },
-    bodyStyles: { fontSize: 9 },
-    alternateRowStyles: { fillColor: LIGHT_BG as [number, number, number] },
-    theme: 'grid',
-  });
-
-  y = (doc as any).lastAutoTable.finalY + 6;
+  const bbMetrics = data.basketballMetrics?.length ? data.basketballMetrics : [
+    { label: 'Shooting', value: data.shooting || '-' },
+    { label: 'Defense', value: data.defense || '-' },
+    { label: 'Decision Making', value: data.decisionMaking || '-' },
+    { label: 'Ball Handling', value: data.ballHandling || '-' },
+    { label: 'Passing', value: data.passing || '-' },
+    { label: 'Rebounds', value: data.rebounds || '-' },
+    { label: 'Game Reading', value: data.gameReading || '-' },
+  ];
+  if (bbMetrics.length > 0) {
+    y = addSectionHeader(doc, 'Basketball Metrics', y);
+    autoTable(doc, {
+      startY: y,
+      margin: { left: 15, right: 15 },
+      head: [['Metric', 'Rating']],
+      body: bbMetrics.map(m => [m.label, m.value || '-']),
+      headStyles: { fillColor: DARK_BG as [number, number, number], textColor: GOLD as [number, number, number], fontStyle: 'bold', fontSize: 9 },
+      bodyStyles: { fontSize: 9 },
+      alternateRowStyles: { fillColor: LIGHT_BG as [number, number, number] },
+      theme: 'grid',
+    });
+    y = (doc as any).lastAutoTable.finalY + 6;
+  }
 
   // ===== Physical Metrics =====
-  y = checkPageBreak(doc, y, 60);
-  y = addSectionHeader(doc, 'Physical Metrics', y, GREEN);
-  autoTable(doc, {
-    startY: y,
-    margin: { left: 15, right: 15 },
-    head: [['Metric', 'Value']],
-    body: [
-      ['Sprint 20m', data.sprint20m || '-'],
-      ['Vertical Jump', data.verticalJump || '-'],
-      ['Agility', data.agility || '-'],
-      ['Strength', data.strength || '-'],
-      ['Endurance', data.endurance || '-'],
-    ],
-    headStyles: { fillColor: GREEN as [number, number, number], textColor: WHITE as [number, number, number], fontStyle: 'bold', fontSize: 9 },
-    bodyStyles: { fontSize: 9 },
-    alternateRowStyles: { fillColor: LIGHT_BG as [number, number, number] },
-    theme: 'grid',
-  });
-
-  y = (doc as any).lastAutoTable.finalY + 6;
+  const physMetrics = data.physicalMetrics?.length ? data.physicalMetrics : [
+    { label: 'Sprint 20m', value: data.sprint20m || '-' },
+    { label: 'Vertical Jump', value: data.verticalJump || '-' },
+    { label: 'Agility', value: data.agility || '-' },
+    { label: 'Strength', value: data.strength || '-' },
+    { label: 'Endurance', value: data.endurance || '-' },
+  ];
+  if (physMetrics.length > 0) {
+    y = checkPageBreak(doc, y, 60);
+    y = addSectionHeader(doc, 'Physical Metrics', y, GREEN);
+    autoTable(doc, {
+      startY: y,
+      margin: { left: 15, right: 15 },
+      head: [['Metric', 'Value']],
+      body: physMetrics.map(m => [m.label, m.value || '-']),
+      headStyles: { fillColor: GREEN as [number, number, number], textColor: WHITE as [number, number, number], fontStyle: 'bold', fontSize: 9 },
+      bodyStyles: { fontSize: 9 },
+      alternateRowStyles: { fillColor: LIGHT_BG as [number, number, number] },
+      theme: 'grid',
+    });
+    y = (doc as any).lastAutoTable.finalY + 6;
+  }
 
   // ===== Mental Metrics =====
-  y = checkPageBreak(doc, y, 60);
-  y = addSectionHeader(doc, 'Mental Metrics', y, PURPLE);
-  autoTable(doc, {
-    startY: y,
-    margin: { left: 15, right: 15 },
-    head: [['Metric', 'Rating']],
-    body: [
-      ['Self Confidence', data.selfConfidence || '-'],
-      ['Discipline', data.discipline || '-'],
-      ['Teamwork', data.teamwork || '-'],
-      ['Pressure Handling', data.pressureHandling || '-'],
-      ['Error Recovery', data.errorRecovery || '-'],
-    ],
-    headStyles: { fillColor: PURPLE as [number, number, number], textColor: WHITE as [number, number, number], fontStyle: 'bold', fontSize: 9 },
-    bodyStyles: { fontSize: 9 },
-    alternateRowStyles: { fillColor: LIGHT_BG as [number, number, number] },
-    theme: 'grid',
-  });
-
-  y = (doc as any).lastAutoTable.finalY + 6;
+  const menMetrics = data.mentalMetrics?.length ? data.mentalMetrics : [
+    { label: 'Self Confidence', value: data.selfConfidence || '-' },
+    { label: 'Discipline', value: data.discipline || '-' },
+    { label: 'Teamwork', value: data.teamwork || '-' },
+    { label: 'Pressure Handling', value: data.pressureHandling || '-' },
+    { label: 'Error Recovery', value: data.errorRecovery || '-' },
+  ];
+  if (menMetrics.length > 0) {
+    y = checkPageBreak(doc, y, 60);
+    y = addSectionHeader(doc, 'Mental Metrics', y, PURPLE);
+    autoTable(doc, {
+      startY: y,
+      margin: { left: 15, right: 15 },
+      head: [['Metric', 'Rating']],
+      body: menMetrics.map(m => [m.label, m.value || '-']),
+      headStyles: { fillColor: PURPLE as [number, number, number], textColor: WHITE as [number, number, number], fontStyle: 'bold', fontSize: 9 },
+      bodyStyles: { fontSize: 9 },
+      alternateRowStyles: { fillColor: LIGHT_BG as [number, number, number] },
+      theme: 'grid',
+    });
+    y = (doc as any).lastAutoTable.finalY + 6;
+  }
 
   // ===== Nutrition Data =====
   y = checkPageBreak(doc, y, 50);
