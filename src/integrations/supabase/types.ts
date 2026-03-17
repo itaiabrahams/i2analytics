@@ -877,6 +877,7 @@ export type Database = {
       }
       weekly_challenges: {
         Row: {
+          bonus_points: number | null
           created_at: string
           created_by: string
           description: string | null
@@ -890,6 +891,7 @@ export type Database = {
           zone: string | null
         }
         Insert: {
+          bonus_points?: number | null
           created_at?: string
           created_by: string
           description?: string | null
@@ -903,6 +905,7 @@ export type Database = {
           zone?: string | null
         }
         Update: {
+          bonus_points?: number | null
           created_at?: string
           created_by?: string
           description?: string | null
