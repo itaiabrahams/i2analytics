@@ -255,6 +255,19 @@ const CourtIQPage = () => {
         </div>
       )}
 
+      {/* Peak question notice - shown for first 5 visits */}
+      {showPeakNotice && (
+        <div className="mx-4 mt-3 px-3 py-2 rounded-lg bg-accent/15 border border-accent/30 text-sm text-accent text-center flex items-center justify-between gap-2">
+          <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => setShowPeakNotice(false)}>
+            <X className="h-3 w-3" />
+          </Button>
+          <span className="flex items-center gap-1">
+            <Zap className="h-4 w-4" />
+            שים לב! שאלת שיא כל יום בשעה 22:00 – ניקוד כפול! ⚡
+          </span>
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col items-center justify-center p-3 sm:p-4 overflow-y-auto">
         <AnimatePresence mode="wait">
           {/* No active question */}
