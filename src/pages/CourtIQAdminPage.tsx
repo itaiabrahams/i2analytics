@@ -105,6 +105,7 @@ const CourtIQAdminPage = () => {
   };
 
   const poolCount = questions.filter(q => q.status === 'pool').length;
+  const peakCount = questions.filter(q => q.status === 'pool' && q.is_peak).length;
 
   const getStatus = (q: QuestionRow) => {
     if (q.status === 'pool') return 'pool';
