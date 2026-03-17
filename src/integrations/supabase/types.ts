@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       admin_tasks: {
         Row: {
+          assigned_to: string
           content: string
           created_at: string
           created_by: string
@@ -23,6 +24,7 @@ export type Database = {
           is_done: boolean
         }
         Insert: {
+          assigned_to?: string
           content: string
           created_at?: string
           created_by: string
@@ -30,6 +32,7 @@ export type Database = {
           is_done?: boolean
         }
         Update: {
+          assigned_to?: string
           content?: string
           created_at?: string
           created_by?: string
