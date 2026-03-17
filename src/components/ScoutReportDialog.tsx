@@ -198,6 +198,7 @@ function createEmptyData(playerName: string, playerPosition: string, playerAge: 
     basketballMetrics: DEFAULT_BASKETBALL_METRICS.map(m => ({ ...m })),
     physicalMetrics: DEFAULT_PHYSICAL_METRICS.map(m => ({ ...m })),
     mentalMetrics: DEFAULT_MENTAL_METRICS.map(m => ({ ...m })),
+    nutritionMetrics: DEFAULT_NUTRITION_METRICS.map(m => ({ ...m })),
     shooting: '', defense: '', decisionMaking: '', ballHandling: '',
     passing: '', rebounds: '', gameReading: '',
     sprint20m: '', verticalJump: '', agility: '', strength: '', endurance: '',
