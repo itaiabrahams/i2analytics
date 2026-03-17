@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight, Dumbbell, Target, Crown, Menu, X, Crosshair, ArrowLeftRight, Pencil } from 'lucide-react';
+import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight, Dumbbell, Target, Crown, Menu, X, Crosshair, ArrowLeftRight, Pencil, ClipboardList } from 'lucide-react';
 import EditPlayerDialog from '@/components/EditPlayerDialog';
 import NotificationBell from '@/components/NotificationBell';
 import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
@@ -167,6 +167,7 @@ const CoachDashboard = () => {
     { label: 'תוכניות עבודה', icon: Dumbbell, onClick: () => navigate('/workout-plans') },
     { label: 'Court IQ', icon: Brain, onClick: () => navigate('/courtiq/admin') },
     { label: 'ניהול משתמשים', icon: Shield, onClick: () => navigate('/manage-users') },
+    { label: 'משימות', icon: ClipboardList, onClick: () => navigate('/admin-tasks') },
   ];
 
   return (
