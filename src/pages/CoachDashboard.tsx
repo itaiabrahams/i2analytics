@@ -2,11 +2,14 @@ import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight, Dumbbell, Target, Crown, Menu, X, Crosshair } from 'lucide-react';
+import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight, Dumbbell, Target, Crown, Menu, X, Crosshair, ArrowLeftRight } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
 import AddPlayerDialog from '@/components/AddPlayerDialog';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 type AgeCategory = 'U14' | 'U15' | 'U16' | 'U18' | 'SENIOR' | 'לא מוגדר';
 
