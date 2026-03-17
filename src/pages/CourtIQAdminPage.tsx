@@ -432,6 +432,7 @@ const CourtIQAdminPage = () => {
               <Database className="h-4 w-4 text-accent" />
               <span className="text-sm text-muted-foreground">
                 <span className="font-bold text-foreground">{poolCount}</span> שאלות במאגר
+                {peakCount > 0 && <span className="mr-2">· <span className="font-bold text-accent">⚡ {peakCount}</span> שאלות שיא</span>}
               </span>
               <Dialog open={bulkImportOpen} onOpenChange={setBulkImportOpen}>
                 <DialogTrigger asChild>
