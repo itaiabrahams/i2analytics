@@ -414,6 +414,7 @@ const CourtIQPage = () => {
               {result.points_earned > 0 && (
                 <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2 }} className="text-2xl sm:text-3xl font-black text-accent">
                   +{result.points_earned}
+                  {result.is_peak && result.multiplier === 2 && <span className="text-base text-accent block">⚡ ניקוד כפול – שאלת שיא!</span>}
                   {result.bonus_points > 0 && <span className="text-base text-yellow-500 block">+{result.bonus_points} בונוס יומי! 🎉</span>}
                 </motion.div>
               )}
