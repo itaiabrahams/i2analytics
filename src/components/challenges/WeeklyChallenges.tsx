@@ -294,7 +294,9 @@ const ChallengeCard = ({
           <h3 className="font-semibold text-foreground">{challenge.title}</h3>
           {challenge.description && <p className="text-xs text-muted-foreground">{challenge.description}</p>}
           <p className="text-xs text-muted-foreground mt-1">
-            יעד: {challenge.target_percentage}% · {new Date(challenge.week_start).toLocaleDateString('he-IL')} - {new Date(challenge.week_end).toLocaleDateString('he-IL')}
+            יעד: {challenge.target_percentage}% · {challenge.target_attempts} ניסיונות
+            {challenge.bonus_points > 0 && <span className="text-accent font-medium"> · 🎁 {challenge.bonus_points} נקודות</span>}
+            {' · '}{new Date(challenge.week_start).toLocaleDateString('he-IL')} - {new Date(challenge.week_end).toLocaleDateString('he-IL')}
           </p>
         </div>
       </div>
