@@ -21,6 +21,7 @@ interface ShotCalendarProps {
   activeSessionId: string | null;
   onSelectSession: (id: string) => void;
   onSessionCreated: () => void;
+  onDateSelect?: (dateKey: string) => void;
   playerId: string;
   coachId?: string;
   canCreate: boolean;
