@@ -167,6 +167,7 @@ const CoachDashboard = () => {
     { label: 'תוכניות עבודה', icon: Dumbbell, onClick: () => navigate('/workout-plans') },
     { label: 'Court IQ', icon: Brain, onClick: () => navigate('/courtiq/admin') },
     { label: 'ניהול משתמשים', icon: Shield, onClick: () => navigate('/manage-users') },
+    { label: 'משימות', icon: ClipboardList, onClick: () => navigate('/admin-tasks') },
   ];
 
   return (
