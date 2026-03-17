@@ -21,6 +21,7 @@ import CourtIQPage from "./pages/CourtIQPage";
 import CourtIQLeaderboardPage from "./pages/CourtIQLeaderboardPage";
 import CourtIQProfilePage from "./pages/CourtIQProfilePage";
 import CourtIQAdminPage from "./pages/CourtIQAdminPage";
+import AdminTasksPage from "./pages/AdminTasksPage";
 import RoleSwitcher from "./components/RoleSwitcher";
 import WorkoutPlansPage from "./pages/WorkoutPlansPage";
 import FloatingLogo from "./components/FloatingLogo";
