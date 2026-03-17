@@ -51,6 +51,17 @@ const CourtIQPage = () => {
   const [suggestCategory, setSuggestCategory] = useState('');
   const [categories, setCategories] = useState<CourtIQCategory[]>([]);
   const [nextQuestionCountdown, setNextQuestionCountdown] = useState('');
+  const [showPeakNotice, setShowPeakNotice] = useState(false);
+
+  // Check if we should show peak notice (first 5 visits)
+  useEffect(() => {
+    const key = 'courtiq_peak_notice_count';
+    const count = parseInt(localStorage.getItem(key) || '0', 10);
+    if (count < 5) {
+      setShowPeakNotice(true);
+      localStorage.setItem(key, String(count + 1));
+    }
+  }, []);
 
   const currentQuestion = questions.find(q => !q.already_answered);
 
