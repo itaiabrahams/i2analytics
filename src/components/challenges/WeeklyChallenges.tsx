@@ -16,6 +16,7 @@ interface Challenge {
   zone: string | null;
   target_percentage: number;
   target_attempts: number;
+  bonus_points: number;
   week_start: string;
   week_end: string;
   created_by: string;
@@ -49,7 +50,7 @@ const WeeklyChallenges = () => {
   const [form, setForm] = useState({
     title: '', description: '', zone: 'all',
     target_percentage: 50, target_attempts: 20,
-    period_type: 'weekly',
+    bonus_points: 0, period_type: 'weekly',
   });
 
   const fetchChallenges = async () => {
@@ -115,6 +116,7 @@ const WeeklyChallenges = () => {
       zone: form.zone === 'all' ? null : form.zone,
       target_percentage: form.target_percentage,
       target_attempts: form.target_attempts,
+      bonus_points: form.bonus_points || 0,
       created_by: user?.id,
       period_type: form.period_type,
       ...dateRange,
@@ -123,7 +125,7 @@ const WeeklyChallenges = () => {
     else {
       toast.success('אתגר חדש נוצר!');
       setShowForm(false);
-      setForm({ title: '', description: '', zone: 'all', target_percentage: 50, target_attempts: 20, period_type: 'weekly' });
+      setForm({ title: '', description: '', zone: 'all', target_percentage: 50, target_attempts: 20, bonus_points: 0, period_type: 'weekly' });
       fetchChallenges();
     }
     setCreating(false);
@@ -132,6 +134,8 @@ const WeeklyChallenges = () => {
   const handleSubmitEntry = async (challengeId: string, attempts: number, made: number, videoUrl: string) => {
     if (!videoUrl) { toast.error('חובה להעלות סרטון הוכחה'); return; }
     const percentage = attempts > 0 ? Math.round((made / attempts) * 100) : 0;
+    const challenge = challenges.find(c => c.id === challengeId);
+    
     const { error } = await supabase.from('challenge_entries').upsert({
       challenge_id: challengeId,
       player_id: user?.id,
@@ -140,8 +144,30 @@ const WeeklyChallenges = () => {
       percentage,
       video_url: videoUrl,
     }, { onConflict: 'challenge_id,player_id' });
-    if (error) toast.error('שגיאה בשליחת תוצאות');
-    else { toast.success('תוצאות נשלחו!'); fetchChallenges(); }
+    
+    if (error) { toast.error('שגיאה בשליחת תוצאות'); return; }
+    
+    // Award bonus points if challenge met and bonus_points > 0
+    if (challenge && challenge.bonus_points > 0 && percentage >= challenge.target_percentage && attempts >= challenge.target_attempts) {
+      const { data: stats } = await supabase
+        .from('courtiq_player_stats')
+        .select('total_points')
+        .eq('player_id', user?.id)
+        .maybeSingle();
+      
+      if (stats) {
+        await supabase.from('courtiq_player_stats')
+          .update({ total_points: (stats.total_points || 0) + challenge.bonus_points })
+          .eq('player_id', user?.id);
+      } else {
+        await supabase.from('courtiq_player_stats')
+          .insert({ player_id: user?.id, total_points: challenge.bonus_points });
+      }
+      toast.success(`🎉 השלמת את האתגר! קיבלת ${challenge.bonus_points} נקודות בונוס!`);
+    } else {
+      toast.success('תוצאות נשלחו!');
+    }
+    fetchChallenges();
   };
 
   const getZoneLabel = (zone: string | null) => {
@@ -210,8 +236,12 @@ const WeeklyChallenges = () => {
               <Input type="number" value={form.target_percentage} onChange={e => setForm({ ...form, target_percentage: Number(e.target.value) })} min={1} max={100} />
             </div>
             <div className="space-y-1">
-              <Label className="text-right block">מינימום ניסיונות</Label>
+              <Label className="text-right block">מספר ניסיונות</Label>
               <Input type="number" value={form.target_attempts} onChange={e => setForm({ ...form, target_attempts: Number(e.target.value) })} min={5} />
+            </div>
+            <div className="space-y-1 col-span-2">
+              <Label className="text-right block">נקודות בונוס להצלחה באתגר</Label>
+              <Input type="number" value={form.bonus_points} onChange={e => setForm({ ...form, bonus_points: Number(e.target.value) })} min={0} placeholder="0 = ללא בונוס" />
             </div>
           </div>
           <Button onClick={handleCreate} disabled={creating} className="w-full gradient-accent text-accent-foreground">
@@ -288,7 +318,9 @@ const ChallengeCard = ({
           <h3 className="font-semibold text-foreground">{challenge.title}</h3>
           {challenge.description && <p className="text-xs text-muted-foreground">{challenge.description}</p>}
           <p className="text-xs text-muted-foreground mt-1">
-            יעד: {challenge.target_percentage}% · {new Date(challenge.week_start).toLocaleDateString('he-IL')} - {new Date(challenge.week_end).toLocaleDateString('he-IL')}
+            יעד: {challenge.target_percentage}% · {challenge.target_attempts} ניסיונות
+            {challenge.bonus_points > 0 && <span className="text-accent font-medium"> · 🎁 {challenge.bonus_points} נקודות</span>}
+            {' · '}{new Date(challenge.week_start).toLocaleDateString('he-IL')} - {new Date(challenge.week_end).toLocaleDateString('he-IL')}
           </p>
         </div>
       </div>
@@ -301,9 +333,12 @@ const ChallengeCard = ({
             {entries.map((e, i) => (
               <div key={e.id} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
-                  <span className={`font-bold ${e.percentage >= challenge.target_percentage ? 'text-success' : 'text-foreground'}`}>
+                  <span className={`font-bold ${e.percentage >= challenge.target_percentage && e.attempts >= challenge.target_attempts ? 'text-success' : 'text-foreground'}`}>
                     {e.percentage}% ({e.made}/{e.attempts})
                   </span>
+                  {e.percentage >= challenge.target_percentage && e.attempts >= challenge.target_attempts && challenge.bonus_points > 0 && (
+                    <span className="text-xs text-accent">+{challenge.bonus_points}🎁</span>
+                  )}
                   {e.video_url && (
                     <a href={e.video_url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
                       <Video className="h-3 w-3" />
