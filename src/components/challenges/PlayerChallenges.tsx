@@ -217,7 +217,6 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
               maxLength={200}
             />
           </div>
-          </div>
           <Button onClick={handleCreate} disabled={submitting} className="w-full gradient-accent text-accent-foreground">
             <Send className="ml-1 h-4 w-4" />
             {submitting ? 'שולח...' : 'שלח אתגר'}
