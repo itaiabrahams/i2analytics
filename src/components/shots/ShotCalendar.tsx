@@ -38,6 +38,13 @@ const ShotCalendar = ({
   canCreate,
 }: ShotCalendarProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+
+  const handleDateChange = (date: Date | undefined) => {
+    setSelectedDate(date);
+    if (date && onDateSelect) {
+      onDateSelect(format(date, 'yyyy-MM-dd'));
+    }
+  };
   const [newTitle, setNewTitle] = useState('');
   const [creating, setCreating] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
