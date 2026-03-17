@@ -90,10 +90,12 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
       challenged_id: form.challenged_id,
       zone: form.zone === 'all' ? null : form.zone,
       target_attempts: form.target_attempts,
+      target_made: form.target_made ? Number(form.target_made) : null,
       description: form.description.trim(),
+      challenger_note: form.challenger_note.trim(),
     });
     if (error) toast.error('שגיאה ביצירת אתגר');
-    else { toast.success('אתגר נשלח!'); setShowForm(false); setForm({ challenged_id: '', zone: 'all', target_attempts: 20, description: '' }); fetchChallenges(); }
+    else { toast.success('אתגר נשלח!'); setShowForm(false); setForm({ challenged_id: '', zone: 'all', target_attempts: 20, target_made: '', description: '', challenger_note: '' }); fetchChallenges(); }
     setSubmitting(false);
   };
 
