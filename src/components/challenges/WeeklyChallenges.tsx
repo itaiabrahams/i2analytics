@@ -116,6 +116,7 @@ const WeeklyChallenges = () => {
       zone: form.zone === 'all' ? null : form.zone,
       target_percentage: form.target_percentage,
       target_attempts: form.target_attempts,
+      bonus_points: form.bonus_points || 0,
       created_by: user?.id,
       period_type: form.period_type,
       ...dateRange,
@@ -124,7 +125,7 @@ const WeeklyChallenges = () => {
     else {
       toast.success('אתגר חדש נוצר!');
       setShowForm(false);
-      setForm({ title: '', description: '', zone: 'all', target_percentage: 50, target_attempts: 20, period_type: 'weekly' });
+      setForm({ title: '', description: '', zone: 'all', target_percentage: 50, target_attempts: 20, bonus_points: 0, period_type: 'weekly' });
       fetchChallenges();
     }
     setCreating(false);
