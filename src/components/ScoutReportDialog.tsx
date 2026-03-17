@@ -342,7 +342,7 @@ const ScoutReportDialog = ({
       return { ...prev, [section]: arr };
     });
   };
-  const removeMetric = (section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics', index: number) => {
+  const removeMetric = (section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics' | 'nutritionMetrics', index: number) => {
     setData(prev => ({ ...prev, [section]: prev[section].filter((_, i) => i !== index) }));
   };
   const addMetric = (section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics') => {
