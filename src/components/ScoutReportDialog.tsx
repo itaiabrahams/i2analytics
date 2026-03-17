@@ -29,13 +29,13 @@ export interface ScoutReportData {
   basketballMetrics: MetricField[];
   physicalMetrics: MetricField[];
   mentalMetrics: MetricField[];
+  nutritionMetrics: MetricField[];
 
   // Keep old fields for backward compat with PDF
   shooting: string; defense: string; decisionMaking: string; ballHandling: string;
   passing: string; rebounds: string; gameReading: string;
   sprint20m: string; verticalJump: string; agility: string; strength: string; endurance: string;
   selfConfidence: string; discipline: string; teamwork: string; pressureHandling: string; errorRecovery: string;
-
   nutritionWeight: string;
   bodyFat: string;
   lastMeasured: string;
@@ -84,6 +84,12 @@ const DEFAULT_MENTAL_METRICS: MetricField[] = [
   { label: 'עבודת צוות', value: '' },
   { label: 'התמודדות עם לחץ', value: '' },
   { label: 'התאוששות משגיאות', value: '' },
+];
+
+const DEFAULT_NUTRITION_METRICS: MetricField[] = [
+  { label: 'משקל', value: '' },
+  { label: 'אחוז שומן', value: '' },
+  { label: 'תאריך מדידה אחרון', value: '' },
 ];
 
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
@@ -198,6 +204,7 @@ function createEmptyData(playerName: string, playerPosition: string, playerAge: 
     basketballMetrics: DEFAULT_BASKETBALL_METRICS.map(m => ({ ...m })),
     physicalMetrics: DEFAULT_PHYSICAL_METRICS.map(m => ({ ...m })),
     mentalMetrics: DEFAULT_MENTAL_METRICS.map(m => ({ ...m })),
+    nutritionMetrics: DEFAULT_NUTRITION_METRICS.map(m => ({ ...m })),
     shooting: '', defense: '', decisionMaking: '', ballHandling: '',
     passing: '', rebounds: '', gameReading: '',
     sprint20m: '', verticalJump: '', agility: '', strength: '', endurance: '',
@@ -328,17 +335,17 @@ const ScoutReportDialog = ({
     setData(prev => ({ ...prev, [field]: value }));
   };
 
-  const updateMetric = (section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics', index: number, field: 'label' | 'value', val: string) => {
+  const updateMetric = (section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics' | 'nutritionMetrics', index: number, field: 'label' | 'value', val: string) => {
     setData(prev => {
       const arr = [...prev[section]];
       arr[index] = { ...arr[index], [field]: val };
       return { ...prev, [section]: arr };
     });
   };
-  const removeMetric = (section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics', index: number) => {
+  const removeMetric = (section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics' | 'nutritionMetrics', index: number) => {
     setData(prev => ({ ...prev, [section]: prev[section].filter((_, i) => i !== index) }));
   };
-  const addMetric = (section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics') => {
+  const addMetric = (section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics' | 'nutritionMetrics') => {
     setData(prev => ({ ...prev, [section]: [...prev[section], { label: 'מדד חדש', value: '' }] }));
   };
 
@@ -399,7 +406,7 @@ const ScoutReportDialog = ({
 
   const renderMetricsSection = (
     title: string,
-    section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics',
+    section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics' | 'nutritionMetrics',
     placeholder: string,
   ) => (
     <>
@@ -470,22 +477,7 @@ const ScoutReportDialog = ({
           {renderMetricsSection('מדדים פיזיים', 'physicalMetrics', '80%')}
           {renderMetricsSection('מדדים מנטליים', 'mentalMetrics', '78%')}
 
-          {/* Nutrition */}
-          <SectionTitle>נתוני תזונה</SectionTitle>
-          <FieldRow>
-            <div>
-              <Label className="text-xs">משקל</Label>
-              <Input value={data.nutritionWeight} onChange={e => updateField('nutritionWeight', e.target.value)} placeholder="74 kg" />
-            </div>
-            <div>
-              <Label className="text-xs">אחוז שומן</Label>
-              <Input value={data.bodyFat} onChange={e => updateField('bodyFat', e.target.value)} placeholder="12.8%" />
-            </div>
-          </FieldRow>
-          <div className="mb-2">
-            <Label className="text-xs">תאריך מדידה אחרון</Label>
-            <Input value={data.lastMeasured} onChange={e => updateField('lastMeasured', e.target.value)} placeholder="13/03/2026" />
-          </div>
+          {renderMetricsSection('נתוני תזונה', 'nutritionMetrics', '74 kg')}
 
           {/* Recommendations */}
           <SectionTitle>המלצות</SectionTitle>
