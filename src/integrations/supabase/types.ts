@@ -390,6 +390,7 @@ export type Database = {
           challenger_attempts: number | null
           challenger_id: string
           challenger_made: number | null
+          challenger_note: string | null
           challenger_video_url: string | null
           created_at: string
           description: string | null
@@ -397,6 +398,7 @@ export type Database = {
           id: string
           status: string
           target_attempts: number | null
+          target_made: number | null
           winner_id: string | null
           zone: string | null
         }
@@ -408,6 +410,7 @@ export type Database = {
           challenger_attempts?: number | null
           challenger_id: string
           challenger_made?: number | null
+          challenger_note?: string | null
           challenger_video_url?: string | null
           created_at?: string
           description?: string | null
@@ -415,6 +418,7 @@ export type Database = {
           id?: string
           status?: string
           target_attempts?: number | null
+          target_made?: number | null
           winner_id?: string | null
           zone?: string | null
         }
@@ -426,6 +430,7 @@ export type Database = {
           challenger_attempts?: number | null
           challenger_id?: string
           challenger_made?: number | null
+          challenger_note?: string | null
           challenger_video_url?: string | null
           created_at?: string
           description?: string | null
@@ -433,6 +438,7 @@ export type Database = {
           id?: string
           status?: string
           target_attempts?: number | null
+          target_made?: number | null
           winner_id?: string | null
           zone?: string | null
         }
