@@ -12,6 +12,7 @@ export interface ActiveQuestion {
   expires_at: string;
   created_at: string;
   already_answered: boolean;
+  is_peak: boolean;
   category_name: string | null;
   category_color: string | null;
   category_icon: string | null;
