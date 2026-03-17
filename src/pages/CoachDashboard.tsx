@@ -41,6 +41,7 @@ const CoachDashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState<AgeCategory | null>(null);
   const [activeSection, setActiveSection] = useState<'premium' | 'basic'>('premium');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [editPlayer, setEditPlayer] = useState<{ user_id: string; display_name: string; team: string | null; age: number | null } | null>(null);
 
   const buildPlayerData = (list: typeof players) => list.map(p => {
     const sc = sessionCounts[p.user_id] || { count: 0, avgScore: 0, latestScores: [] };
