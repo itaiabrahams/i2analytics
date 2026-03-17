@@ -16,6 +16,7 @@ interface PlayerChallenge {
   challenged_id: string;
   zone: string | null;
   target_attempts: number;
+  target_made: number | null;
   status: string;
   challenger_attempts: number;
   challenger_made: number;
@@ -25,6 +26,7 @@ interface PlayerChallenge {
   created_at: string;
   expires_at: string;
   description: string;
+  challenger_note?: string | null;
   challenger_video_url?: string | null;
   challenged_video_url?: string | null;
   challenger_name?: string;
@@ -40,7 +42,7 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
   const [challenges, setChallenges] = useState<PlayerChallenge[]>([]);
   const [players, setPlayers] = useState<{ user_id: string; display_name: string }[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ challenged_id: '', zone: 'all', target_attempts: 20, description: '' });
+  const [form, setForm] = useState({ challenged_id: '', zone: 'all', target_attempts: 20, target_made: '', description: '', challenger_note: '' });
   const [submitting, setSubmitting] = useState(false);
 
   const fetchChallenges = async () => {
@@ -90,10 +92,12 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
       challenged_id: form.challenged_id,
       zone: form.zone === 'all' ? null : form.zone,
       target_attempts: form.target_attempts,
+      target_made: form.target_made ? Number(form.target_made) : null,
       description: form.description.trim(),
+      challenger_note: form.challenger_note.trim(),
     });
     if (error) toast.error('שגיאה ביצירת אתגר');
-    else { toast.success('אתגר נשלח!'); setShowForm(false); setForm({ challenged_id: '', zone: 'all', target_attempts: 20, description: '' }); fetchChallenges(); }
+    else { toast.success('אתגר נשלח!'); setShowForm(false); setForm({ challenged_id: '', zone: 'all', target_attempts: 20, target_made: '', description: '', challenger_note: '' }); fetchChallenges(); }
     setSubmitting(false);
   };
 
@@ -200,6 +204,20 @@ const PlayerChallenges = ({ playerId }: PlayerChallengesProps) => {
               <Label className="text-right block">מינימום ניסיונות</Label>
               <Input type="number" value={form.target_attempts} onChange={e => setForm({ ...form, target_attempts: Number(e.target.value) })} min={5} />
             </div>
+            <div className="space-y-1">
+              <Label className="text-right block">כמות קליעות (אופציונלי)</Label>
+              <Input type="number" value={form.target_made} onChange={e => setForm({ ...form, target_made: e.target.value })} min={0} placeholder="למשל: 15" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-right block">הערה אישית לחבר</Label>
+            <Input
+              value={form.challenger_note}
+              onChange={e => setForm({ ...form, challenger_note: e.target.value })}
+              placeholder='למשל: "בוא נראה מי הקולע הכי טוב! 😎"'
+              className="text-right"
+              maxLength={200}
+            />
           </div>
           <Button onClick={handleCreate} disabled={submitting} className="w-full gradient-accent text-accent-foreground">
             <Send className="ml-1 h-4 w-4" />
@@ -275,9 +293,19 @@ const ChallengeMatchCard = ({
       <div className="flex items-start justify-between mb-3">
         {getStatusBadge(challenge.status)}
         <div className="text-right">
-          <p className="text-xs text-muted-foreground">{getZoneLabel(challenge.zone)} · מינימום {challenge.target_attempts} ניסיונות</p>
+          <p className="text-xs text-muted-foreground">
+            {getZoneLabel(challenge.zone)} · מינימום {challenge.target_attempts} ניסיונות
+            {challenge.target_made ? ` · יעד ${challenge.target_made} קליעות` : ''}
+          </p>
         </div>
       </div>
+
+      {/* Challenger note */}
+      {challenge.challenger_note && (
+        <div className="rounded-lg bg-accent/10 p-2 mb-3 border border-accent/20">
+          <p className="text-xs text-accent text-right">💬 {challenge.challenger_note}</p>
+        </div>
+      )}
 
       {/* Challenge description */}
       {challenge.description && (
