@@ -86,6 +86,12 @@ const DEFAULT_MENTAL_METRICS: MetricField[] = [
   { label: 'התאוששות משגיאות', value: '' },
 ];
 
+const DEFAULT_NUTRITION_METRICS: MetricField[] = [
+  { label: 'משקל', value: '' },
+  { label: 'אחוז שומן', value: '' },
+  { label: 'תאריך מדידה אחרון', value: '' },
+];
+
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   <h3 className="text-sm font-bold text-accent mt-4 mb-2 border-b border-border pb-1">{children}</h3>
 );
