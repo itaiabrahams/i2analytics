@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_tasks: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string
+          id: string
+          is_done: boolean
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by: string
+          id?: string
+          is_done?: boolean
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_done?: boolean
+        }
+        Relationships: []
+      }
       challenge_entries: {
         Row: {
           attempts: number | null
