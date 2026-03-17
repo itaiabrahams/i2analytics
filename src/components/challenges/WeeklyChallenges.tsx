@@ -212,8 +212,12 @@ const WeeklyChallenges = () => {
               <Input type="number" value={form.target_percentage} onChange={e => setForm({ ...form, target_percentage: Number(e.target.value) })} min={1} max={100} />
             </div>
             <div className="space-y-1">
-              <Label className="text-right block">מינימום ניסיונות</Label>
+              <Label className="text-right block">מספר ניסיונות</Label>
               <Input type="number" value={form.target_attempts} onChange={e => setForm({ ...form, target_attempts: Number(e.target.value) })} min={5} />
+            </div>
+            <div className="space-y-1 col-span-2">
+              <Label className="text-right block">נקודות בונוס להצלחה באתגר</Label>
+              <Input type="number" value={form.bonus_points} onChange={e => setForm({ ...form, bonus_points: Number(e.target.value) })} min={0} placeholder="0 = ללא בונוס" />
             </div>
           </div>
           <Button onClick={handleCreate} disabled={creating} className="w-full gradient-accent text-accent-foreground">
