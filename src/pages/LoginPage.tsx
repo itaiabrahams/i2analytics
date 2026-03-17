@@ -121,6 +121,11 @@ const LoginPage = () => {
     } else {
       if (role === 'coach') {
         setSuccess('ההרשמה הצליחה! חשבונך ממתין לאישור.');
+      } else if (subscriptionTier === 'premium') {
+        setSuccess('ההרשמה הצליחה! לפני שנתחיל, נקבע שיחת היכרות ותכנון. אנא צור קשר בווצאפ.');
+        setTimeout(() => {
+          window.open('https://wa.me/972526124759?text=היי, נרשמתי לליווי אישי באפליקציה ואשמח לתאם שיחת היכרות! השם שלי: ' + encodeURIComponent(displayName.trim()), '_blank');
+        }, 1500);
       } else {
         setSuccess('ההרשמה הצליחה! לאחר ביצוע התשלום, חשבונך יאושר על ידי המאמן.');
       }
@@ -395,10 +400,10 @@ const LoginPage = () => {
                     {subscriptionTier === 'basic'
                       ? '💳 עלות: 30₪ לחודש · התשלום מתבצע מחוץ לאפליקציה'
                       : premiumPackage
-                        ? `💳 חבילה שנבחרה: ${premiumPackage === 'single' ? 'סשן בודד · 350₪' : premiumPackage === 'monthly' ? 'מנוי חודשי · 1,500₪/חודש' : 'מנוי עונתי · 1,250₪/חודש'} · התשלום מתבצע מחוץ לאפליקציה`
-                        : '💳 התשלום לליווי אישי מתבצע מחוץ לאפליקציה בהתאם לחבילה שנבחרה'}
+                        ? `📞 חבילה שנבחרה: ${premiumPackage === 'single' ? 'סשן בודד · 350₪' : premiumPackage === 'monthly' ? 'מנוי חודשי · 1,500₪/חודש' : 'מנוי עונתי · 1,250₪/חודש'} · לאחר ההרשמה תופנה לשיחת היכרות ותכנון`
+                        : '📞 ליווי אישי מחייב שיחת היכרות ותכנון לפני תחילת העבודה'}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">לאחר ביצוע התשלום, המאמן יאשר את הגישה שלך</p>
+                  <p className="text-xs text-muted-foreground mt-1">לאחר ההרשמה תופנה לווצאפ לתיאום שיחה עם המאמן</p>
                 </div>
               )}
 
