@@ -110,7 +110,7 @@ const ShotTracker = () => {
   };
 
   const handleZoneClick = (zoneId: ZoneId) => {
-    if (viewAll) {
+    if (viewMode !== 'session') {
       toast.error('יש לבחור אימון ספציפי כדי להזין זריקות');
       return;
     }
@@ -142,8 +142,24 @@ const ShotTracker = () => {
   }
 
   const activeSession = sessions.find(s => s.id === activeSessionId);
-  const displayStats = viewAll ? allTimeStats : zoneStats;
+  
+  // Compute date-based stats when in date view mode
+  const dateSessionIds = selectedDateKey
+    ? sessions.filter(s => s.date.split('T')[0] === selectedDateKey).map(s => s.id)
+    : [];
+  const dateShotsFiltered = allShots.filter(s => dateSessionIds.includes(s.session_id));
+  const dateStats: ZoneStats[] = ZONES.map(zone => {
+    const zoneShots = dateShotsFiltered.filter(s => s.zone === zone.id);
+    const attempts = zoneShots.reduce((s, sh) => s + sh.attempts, 0);
+    const made = zoneShots.reduce((s, sh) => s + sh.made, 0);
+    return { zone: zone.id, attempts, made, percentage: attempts > 0 ? Math.round((made / attempts) * 100) : 0 };
+  });
+
+  const displayStats = viewMode === 'all' ? allTimeStats : viewMode === 'date' ? dateStats : zoneStats;
   const allSessionVideos = sessions.filter(s => s.video_url);
+  const dateSessionVideos = selectedDateKey
+    ? sessions.filter(s => s.video_url && s.date.split('T')[0] === selectedDateKey)
+    : [];
 
   return (
     <div className="min-h-screen p-3 sm:p-4 md:p-8">
@@ -207,15 +223,21 @@ const ShotTracker = () => {
             {/* View All toggle */}
             <div className="flex items-center gap-2 justify-end">
               <Button
-                variant={viewAll ? 'default' : 'outline'}
+                variant={viewMode === 'all' ? 'default' : 'outline'}
                 size="sm"
                 onClick={handleViewAll}
-                className={`h-8 text-xs ${viewAll ? 'gradient-accent text-accent-foreground' : 'text-muted-foreground border-accent/30'}`}
+                className={`h-8 text-xs ${viewMode === 'all' ? 'gradient-accent text-accent-foreground' : 'text-muted-foreground border-accent/30'}`}
               >
                 <Eye className="ml-1 h-3.5 w-3.5" />
                 כל האימונים
               </Button>
-              {activeSession && !viewAll && (
+              {viewMode === 'date' && selectedDateKey && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <CalendarDays className="h-3 w-3" />
+                  {selectedDateKey.split('-').reverse().join('/')}
+                </span>
+              )}
+              {viewMode === 'session' && activeSession && (
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <CalendarDays className="h-3 w-3" />
                   {activeSession.title}
@@ -228,13 +250,14 @@ const ShotTracker = () => {
               activeSessionId={activeSessionId}
               onSelectSession={handleSelectSession}
               onSessionCreated={() => { fetchSessions(); }}
+              onDateSelect={handleDateSelect}
               playerId={id}
               coachId={isCoach ? user?.id : undefined}
               canCreate={true}
             />
 
             {/* Videos */}
-            {viewAll ? (
+            {viewMode === 'all' ? (
               allSessionVideos.length > 0 && (
                 <div className="gradient-card rounded-xl p-4 space-y-3">
                   <h3 className="text-sm font-medium text-muted-foreground text-right">כל סרטוני האימונים 🎥 ({allSessionVideos.length})</h3>
@@ -242,6 +265,20 @@ const ShotTracker = () => {
                     {allSessionVideos.map(s => (
                       <div key={s.id} className="space-y-1">
                         <p className="text-xs text-muted-foreground text-right">{s.title} · {new Date(s.date).toLocaleDateString('he-IL')}</p>
+                        <video src={s.video_url} controls className="w-full rounded-lg max-h-36" preload="metadata" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            ) : viewMode === 'date' ? (
+              dateSessionVideos.length > 0 && (
+                <div className="gradient-card rounded-xl p-4 space-y-3">
+                  <h3 className="text-sm font-medium text-muted-foreground text-right">סרטוני אימונים בתאריך 🎥 ({dateSessionVideos.length})</h3>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {dateSessionVideos.map(s => (
+                      <div key={s.id} className="space-y-1">
+                        <p className="text-xs text-muted-foreground text-right">{s.title}</p>
                         <video src={s.video_url} controls className="w-full rounded-lg max-h-36" preload="metadata" />
                       </div>
                     ))}
@@ -258,19 +295,26 @@ const ShotTracker = () => {
             )}
 
             {/* Stats header */}
-            {!viewAll && activeSession && (
+            {viewMode === 'session' && activeSession && (
               <div className="text-right">
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">אימון: {activeSession.title}</h3>
               </div>
             )}
-            {viewAll && sessions.length > 0 && (
+            {viewMode === 'date' && selectedDateKey && (
+              <div className="text-right">
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                  נתוני תאריך: {selectedDateKey.split('-').reverse().join('/')} ({dateSessionIds.length} אימונים)
+                </h3>
+              </div>
+            )}
+            {viewMode === 'all' && sessions.length > 0 && (
               <div className="text-right">
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">סה״כ כל האימונים ({sessions.length})</h3>
               </div>
             )}
             <ShotStats zoneStats={displayStats} />
 
-            {!viewAll && sessions.length > 1 && (
+            {viewMode !== 'all' && sessions.length > 1 && (
               <div className="gradient-card rounded-xl p-4">
                 <h3 className="font-semibold text-foreground text-right mb-2">סה"כ כל האימונים</h3>
                 <ShotStats zoneStats={allTimeStats} />
@@ -288,8 +332,10 @@ const ShotTracker = () => {
           <div className="lg:col-span-3 order-1 lg:order-2 space-y-4">
             <div className="gradient-card rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${viewAll ? 'bg-accent/20 text-accent' : 'bg-primary/20 text-primary'}`}>
-                  {viewAll ? '📊 תצוגה כללית' : `🎯 ${activeSession?.title || 'אימון'}`}
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  viewMode === 'all' ? 'bg-accent/20 text-accent' : viewMode === 'date' ? 'bg-secondary text-secondary-foreground' : 'bg-primary/20 text-primary'
+                }`}>
+                  {viewMode === 'all' ? '📊 תצוגה כללית' : viewMode === 'date' ? `📅 ${selectedDateKey?.split('-').reverse().join('/')}` : `🎯 ${activeSession?.title || 'אימון'}`}
                 </span>
               </div>
               <BasketballCourt
@@ -299,7 +345,7 @@ const ShotTracker = () => {
                 interactive={true}
               />
               <p className="text-xs text-muted-foreground text-center mt-3">
-                {viewAll ? 'בחר אימון ספציפי בלוח השנה כדי להזין זריקות' : 'לחץ על אזור במגרש כדי להזין זריקות'}
+                {viewMode !== 'session' ? 'בחר אימון ספציפי בלוח השנה כדי להזין זריקות' : 'לחץ על אזור במגרש כדי להזין זריקות'}
               </p>
             </div>
 
@@ -317,5 +363,6 @@ const ShotTracker = () => {
     </div>
   );
 };
+
 
 export default ShotTracker;
