@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight, Dumbbell, Target, Crown, Menu, X, Crosshair, ArrowLeftRight } from 'lucide-react';
+import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight, Dumbbell, Target, Crown, Menu, X, Crosshair, ArrowLeftRight, Pencil } from 'lucide-react';
+import EditPlayerDialog from '@/components/EditPlayerDialog';
 import NotificationBell from '@/components/NotificationBell';
 import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
 import AddPlayerDialog from '@/components/AddPlayerDialog';
@@ -40,6 +41,7 @@ const CoachDashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState<AgeCategory | null>(null);
   const [activeSection, setActiveSection] = useState<'premium' | 'basic'>('premium');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [editPlayer, setEditPlayer] = useState<{ user_id: string; display_name: string; team: string | null; age: number | null } | null>(null);
 
   const buildPlayerData = (list: typeof players) => list.map(p => {
     const sc = sessionCounts[p.user_id] || { count: 0, avgScore: 0, latestScores: [] };
@@ -128,6 +130,9 @@ const CoachDashboard = () => {
             </div>
           </div>
           <div className="mt-4 flex items-center justify-end gap-2 flex-wrap">
+            <Button variant="ghost" size="sm" onClick={() => setEditPlayer({ user_id: p.user_id, display_name: p.display_name, team: p.team, age: p.age })} className="text-muted-foreground h-8 w-8 p-0">
+              <Pencil className="h-4 w-4" />
+            </Button>
             <Select
               value=""
               onValueChange={(val) => handleMovePlayer(p.user_id, val as AgeCategory)}
@@ -299,6 +304,7 @@ const CoachDashboard = () => {
         </div>
       </div>
       <AddPlayerDialog open={addPlayerOpen} onOpenChange={setAddPlayerOpen} onSaved={refetch} />
+      <EditPlayerDialog open={!!editPlayer} onOpenChange={(o) => { if (!o) setEditPlayer(null); }} player={editPlayer} onSaved={refetch} />
     </div>
   );
 };
