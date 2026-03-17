@@ -16,6 +16,7 @@ interface PlayerChallenge {
   challenged_id: string;
   zone: string | null;
   target_attempts: number;
+  target_made: number | null;
   status: string;
   challenger_attempts: number;
   challenger_made: number;
@@ -25,6 +26,7 @@ interface PlayerChallenge {
   created_at: string;
   expires_at: string;
   description: string;
+  challenger_note?: string | null;
   challenger_video_url?: string | null;
   challenged_video_url?: string | null;
   challenger_name?: string;
