@@ -121,6 +121,11 @@ const LoginPage = () => {
     } else {
       if (role === 'coach') {
         setSuccess('ההרשמה הצליחה! חשבונך ממתין לאישור.');
+      } else if (subscriptionTier === 'premium') {
+        setSuccess('ההרשמה הצליחה! לפני שנתחיל, נקבע שיחת היכרות ותכנון. אנא צור קשר בווצאפ.');
+        setTimeout(() => {
+          window.open('https://wa.me/972526124759?text=היי, נרשמתי לליווי אישי באפליקציה ואשמח לתאם שיחת היכרות! השם שלי: ' + encodeURIComponent(displayName.trim()), '_blank');
+        }, 1500);
       } else {
         setSuccess('ההרשמה הצליחה! לאחר ביצוע התשלום, חשבונך יאושר על ידי המאמן.');
       }
