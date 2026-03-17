@@ -94,11 +94,18 @@ const ShotTracker = () => {
 
   const handleSelectSession = (sessionId: string) => {
     setActiveSessionId(sessionId);
-    setViewAll(false);
+    setViewMode('session');
   };
 
   const handleViewAll = () => {
-    setViewAll(true);
+    setViewMode('all');
+    setActiveSessionId(null);
+    setSelectedDateKey(null);
+  };
+
+  const handleDateSelect = (dateKey: string) => {
+    setSelectedDateKey(dateKey);
+    setViewMode('date');
     setActiveSessionId(null);
   };
 
