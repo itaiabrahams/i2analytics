@@ -21,6 +21,7 @@ interface ShotCalendarProps {
   activeSessionId: string | null;
   onSelectSession: (id: string) => void;
   onSessionCreated: () => void;
+  onDateSelect?: (dateKey: string) => void;
   playerId: string;
   coachId?: string;
   canCreate: boolean;
@@ -31,11 +32,19 @@ const ShotCalendar = ({
   activeSessionId,
   onSelectSession,
   onSessionCreated,
+  onDateSelect,
   playerId,
   coachId,
   canCreate,
 }: ShotCalendarProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+
+  const handleDateChange = (date: Date | undefined) => {
+    setSelectedDate(date);
+    if (date && onDateSelect) {
+      onDateSelect(format(date, 'yyyy-MM-dd'));
+    }
+  };
   const [newTitle, setNewTitle] = useState('');
   const [creating, setCreating] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -189,7 +198,7 @@ const ShotCalendar = ({
         <Calendar
           mode="single"
           selected={selectedDate}
-          onSelect={setSelectedDate}
+          onSelect={handleDateChange}
           locale={he}
           modifiers={{
             hasSessions: datesWithSessions,

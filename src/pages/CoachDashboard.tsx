@@ -2,11 +2,14 @@ import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight, Dumbbell, Target, Crown, Menu, X, Crosshair } from 'lucide-react';
+import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight, Dumbbell, Target, Crown, Menu, X, Crosshair, ArrowLeftRight } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
 import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
 import AddPlayerDialog from '@/components/AddPlayerDialog';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 type AgeCategory = 'U14' | 'U15' | 'U16' | 'U18' | 'SENIOR' | 'לא מוגדר';
 
@@ -68,6 +71,26 @@ const CoachDashboard = () => {
     return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
   }
 
+  const handleMovePlayer = async (playerId: string, targetCategory: AgeCategory) => {
+    const targetCat = AGE_CATEGORIES.find(c => c.key === targetCategory);
+    if (!targetCat || targetCategory === 'לא מוגדר') return;
+    
+    // Set age to the max age of the target category
+    const newAge = targetCat.maxAge === 999 ? 19 : targetCat.maxAge;
+    
+    const { error } = await supabase
+      .from('profiles')
+      .update({ age: newAge })
+      .eq('user_id', playerId);
+    
+    if (error) {
+      toast.error('שגיאה בהעברת השחקן');
+    } else {
+      toast.success(`השחקן הועבר ל-${targetCategory}`);
+      refetch();
+    }
+  };
+
   const renderPlayerCards = (playersToShow: PlayerDataItem[]) => (
     <div className="grid gap-4 md:grid-cols-2">
       {playersToShow.map((p, i) => (
@@ -104,7 +127,23 @@ const CoachDashboard = () => {
               <p className="text-xs text-muted-foreground">גיל</p>
             </div>
           </div>
-          <div className="mt-4 flex items-center justify-end gap-2">
+          <div className="mt-4 flex items-center justify-end gap-2 flex-wrap">
+            <Select
+              value=""
+              onValueChange={(val) => handleMovePlayer(p.user_id, val as AgeCategory)}
+            >
+              <SelectTrigger className="w-[130px] h-8 text-xs">
+                <div className="flex items-center gap-1">
+                  <ArrowLeftRight className="h-3 w-3" />
+                  <span>העבר קטגוריה</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                {AGE_CATEGORIES.filter(c => c.key !== 'לא מוגדר' && c.key !== p.ageCategory).map(c => (
+                  <SelectItem key={c.key} value={c.key}>{c.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button variant="outline" size="sm" onClick={() => navigate(`/player/${p.user_id}/shots`)} className="text-muted-foreground">
               <Target className="ml-1 h-4 w-4" />
               מעקב קליעה
