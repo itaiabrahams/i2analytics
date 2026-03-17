@@ -293,9 +293,19 @@ const ChallengeMatchCard = ({
       <div className="flex items-start justify-between mb-3">
         {getStatusBadge(challenge.status)}
         <div className="text-right">
-          <p className="text-xs text-muted-foreground">{getZoneLabel(challenge.zone)} · מינימום {challenge.target_attempts} ניסיונות</p>
+          <p className="text-xs text-muted-foreground">
+            {getZoneLabel(challenge.zone)} · מינימום {challenge.target_attempts} ניסיונות
+            {challenge.target_made ? ` · יעד ${challenge.target_made} קליעות` : ''}
+          </p>
         </div>
       </div>
+
+      {/* Challenger note */}
+      {challenge.challenger_note && (
+        <div className="rounded-lg bg-accent/10 p-2 mb-3 border border-accent/20">
+          <p className="text-xs text-accent text-right">💬 {challenge.challenger_note}</p>
+        </div>
+      )}
 
       {/* Challenge description */}
       {challenge.description && (
