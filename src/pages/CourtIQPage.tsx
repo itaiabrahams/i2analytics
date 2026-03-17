@@ -321,11 +321,16 @@ const CourtIQPage = () => {
                 </div>
               )}
 
-              {/* Category badge */}
-              <div className="flex justify-center">
+              {/* Category badge + peak indicator */}
+              <div className="flex justify-center gap-2">
                 <span className="px-3 py-1 rounded-full text-sm font-semibold text-white" style={{ backgroundColor: currentQuestion.category_color || '#3b82f6' }}>
                   {currentQuestion.category_icon} {currentQuestion.category_name || 'כללי'}
                 </span>
+                {currentQuestion.is_peak && (
+                  <span className="px-3 py-1 rounded-full text-sm font-bold bg-accent text-accent-foreground animate-pulse flex items-center gap-1">
+                    <Zap className="h-3.5 w-3.5" /> שאלת שיא x2
+                  </span>
+                )}
               </div>
 
               {/* Timer */}
