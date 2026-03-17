@@ -16,6 +16,7 @@ interface Challenge {
   zone: string | null;
   target_percentage: number;
   target_attempts: number;
+  bonus_points: number;
   week_start: string;
   week_end: string;
   created_by: string;
