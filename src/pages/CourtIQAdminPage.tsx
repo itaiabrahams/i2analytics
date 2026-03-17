@@ -596,7 +596,7 @@ const CourtIQAdminPage = () => {
               const status = getStatus(q);
               const cat = categories.find(c => c.id === q.category_id);
               return (
-                <Card key={q.id} className="relative">
+                <Card key={q.id} className={`relative ${q.is_peak ? 'ring-2 ring-accent' : ''}`}>
                   <CardContent className="p-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
@@ -604,6 +604,7 @@ const CourtIQAdminPage = () => {
                           <Badge variant={status === 'active' ? 'default' : status === 'scheduled' ? 'secondary' : status === 'pool' ? 'outline' : 'outline'} className="text-xs">
                             {status === 'active' ? '🟢 פעילה' : status === 'scheduled' ? '🕐 מתוזמנת' : status === 'pool' ? '📦 מאגר' : '⏱️ פג תוקף'}
                           </Badge>
+                          {q.is_peak && <Badge className="text-xs bg-accent text-accent-foreground">⚡ שיא</Badge>}
                           {cat && <span className="text-xs" style={{ color: cat.color }}>{cat.icon} {cat.name}</span>}
                           {q.is_ai_generated && <Badge variant="outline" className="text-xs">AI</Badge>}
                         </div>
@@ -615,9 +616,26 @@ const CourtIQAdminPage = () => {
                           </p>
                         )}
                       </div>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteQuestion(q.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex flex-col gap-1">
+                        {status === 'pool' && (
+                          <Button
+                            variant={q.is_peak ? 'default' : 'outline'}
+                            size="icon"
+                            className={`h-8 w-8 ${q.is_peak ? 'bg-accent text-accent-foreground' : ''}`}
+                            title={q.is_peak ? 'הסר סימון שאלת שיא' : 'סמן כשאלת שיא'}
+                            onClick={async () => {
+                              await supabase.from('courtiq_questions' as any).update({ is_peak: !q.is_peak }).eq('id', q.id);
+                              fetchAll();
+                              toast.success(q.is_peak ? 'הוסר מסימון שיא' : 'סומן כשאלת שיא ⚡');
+                            }}
+                          >
+                            <span className="text-sm">⚡</span>
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteQuestion(q.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
