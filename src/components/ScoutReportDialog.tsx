@@ -477,22 +477,7 @@ const ScoutReportDialog = ({
           {renderMetricsSection('מדדים פיזיים', 'physicalMetrics', '80%')}
           {renderMetricsSection('מדדים מנטליים', 'mentalMetrics', '78%')}
 
-          {/* Nutrition */}
-          <SectionTitle>נתוני תזונה</SectionTitle>
-          <FieldRow>
-            <div>
-              <Label className="text-xs">משקל</Label>
-              <Input value={data.nutritionWeight} onChange={e => updateField('nutritionWeight', e.target.value)} placeholder="74 kg" />
-            </div>
-            <div>
-              <Label className="text-xs">אחוז שומן</Label>
-              <Input value={data.bodyFat} onChange={e => updateField('bodyFat', e.target.value)} placeholder="12.8%" />
-            </div>
-          </FieldRow>
-          <div className="mb-2">
-            <Label className="text-xs">תאריך מדידה אחרון</Label>
-            <Input value={data.lastMeasured} onChange={e => updateField('lastMeasured', e.target.value)} placeholder="13/03/2026" />
-          </div>
+          {renderMetricsSection('נתוני תזונה', 'nutritionMetrics', '74 kg')}
 
           {/* Recommendations */}
           <SectionTitle>המלצות</SectionTitle>
