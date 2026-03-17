@@ -406,7 +406,7 @@ const ScoutReportDialog = ({
 
   const renderMetricsSection = (
     title: string,
-    section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics',
+    section: 'basketballMetrics' | 'physicalMetrics' | 'mentalMetrics' | 'nutritionMetrics',
     placeholder: string,
   ) => (
     <>
