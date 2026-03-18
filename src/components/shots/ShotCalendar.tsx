@@ -3,7 +3,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, CalendarDays, Upload, Loader2, Video } from 'lucide-react';
+import { Plus, CalendarDays, Upload, Loader2, Video, Link } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -48,6 +48,8 @@ const ShotCalendar = ({
   const [newTitle, setNewTitle] = useState('');
   const [creating, setCreating] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoLink, setVideoLink] = useState('');
+  const [showLinkInput, setShowLinkInput] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -120,9 +122,10 @@ const ShotCalendar = ({
     if (!selectedDate) return;
 
     const videoRequired = isVideoRequired(selectedDate);
+    const hasVideo = videoFile || videoLink.trim();
 
-    if (videoRequired && !videoFile) {
-      toast.error('יש להעלות סרטון וידאו כהוכחה לאימון');
+    if (videoRequired && !hasVideo) {
+      toast.error('יש להעלות סרטון או להזין קישור כהוכחה לאימון');
       return;
     }
     
@@ -135,7 +138,9 @@ const ShotCalendar = ({
 
     let videoUrl: string | null = null;
 
-    if (videoFile) {
+    if (videoLink.trim()) {
+      videoUrl = videoLink.trim();
+    } else if (videoFile) {
       setUploading(true);
       const ext = videoFile.name.split('.').pop();
       const path = `${playerId}/${Date.now()}.${ext}`;
@@ -172,6 +177,8 @@ const ShotCalendar = ({
       toast.success(videoUrl ? 'אימון חדש נוצר עם סרטון!' : 'אימון חדש נוצר!');
       setNewTitle('');
       setVideoFile(null);
+      setVideoLink('');
+      setShowLinkInput(false);
       onSessionCreated();
     }
     setCreating(false);
@@ -254,7 +261,7 @@ const ShotCalendar = ({
                 />
               </div>
 
-              {/* Video upload */}
+              {/* Video upload or link */}
               <div className="space-y-1">
                 <Label className="text-xs text-right block">
                   סרטון אימון {videoRequired && <span className="text-destructive">*</span>}
@@ -275,23 +282,60 @@ const ShotCalendar = ({
                       <span className="text-xs truncate max-w-[150px]">{videoFile.name}</span>
                     </div>
                   </div>
+                ) : videoLink ? (
+                  <div className="flex items-center justify-between rounded-lg bg-secondary p-2 text-sm">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setVideoLink('')}
+                      className="text-muted-foreground h-6 px-2 text-xs"
+                    >
+                      הסר
+                    </Button>
+                    <div className="flex items-center gap-1 text-success">
+                      <Link className="h-3 w-3" />
+                      <span className="text-xs truncate max-w-[150px]">קישור סרטון</span>
+                    </div>
+                  </div>
+                ) : showLinkInput ? (
+                  <div className="space-y-2">
+                    <Input
+                      value={videoLink}
+                      onChange={e => setVideoLink(e.target.value)}
+                      placeholder="הדבק קישור YouTube או Google Drive"
+                      className="text-right h-8 text-xs"
+                      dir="ltr"
+                    />
+                    <div className="flex gap-1">
+                      <Button size="sm" variant="ghost" onClick={() => setShowLinkInput(false)} className="text-xs flex-1">חזור</Button>
+                    </div>
+                  </div>
                 ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileRef.current?.click()}
-                    className="w-full border-dashed border-2 border-muted-foreground/30 text-muted-foreground h-10"
-                  >
-                    <Upload className="ml-2 h-4 w-4" />
-                    {videoRequired ? 'העלה סרטון (חובה)' : 'העלה סרטון (אופציונלי)'}
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowLinkInput(true)}
+                      className="flex-1 border-dashed border-2 border-muted-foreground/30 text-muted-foreground h-10"
+                    >
+                      <Link className="ml-1 h-3 w-3" />קישור
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileRef.current?.click()}
+                      className="flex-1 border-dashed border-2 border-muted-foreground/30 text-muted-foreground h-10"
+                    >
+                      <Upload className="ml-1 h-3 w-3" />העלה קובץ
+                    </Button>
+                  </div>
                 )}
               </div>
 
               <Button
                 size="sm"
                 onClick={handleCreateSession}
-                disabled={creating || (videoRequired && !videoFile)}
+                disabled={creating || (videoRequired && !videoFile && !videoLink.trim())}
                 className="w-full gradient-accent text-accent-foreground"
               >
                 {uploading ? (

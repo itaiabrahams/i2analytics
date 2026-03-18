@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Upload, Video, X, Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Upload, Video, X, Loader2, Link } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface TechniqueVideosProps {
@@ -15,9 +16,22 @@ const CATEGORIES = [
   { id: 'three', label: 'שלשות', emoji: '🏀' },
 ];
 
+const isExternalVideoUrl = (url: string) =>
+  /youtube\.com|youtu\.be|drive\.google\.com/i.test(url);
+
+const getEmbedUrl = (url: string): string | null => {
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/);
+  if (driveMatch) return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+  return null;
+};
+
 const TechniqueVideos = ({ playerId, isOwnProfile }: TechniqueVideosProps) => {
   const [videos, setVideos] = useState<any[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [linkInputFor, setLinkInputFor] = useState<string | null>(null);
+  const [linkValue, setLinkValue] = useState('');
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const fetchVideos = async () => {
@@ -58,7 +72,6 @@ const TechniqueVideos = ({ playerId, isOwnProfile }: TechniqueVideosProps) => {
 
     const { data: urlData } = supabase.storage.from('shot-videos').getPublicUrl(path);
 
-    // Delete old video for this category
     const existing = videos.find(v => v.category === category);
     if (existing) {
       await supabase.from('player_technique_videos').delete().eq('id', existing.id);
@@ -75,10 +88,51 @@ const TechniqueVideos = ({ playerId, isOwnProfile }: TechniqueVideosProps) => {
     fetchVideos();
   };
 
+  const handleLinkSubmit = async (category: string) => {
+    const trimmed = linkValue.trim();
+    if (!trimmed || !isExternalVideoUrl(trimmed)) {
+      toast.error('יש להזין קישור מ-YouTube או Google Drive');
+      return;
+    }
+
+    const existing = videos.find(v => v.category === category);
+    if (existing) {
+      await supabase.from('player_technique_videos').delete().eq('id', existing.id);
+    }
+
+    await supabase.from('player_technique_videos').insert({
+      player_id: playerId,
+      category,
+      video_url: trimmed,
+    });
+
+    toast.success('קישור הסרטון נשמר בהצלחה!');
+    setLinkValue('');
+    setLinkInputFor(null);
+    fetchVideos();
+  };
+
   const handleDelete = async (id: string) => {
     await supabase.from('player_technique_videos').delete().eq('id', id);
     toast.success('הסרטון נמחק');
     fetchVideos();
+  };
+
+  const renderVideo = (videoUrl: string) => {
+    const embedUrl = getEmbedUrl(videoUrl);
+    if (embedUrl) {
+      return (
+        <iframe
+          src={embedUrl}
+          className="w-full rounded-lg aspect-video"
+          allowFullScreen
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        />
+      );
+    }
+    return (
+      <video src={videoUrl} controls className="w-full rounded-lg max-h-48" preload="metadata" />
+    );
   };
 
   return (
@@ -93,7 +147,7 @@ const TechniqueVideos = ({ playerId, isOwnProfile }: TechniqueVideosProps) => {
           return (
             <div key={cat.id} className="rounded-lg bg-secondary p-3">
               <div className="flex items-center justify-between mb-2">
-                {isOwnProfile && !video && (
+                {isOwnProfile && !video && linkInputFor !== cat.id && (
                   <>
                     <input
                       ref={el => { fileRefs.current[cat.id] = el; }}
@@ -102,19 +156,29 @@ const TechniqueVideos = ({ playerId, isOwnProfile }: TechniqueVideosProps) => {
                       className="hidden"
                       onChange={e => { if (e.target.files?.[0]) handleUpload(cat.id, e.target.files[0]); }}
                     />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => fileRefs.current[cat.id]?.click()}
-                      disabled={uploading === cat.id}
-                      className="text-accent text-xs"
-                    >
-                      {uploading === cat.id ? (
-                        <><Loader2 className="ml-1 h-3 w-3 animate-spin" />מעלה...</>
-                      ) : (
-                        <><Upload className="ml-1 h-3 w-3" />העלה</>
-                      )}
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => { setLinkInputFor(cat.id); setLinkValue(''); }}
+                        className="text-accent text-xs"
+                      >
+                        <Link className="ml-1 h-3 w-3" />קישור
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => fileRefs.current[cat.id]?.click()}
+                        disabled={uploading === cat.id}
+                        className="text-accent text-xs"
+                      >
+                        {uploading === cat.id ? (
+                          <><Loader2 className="ml-1 h-3 w-3 animate-spin" />מעלה...</>
+                        ) : (
+                          <><Upload className="ml-1 h-3 w-3" />העלה</>
+                        )}
+                      </Button>
+                    </div>
                   </>
                 )}
                 {isOwnProfile && video && (
@@ -128,15 +192,25 @@ const TechniqueVideos = ({ playerId, isOwnProfile }: TechniqueVideosProps) => {
                   <span>{cat.emoji}</span>
                 </div>
               </div>
-              {video && (
-                <video
-                  src={video.video_url}
-                  controls
-                  className="w-full rounded-lg max-h-48"
-                  preload="metadata"
-                />
+              {linkInputFor === cat.id && !video && (
+                <div className="space-y-2 mb-2">
+                  <Input
+                    value={linkValue}
+                    onChange={e => setLinkValue(e.target.value)}
+                    placeholder="הדבק קישור YouTube או Google Drive"
+                    className="text-right text-xs"
+                    dir="ltr"
+                  />
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="ghost" onClick={() => setLinkInputFor(null)} className="text-xs flex-1">ביטול</Button>
+                    <Button size="sm" onClick={() => handleLinkSubmit(cat.id)} disabled={!linkValue.trim()} className="text-xs flex-1 gradient-accent text-accent-foreground">
+                      <Link className="ml-1 h-3 w-3" />שמור
+                    </Button>
+                  </div>
+                </div>
               )}
-              {!video && (
+              {video && renderVideo(video.video_url)}
+              {!video && linkInputFor !== cat.id && (
                 <p className="text-xs text-muted-foreground text-center py-2">לא הועלה סרטון</p>
               )}
             </div>
