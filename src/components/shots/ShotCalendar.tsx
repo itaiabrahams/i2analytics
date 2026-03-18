@@ -121,6 +121,7 @@ const ShotCalendar = ({
     }
     if (!selectedDate) return;
 
+    const videoRequired = isVideoRequired(selectedDate);
     const hasVideo = videoFile || videoLink.trim();
 
     if (videoRequired && !hasVideo) {
