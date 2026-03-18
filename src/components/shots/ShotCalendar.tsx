@@ -121,10 +121,10 @@ const ShotCalendar = ({
     }
     if (!selectedDate) return;
 
-    const videoRequired = isVideoRequired(selectedDate);
+    const hasVideo = videoFile || videoLink.trim();
 
-    if (videoRequired && !videoFile) {
-      toast.error('יש להעלות סרטון וידאו כהוכחה לאימון');
+    if (videoRequired && !hasVideo) {
+      toast.error('יש להעלות סרטון או להזין קישור כהוכחה לאימון');
       return;
     }
     
