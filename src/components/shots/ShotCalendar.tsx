@@ -177,6 +177,8 @@ const ShotCalendar = ({
       toast.success(videoUrl ? 'אימון חדש נוצר עם סרטון!' : 'אימון חדש נוצר!');
       setNewTitle('');
       setVideoFile(null);
+      setVideoLink('');
+      setShowLinkInput(false);
       onSessionCreated();
     }
     setCreating(false);
