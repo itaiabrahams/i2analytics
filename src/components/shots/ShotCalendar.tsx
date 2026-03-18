@@ -138,7 +138,9 @@ const ShotCalendar = ({
 
     let videoUrl: string | null = null;
 
-    if (videoFile) {
+    if (videoLink.trim()) {
+      videoUrl = videoLink.trim();
+    } else if (videoFile) {
       setUploading(true);
       const ext = videoFile.name.split('.').pop();
       const path = `${playerId}/${Date.now()}.${ext}`;
