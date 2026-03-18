@@ -48,6 +48,8 @@ const ShotCalendar = ({
   const [newTitle, setNewTitle] = useState('');
   const [creating, setCreating] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoLink, setVideoLink] = useState('');
+  const [showLinkInput, setShowLinkInput] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
