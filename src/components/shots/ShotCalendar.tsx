@@ -53,7 +53,6 @@ const ShotCalendar = ({
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Map dates to sessions
   const sessionsByDate = useMemo(() => {
     const map: Record<string, ShotSession[]> = {};
     sessions.forEach(s => {
@@ -64,7 +63,6 @@ const ShotCalendar = ({
     return map;
   }, [sessions]);
 
-  // Dates that have sessions
   const datesWithSessions = useMemo(() => {
     return sessions.map(s => new Date(s.date));
   }, [sessions]);
@@ -84,32 +82,20 @@ const ShotCalendar = ({
     setVideoFile(file);
   };
 
-  // Check if retroactive logging is allowed for the selected date
   const isRetroAllowed = (date: Date): boolean => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const selected = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    
-    // Future dates are never allowed
     if (selected > today) return false;
-    
-    // Today is always allowed
     if (selected.getTime() === today.getTime()) return true;
-    
-    // March 2026: allow retroactive logging for any date within March
     if (now.getFullYear() === 2026 && now.getMonth() === 2) {
       return selected.getFullYear() === 2026 && selected.getMonth() === 2;
     }
-    
-    // Otherwise, only today
     return false;
   };
 
-  // Check if video is required for the selected date
-  // Before March 16, 2026 (retro dates in March) → video optional
-  // March 16 onwards → video required
   const isVideoRequired = (date: Date): boolean => {
-    const cutoff = new Date(2026, 2, 16); // March 16, 2026
+    const cutoff = new Date(2026, 2, 16);
     const selected = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     return selected >= cutoff;
   };
@@ -128,7 +114,7 @@ const ShotCalendar = ({
       toast.error('יש להעלות סרטון או להזין קישור כהוכחה לאימון');
       return;
     }
-    
+
     if (!isRetroAllowed(selectedDate)) {
       toast.error('ניתן לדווח רק על אימונים של היום');
       return;
@@ -162,7 +148,6 @@ const ShotCalendar = ({
       setUploading(false);
     }
 
-    // Create session
     const { error } = await supabase.from('shot_sessions').insert({
       player_id: playerId,
       coach_id: coachId || null,
@@ -185,13 +170,12 @@ const ShotCalendar = ({
   };
 
   return (
-    <div className="gradient-card rounded-xl p-4 space-y-4">
+    <div className="gradient-card rounded-xl p-3 sm:p-4 space-y-4">
       <div className="flex items-center justify-end gap-2">
         <h3 className="font-semibold text-foreground">לוח אימונים</h3>
         <CalendarDays className="h-5 w-5 text-accent" />
       </div>
 
-      {/* Hidden file input */}
       <input
         ref={fileRef}
         type="file"
@@ -200,7 +184,6 @@ const ShotCalendar = ({
         onChange={e => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]); }}
       />
 
-      {/* Calendar */}
       <div className="flex justify-center">
         <Calendar
           mode="single"
@@ -217,22 +200,21 @@ const ShotCalendar = ({
         />
       </div>
 
-      {/* Sessions for selected date */}
       {selectedDate && (
-        <div className="space-y-2">
-          <p className="text-sm text-muted-foreground text-right">
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground text-right font-medium">
             {format(selectedDate, 'dd/MM/yyyy', { locale: he })}
           </p>
 
           {sessionsForDate.length > 0 ? (
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {sessionsForDate.map(s => (
                 <button
                   key={s.id}
                   onClick={() => onSelectSession(s.id)}
-                  className={`w-full rounded-lg p-3 text-right text-sm font-medium transition-all ${
+                  className={`w-full rounded-xl p-3.5 text-right text-sm font-medium transition-all active:scale-[0.97] ${
                     s.id === activeSessionId
-                      ? 'gradient-accent text-accent-foreground'
+                      ? 'gradient-accent text-accent-foreground shadow-md'
                       : 'bg-secondary text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -245,88 +227,86 @@ const ShotCalendar = ({
             <p className="text-xs text-muted-foreground text-center py-2">אין אימונים בתאריך זה</p>
           )}
 
-          {/* Create new session for this date */}
           {canCreate && selectedDate && isRetroAllowed(selectedDate) && (() => {
             const videoRequired = isVideoRequired(selectedDate);
             return (
-            <div className="space-y-3 pt-2 border-t border-border">
-              <div className="space-y-1">
-                <Label className="text-xs text-right block">כותרת אימון</Label>
+            <div className="space-y-4 pt-3 border-t border-border">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-right block font-medium">כותרת אימון</Label>
                 <Input
                   value={newTitle}
                   onChange={e => setNewTitle(e.target.value)}
                   placeholder='לדוגמה: "אימון קליעות בוקר"'
                   maxLength={100}
-                  className="text-right h-8 text-sm"
+                  className="text-right h-11 text-sm rounded-xl"
                 />
               </div>
 
-              {/* Video upload or link */}
-              <div className="space-y-1">
-                <Label className="text-xs text-right block">
+              <div className="space-y-2">
+                <Label className="text-xs text-right block font-medium">
                   סרטון אימון {videoRequired && <span className="text-destructive">*</span>}
                   {!videoRequired && <span className="text-muted-foreground">(אופציונלי)</span>}
                 </Label>
                 {videoFile ? (
-                  <div className="flex items-center justify-between rounded-lg bg-secondary p-2 text-sm">
+                  <div className="flex items-center justify-between rounded-xl bg-secondary p-3">
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => setVideoFile(null)}
-                      className="text-muted-foreground h-6 px-2 text-xs"
+                      className="text-muted-foreground h-8 px-3 text-xs"
                     >
                       הסר
                     </Button>
-                    <div className="flex items-center gap-1 text-success">
-                      <Video className="h-3 w-3" />
-                      <span className="text-xs truncate max-w-[150px]">{videoFile.name}</span>
+                    <div className="flex items-center gap-1.5 text-success">
+                      <Video className="h-4 w-4" />
+                      <span className="text-xs truncate max-w-[140px]">{videoFile.name}</span>
                     </div>
                   </div>
                 ) : videoLink ? (
-                  <div className="flex items-center justify-between rounded-lg bg-secondary p-2 text-sm">
+                  <div className="flex items-center justify-between rounded-xl bg-secondary p-3">
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => setVideoLink('')}
-                      className="text-muted-foreground h-6 px-2 text-xs"
+                      className="text-muted-foreground h-8 px-3 text-xs"
                     >
                       הסר
                     </Button>
-                    <div className="flex items-center gap-1 text-success">
-                      <Link className="h-3 w-3" />
-                      <span className="text-xs truncate max-w-[150px]">קישור סרטון</span>
+                    <div className="flex items-center gap-1.5 text-success">
+                      <Link className="h-4 w-4" />
+                      <span className="text-xs">קישור סרטון</span>
                     </div>
                   </div>
                 ) : showLinkInput ? (
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     <Input
                       value={videoLink}
                       onChange={e => setVideoLink(e.target.value)}
                       placeholder="הדבק קישור YouTube או Google Drive"
-                      className="text-right h-8 text-xs"
+                      className="text-right h-11 text-xs rounded-xl"
                       dir="ltr"
                     />
-                    <div className="flex gap-1">
-                      <Button size="sm" variant="ghost" onClick={() => setShowLinkInput(false)} className="text-xs flex-1">חזור</Button>
-                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => setShowLinkInput(false)} className="text-xs w-full h-10">חזור</Button>
                   </div>
                 ) : (
-                  <div className="flex gap-1">
+                  <div className="grid grid-cols-2 gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setShowLinkInput(true)}
-                      className="flex-1 border-dashed border-2 border-muted-foreground/30 text-muted-foreground h-10"
+                      className="border-dashed border-2 border-accent/30 text-muted-foreground h-14 rounded-xl flex flex-col gap-0.5 active:scale-[0.97] transition-all"
                     >
-                      <Link className="ml-1 h-3 w-3" />קישור
+                      <Link className="h-4 w-4" />
+                      <span className="text-[10px]">קישור</span>
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => fileRef.current?.click()}
-                      className="flex-1 border-dashed border-2 border-muted-foreground/30 text-muted-foreground h-10"
+                      className="border-dashed border-2 border-accent/30 text-muted-foreground h-14 rounded-xl flex flex-col gap-0.5 active:scale-[0.97] transition-all"
                     >
-                      <Upload className="ml-1 h-3 w-3" />העלה קובץ
+                      <Upload className="h-4 w-4" />
+                      <span className="text-[10px]">העלה קובץ</span>
                     </Button>
                   </div>
                 )}
@@ -336,12 +316,12 @@ const ShotCalendar = ({
                 size="sm"
                 onClick={handleCreateSession}
                 disabled={creating || (videoRequired && !videoFile && !videoLink.trim())}
-                className="w-full gradient-accent text-accent-foreground"
+                className="w-full gradient-accent text-accent-foreground h-12 rounded-xl text-sm font-bold active:scale-[0.97] transition-transform"
               >
                 {uploading ? (
-                  <><Loader2 className="ml-1 h-4 w-4 animate-spin" />מעלה סרטון ויוצר אימון...</>
+                  <><Loader2 className="ml-1.5 h-4 w-4 animate-spin" />מעלה סרטון ויוצר אימון...</>
                 ) : (
-                  <><Plus className="ml-1 h-4 w-4" />{creating ? 'יוצר...' : 'הוסף אימון'}</>
+                  <><Plus className="ml-1.5 h-4 w-4" />{creating ? 'יוצר...' : 'הוסף אימון'}</>
                 )}
               </Button>
             </div>

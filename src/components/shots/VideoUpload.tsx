@@ -96,17 +96,17 @@ const VideoUpload = ({ sessionId, currentUrl, playerId, onUploaded }: VideoUploa
       />
 
       {currentUrl ? (
-        <div className="rounded-lg bg-secondary p-3">
+        <div className="rounded-xl bg-secondary p-3">
           <div className="flex items-center justify-between mb-2">
             <Button
               size="sm"
               variant="ghost"
               onClick={() => onUploaded('')}
-              className="text-muted-foreground h-6 w-6 p-0"
+              className="text-muted-foreground h-8 w-8 p-0"
             >
-              <X className="h-3 w-3" />
+              <X className="h-4 w-4" />
             </Button>
-            <div className="flex items-center gap-1 text-sm text-success">
+            <div className="flex items-center gap-1.5 text-sm text-success">
               {isExternal ? <Link className="h-4 w-4" /> : <Video className="h-4 w-4" />}
               <span>{isExternal ? 'קישור סרטון' : 'סרטון מצורף'}</span>
             </div>
@@ -128,42 +128,43 @@ const VideoUpload = ({ sessionId, currentUrl, playerId, onUploaded }: VideoUploa
           )}
         </div>
       ) : showLinkInput ? (
-        <div className="space-y-2 rounded-lg border border-border p-3">
+        <div className="space-y-3 rounded-xl border border-border p-4">
           <Input
             value={linkValue}
             onChange={e => setLinkValue(e.target.value)}
             placeholder="הדבק קישור YouTube או Google Drive"
-            className="text-right text-sm"
+            className="text-right text-sm h-12"
             dir="ltr"
           />
           <div className="flex gap-2">
-            <Button size="sm" variant="ghost" onClick={() => { setShowLinkInput(false); setLinkValue(''); }} className="flex-1">
+            <Button size="sm" variant="ghost" onClick={() => { setShowLinkInput(false); setLinkValue(''); }} className="flex-1 h-11">
               ביטול
             </Button>
-            <Button size="sm" onClick={handleLinkSubmit} disabled={!linkValue.trim()} className="flex-1 gradient-accent text-accent-foreground">
-              <Link className="ml-1 h-3 w-3" />שמור קישור
+            <Button size="sm" onClick={handleLinkSubmit} disabled={!linkValue.trim()} className="flex-1 gradient-accent text-accent-foreground h-11 font-semibold">
+              <Link className="ml-1.5 h-4 w-4" />שמור קישור
             </Button>
           </div>
         </div>
       ) : (
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 gap-3">
           <Button
             variant="outline"
             onClick={() => setShowLinkInput(true)}
-            className="flex-1 border-dashed border-2 border-muted-foreground/30 text-muted-foreground h-16"
+            className="border-dashed border-2 border-accent/30 text-muted-foreground h-16 sm:h-14 rounded-xl flex flex-col gap-1 hover:border-accent/60 hover:text-accent active:scale-[0.97] transition-all"
           >
-            <Link className="ml-2 h-4 w-4" />קישור YouTube / Drive
+            <Link className="h-5 w-5" />
+            <span className="text-xs font-medium">קישור YouTube / Drive</span>
           </Button>
           <Button
             variant="outline"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="flex-1 border-dashed border-2 border-muted-foreground/30 text-muted-foreground h-16"
+            className="border-dashed border-2 border-accent/30 text-muted-foreground h-16 sm:h-14 rounded-xl flex flex-col gap-1 hover:border-accent/60 hover:text-accent active:scale-[0.97] transition-all"
           >
             {uploading ? (
-              <><Loader2 className="ml-2 h-4 w-4 animate-spin" />מעלה...</>
+              <><Loader2 className="h-5 w-5 animate-spin" /><span className="text-xs">מעלה...</span></>
             ) : (
-              <><Upload className="ml-2 h-4 w-4" />העלה קובץ</>
+              <><Upload className="h-5 w-5" /><span className="text-xs font-medium">העלה קובץ</span></>
             )}
           </Button>
         </div>
