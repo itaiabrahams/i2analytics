@@ -217,18 +217,18 @@ const ShotTracker = () => {
         </div>
 
         {/* Main layout */}
-        <div className="grid gap-6 lg:grid-cols-5">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-5">
           {/* Left side */}
-          <div className="lg:col-span-2 order-2 lg:order-1 space-y-4">
+          <div className="lg:col-span-2 order-2 lg:order-1 space-y-3 sm:space-y-4">
             {/* View All toggle */}
-            <div className="flex items-center gap-2 justify-end">
+            <div className="flex items-center gap-2 justify-end flex-wrap">
               <Button
                 variant={viewMode === 'all' ? 'default' : 'outline'}
                 size="sm"
                 onClick={handleViewAll}
-                className={`h-8 text-xs ${viewMode === 'all' ? 'gradient-accent text-accent-foreground' : 'text-muted-foreground border-accent/30'}`}
+                className={`h-10 sm:h-8 text-xs rounded-xl active:scale-[0.97] transition-transform ${viewMode === 'all' ? 'gradient-accent text-accent-foreground' : 'text-muted-foreground border-accent/30'}`}
               >
-                <Eye className="ml-1 h-3.5 w-3.5" />
+                <Eye className="ml-1 h-4 w-4 sm:h-3.5 sm:w-3.5" />
                 כל האימונים
               </Button>
               {viewMode === 'date' && selectedDateKey && (
