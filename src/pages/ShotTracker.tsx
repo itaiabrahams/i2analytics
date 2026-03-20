@@ -329,10 +329,10 @@ const ShotTracker = () => {
           </div>
 
           {/* Right side: Court + Workout */}
-          <div className="lg:col-span-3 order-1 lg:order-2 space-y-4">
-            <div className="gradient-card rounded-xl p-4">
+          <div className="lg:col-span-3 order-1 lg:order-2 space-y-3 sm:space-y-4">
+            <div className="gradient-card rounded-xl p-2.5 sm:p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                <span className={`text-[11px] sm:text-xs font-medium px-2 py-1 rounded-full ${
                   viewMode === 'all' ? 'bg-accent/20 text-accent' : viewMode === 'date' ? 'bg-secondary text-secondary-foreground' : 'bg-primary/20 text-primary'
                 }`}>
                   {viewMode === 'all' ? '📊 תצוגה כללית' : viewMode === 'date' ? `📅 ${selectedDateKey?.split('-').reverse().join('/')}` : `🎯 ${activeSession?.title || 'אימון'}`}
@@ -344,8 +344,8 @@ const ShotTracker = () => {
                 showHeatMap={showHeatMap}
                 interactive={true}
               />
-              <p className="text-xs text-muted-foreground text-center mt-3">
-                {viewMode !== 'session' ? 'בחר אימון ספציפי בלוח השנה כדי להזין זריקות' : 'לחץ על אזור במגרש כדי להזין זריקות'}
+              <p className="text-[11px] sm:text-xs text-muted-foreground text-center mt-2 sm:mt-3 font-medium">
+                {viewMode !== 'session' ? 'בחר אימון ספציפי בלוח השנה כדי להזין זריקות' : '👆 לחץ על אזור במגרש כדי להזין זריקות'}
               </p>
             </div>
 
