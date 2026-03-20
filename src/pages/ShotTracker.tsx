@@ -162,42 +162,42 @@ const ShotTracker = () => {
     : [];
 
   return (
-    <div className="min-h-screen p-3 sm:p-4 md:p-8">
+    <div className="min-h-screen p-2 sm:p-4 md:p-8 pb-20 sm:pb-8">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
-        <div className="mb-4 space-y-3">
+        <div className="mb-3 sm:mb-4 space-y-2 sm:space-y-3">
           <div className="flex items-center justify-between">
             <Button
               variant={showHeatMap ? 'default' : 'outline'}
               size="sm"
               onClick={() => setShowHeatMap(!showHeatMap)}
-              className={`h-8 text-xs ${showHeatMap ? 'gradient-accent text-accent-foreground' : 'text-muted-foreground'}`}
+              className={`h-10 sm:h-8 text-xs px-3 rounded-xl active:scale-[0.97] transition-transform ${showHeatMap ? 'gradient-accent text-accent-foreground' : 'text-muted-foreground'}`}
             >
-              <Flame className="ml-1 h-3.5 w-3.5" />
+              <Flame className="ml-1 h-4 w-4 sm:h-3.5 sm:w-3.5" />
               Heat Map
             </Button>
             <div className="flex items-center gap-2">
               <div className="text-right">
-                <h1 className="text-lg sm:text-2xl font-bold text-foreground flex items-center gap-1.5 justify-end">
+                <h1 className="text-base sm:text-2xl font-bold text-foreground flex items-center gap-1.5 justify-end">
                   <span>מעקב קליעות</span>
-                  <BarChart3 className="h-5 w-5 text-accent" />
+                  <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
                 </h1>
-                {player && <p className="text-xs text-muted-foreground">{player.display_name}</p>}
+                {player && <p className="text-[11px] sm:text-xs text-muted-foreground">{player.display_name}</p>}
               </div>
-              <Button variant="ghost" size="sm" onClick={() => isCoach ? navigate(`/player/${id}`) : navigate('/')} className="text-muted-foreground h-8 px-2">
-                <ArrowRight className="h-4 w-4" />
+              <Button variant="ghost" size="sm" onClick={() => isCoach ? navigate(`/player/${id}`) : navigate('/')} className="text-muted-foreground h-10 w-10 sm:h-8 sm:w-8 p-0 rounded-xl">
+                <ArrowRight className="h-5 w-5 sm:h-4 sm:w-4" />
               </Button>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="text-accent border-accent/30 h-8 text-xs px-2.5">
-                  <Trophy className="ml-1 h-3.5 w-3.5" />
+                <Button variant="outline" size="sm" className="text-accent border-accent/30 h-10 sm:h-8 text-xs px-3 rounded-xl active:scale-[0.97] transition-transform">
+                  <Trophy className="ml-1 h-4 w-4 sm:h-3.5 sm:w-3.5" />
                   אתגרים
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[90vw] sm:w-[420px] overflow-y-auto p-4">
+              <SheetContent side="left" className="w-[92vw] sm:w-[420px] overflow-y-auto p-4">
                 <div className="space-y-6 mt-6">
                   <WeeklyChallenges />
                   {id && <PlayerChallenges playerId={id} />}
@@ -208,9 +208,9 @@ const ShotTracker = () => {
               variant="outline"
               size="sm"
               onClick={() => navigate('/leaderboard')}
-              className="text-accent border-accent/30 h-8 text-xs px-2.5"
+              className="text-accent border-accent/30 h-10 sm:h-8 text-xs px-3 rounded-xl active:scale-[0.97] transition-transform"
             >
-              <BarChart3 className="ml-1 h-3.5 w-3.5" />
+              <BarChart3 className="ml-1 h-4 w-4 sm:h-3.5 sm:w-3.5" />
               דירוג
             </Button>
           </div>
