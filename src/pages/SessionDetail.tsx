@@ -1,21 +1,49 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, ExternalLink } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowRight, ExternalLink, Pencil, Plus, Trash2, Save, X } from 'lucide-react';
 import { useState } from 'react';
 import { ACTION_TYPES } from '@/lib/types';
 import VideoMeeting from '@/components/VideoMeeting';
 import { useSession, usePlayer } from '@/hooks/useSupabaseData';
 import { getLetterGrade, getGradeColor } from '@/lib/gradeUtils';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface LocalAction {
+  id: string;
+  quarter: number;
+  minute: number;
+  score: number;
+  description: string;
+  type: string;
+  isNew?: boolean;
+}
 
 const SessionDetail = () => {
   const { sessionId } = useParams();
   const { auth } = useAuth();
   const navigate = useNavigate();
   const [filter, setFilter] = useState<string>('all');
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const { session, actions, loading } = useSession(sessionId);
+  const { session, actions, loading, refetch } = useSession(sessionId);
   const { player } = usePlayer(session?.player_id);
+
+  // Edit state
+  const [editStats, setEditStats] = useState<Record<string, number>>({});
+  const [editActions, setEditActions] = useState<LocalAction[]>([]);
+  const [editNotes, setEditNotes] = useState('');
+
+  // New action form
+  const [actionQuarter, setActionQuarter] = useState('1');
+  const [actionMinute, setActionMinute] = useState('');
+  const [actionScore, setActionScore] = useState<string>('1');
+  const [actionType, setActionType] = useState('');
+  const [actionDesc, setActionDesc] = useState('');
 
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
@@ -23,31 +51,164 @@ const SessionDetail = () => {
 
   if (!session) return <div className="p-8 text-center text-foreground">סשן לא נמצא</div>;
 
-  const plusActions = actions.filter(a => a.score === 1).length;
-  const zeroActions = actions.filter(a => a.score === 0).length;
-  const minusActions = actions.filter(a => a.score === -1).length;
+  const canEdit = auth.role === 'coach' || auth.playerId === session.player_id;
 
-  const filteredActions = filter === 'all' ? actions : actions.filter(a => a.type === filter);
+  const startEditing = () => {
+    setEditStats({
+      points: session.points,
+      assists: session.assists,
+      rebounds: session.rebounds,
+      steals: session.steals,
+      turnovers: session.turnovers,
+      fgPercentage: session.fg_percentage,
+    });
+    setEditActions(actions.map(a => ({ ...a, isNew: false })));
+    setEditNotes(session.coach_notes || '');
+    setEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setEditing(false);
+  };
+
+  const overallScore = editing
+    ? editActions.length > 0
+      ? editActions.reduce((s, a) => s + a.score, 0) / editActions.length
+      : 0
+    : Number(session.overall_score);
+
+  const addAction = () => {
+    if (!actionType || !actionDesc || !actionMinute) return;
+    const newAction: LocalAction = {
+      id: `new-${Date.now()}`,
+      quarter: parseInt(actionQuarter),
+      minute: parseInt(actionMinute),
+      score: parseInt(actionScore),
+      description: actionDesc,
+      type: actionType,
+      isNew: true,
+    };
+    setEditActions(prev => [...prev, newAction].sort((a, b) => a.quarter - b.quarter || a.minute - b.minute));
+    setActionDesc('');
+    setActionMinute('');
+  };
+
+  const removeAction = (id: string) => {
+    setEditActions(prev => prev.filter(a => a.id !== id));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const newOverall = editActions.length > 0
+        ? editActions.reduce((s, a) => s + a.score, 0) / editActions.length
+        : 0;
+
+      const { error: sessionError } = await supabase
+        .from('sessions')
+        .update({
+          points: editStats.points,
+          assists: editStats.assists,
+          rebounds: editStats.rebounds,
+          steals: editStats.steals,
+          turnovers: editStats.turnovers,
+          fg_percentage: editStats.fgPercentage,
+          overall_score: parseFloat(newOverall.toFixed(2)),
+          coach_notes: editNotes,
+        })
+        .eq('id', session.id);
+
+      if (sessionError) throw sessionError;
+
+      // Delete all existing actions
+      const { error: deleteError } = await supabase
+        .from('game_actions')
+        .delete()
+        .eq('session_id', session.id);
+
+      if (deleteError) throw deleteError;
+
+      // Re-insert all actions
+      if (editActions.length > 0) {
+        const actionsToInsert = editActions.map(a => ({
+          session_id: session.id,
+          quarter: a.quarter,
+          minute: a.minute,
+          score: a.score,
+          description: a.description,
+          type: a.type,
+        }));
+
+        const { error: insertError } = await supabase
+          .from('game_actions')
+          .insert(actionsToInsert);
+
+        if (insertError) throw insertError;
+      }
+
+      toast.success('הסשן עודכן בהצלחה!');
+      setEditing(false);
+      if (refetch) refetch();
+    } catch (err: any) {
+      toast.error('שגיאה בעדכון: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const displayActions = editing ? editActions : actions;
+  const plusActions = displayActions.filter(a => a.score === 1).length;
+  const zeroActions = displayActions.filter(a => a.score === 0).length;
+  const minusActions = displayActions.filter(a => a.score === -1).length;
+  const filteredActions = filter === 'all' ? displayActions : displayActions.filter(a => a.type === filter);
 
   const backPath = auth.role === 'coach' ? `/player/${session.player_id}` : `/player/${auth.playerId}`;
 
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="mx-auto max-w-4xl">
-        <Button variant="ghost" onClick={() => navigate(backPath)} className="mb-4 text-muted-foreground">
-          חזרה לפרופיל
-          <ArrowRight className="mr-2 h-4 w-4" />
-        </Button>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            {canEdit && !editing && (
+              <Button variant="outline" size="sm" onClick={startEditing} className="gap-1.5">
+                <Pencil className="h-4 w-4" />
+                ערוך סשן
+              </Button>
+            )}
+            {editing && (
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleSave} disabled={saving} className="gradient-accent text-accent-foreground gap-1.5">
+                  <Save className="h-4 w-4" />
+                  {saving ? 'שומר...' : 'שמור'}
+                </Button>
+                <Button size="sm" variant="outline" onClick={cancelEditing} className="gap-1.5">
+                  <X className="h-4 w-4" />
+                  ביטול
+                </Button>
+              </div>
+            )}
+          </div>
+          <Button variant="ghost" onClick={() => navigate(backPath)} className="text-muted-foreground">
+            חזרה לפרופיל
+            <ArrowRight className="mr-2 h-4 w-4" />
+          </Button>
+        </div>
+
+        {editing && (
+          <div className="rounded-xl bg-accent/10 border border-accent/30 p-3 mb-4 text-center text-sm text-accent font-medium">
+            מצב עריכה — ניתן לעדכן סטטיסטיקות, ניקוד ופעולות
+          </div>
+        )}
 
         {/* Session header */}
         <div className="gradient-card rounded-xl p-6 mb-6 animate-fade-in">
           <div className="flex items-start justify-between">
             <div className="stat-glow rounded-xl bg-secondary p-4 text-center">
-              <p className={`text-3xl font-bold ${Number(session.overall_score) > 0 ? 'text-success' : Number(session.overall_score) < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                {Number(session.overall_score).toFixed(2)}
+              <p className={`text-3xl font-bold ${overallScore > 0 ? 'text-success' : overallScore < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                {overallScore.toFixed(2)}
               </p>
-              <p className={`text-lg font-bold ${getGradeColor(getLetterGrade(Number(session.overall_score)))}`}>
-                {getLetterGrade(Number(session.overall_score))}
+              <p className={`text-lg font-bold ${getGradeColor(getLetterGrade(overallScore))}`}>
+                {getLetterGrade(overallScore)}
               </p>
               <p className="text-xs text-muted-foreground">ציון כולל</p>
             </div>
@@ -85,21 +246,45 @@ const SessionDetail = () => {
           </div>
           <div className="gradient-card rounded-xl p-4">
             <h3 className="mb-3 text-right font-semibold text-foreground">סטטיסטיקות משחק</h3>
-            <div className="grid grid-cols-3 gap-2 text-center">
-              {[
-                { label: 'נקודות', value: session.points },
-                { label: 'אסיסטים', value: session.assists },
-                { label: 'ריבאונדים', value: session.rebounds },
-                { label: 'גניבות', value: session.steals },
-                { label: 'טורנוברים', value: session.turnovers },
-                { label: '% קליעה', value: `${session.fg_percentage}%` },
-              ].map((s, i) => (
-                <div key={i} className="rounded-lg bg-secondary p-2">
-                  <p className="text-lg font-bold text-foreground">{s.value}</p>
-                  <p className="text-xs text-muted-foreground">{s.label}</p>
-                </div>
-              ))}
-            </div>
+            {editing ? (
+              <div className="grid grid-cols-3 gap-2 text-center">
+                {([
+                  ['points', 'נקודות'],
+                  ['assists', 'אסיסטים'],
+                  ['rebounds', 'ריבאונדים'],
+                  ['steals', 'גניבות'],
+                  ['turnovers', 'טורנוברים'],
+                  ['fgPercentage', '% קליעה'],
+                ] as [string, string][]).map(([key, label]) => (
+                  <div key={key} className="rounded-lg bg-secondary p-2">
+                    <Input
+                      type="number"
+                      min={0}
+                      value={editStats[key]}
+                      onChange={e => setEditStats(prev => ({ ...prev, [key]: parseInt(e.target.value) || 0 }))}
+                      className="bg-muted border-border text-foreground text-center h-8 text-lg font-bold"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">{label}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-2 text-center">
+                {[
+                  { label: 'נקודות', value: session.points },
+                  { label: 'אסיסטים', value: session.assists },
+                  { label: 'ריבאונדים', value: session.rebounds },
+                  { label: 'גניבות', value: session.steals },
+                  { label: 'טורנוברים', value: session.turnovers },
+                  { label: '% קליעה', value: `${session.fg_percentage}%` },
+                ].map((s, i) => (
+                  <div key={i} className="rounded-lg bg-secondary p-2">
+                    <p className="text-lg font-bold text-foreground">{s.value}</p>
+                    <p className="text-xs text-muted-foreground">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -107,10 +292,19 @@ const SessionDetail = () => {
         <VideoMeeting meetingUrl={session.meeting_url} />
 
         {/* Coach notes */}
-        {session.coach_notes && (
+        {(session.coach_notes || editing) && (
           <div className="gradient-card rounded-xl p-4 mb-6">
             <h3 className="mb-2 text-right font-semibold text-foreground">הערות מאמן</h3>
-            <p className="text-right text-muted-foreground">{session.coach_notes}</p>
+            {editing ? (
+              <textarea
+                value={editNotes}
+                onChange={e => setEditNotes(e.target.value)}
+                className="w-full rounded-md bg-secondary border border-border text-foreground p-3 text-right min-h-[80px] resize-none"
+                placeholder="הוסף הערות..."
+              />
+            ) : (
+              <p className="text-right text-muted-foreground">{session.coach_notes}</p>
+            )}
           </div>
         )}
 
@@ -120,6 +314,54 @@ const SessionDetail = () => {
             <span className="text-sm text-muted-foreground">{filteredActions.length} פעולות</span>
             <h3 className="font-semibold text-foreground">יומן פעולות</h3>
           </div>
+
+          {/* Add action form (edit mode) */}
+          {editing && (
+            <div className="rounded-lg bg-secondary p-4 mb-4 space-y-3">
+              <p className="text-sm text-muted-foreground text-right font-medium">הוסף פעולה חדשה</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <Select value={actionType} onValueChange={setActionType}>
+                  <SelectTrigger className="bg-muted border-border text-foreground">
+                    <SelectValue placeholder="סוג" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    {ACTION_TYPES.map(t => (
+                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={actionQuarter} onValueChange={setActionQuarter}>
+                  <SelectTrigger className="bg-muted border-border text-foreground">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    <SelectItem value="1">רבע 1</SelectItem>
+                    <SelectItem value="2">רבע 2</SelectItem>
+                    <SelectItem value="3">רבע 3</SelectItem>
+                    <SelectItem value="4">רבע 4</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input type="number" min={1} max={10} placeholder="דקה" value={actionMinute} onChange={e => setActionMinute(e.target.value)} className="bg-muted border-border text-foreground text-center" />
+                <Select value={actionScore} onValueChange={setActionScore}>
+                  <SelectTrigger className="bg-muted border-border text-foreground">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    <SelectItem value="1">+1 ✅</SelectItem>
+                    <SelectItem value="0">0 ➖</SelectItem>
+                    <SelectItem value="-1">-1 ❌</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={addAction} size="sm" className="gradient-accent text-accent-foreground">
+                  <Plus className="ml-1 h-4 w-4" />
+                  הוסף
+                </Button>
+                <Input placeholder="תיאור הפעולה" value={actionDesc} onChange={e => setActionDesc(e.target.value)} className="flex-1 bg-muted border-border text-foreground text-right" onKeyDown={e => e.key === 'Enter' && addAction()} />
+              </div>
+            </div>
+          )}
 
           {/* Filter */}
           <div className="mb-4 flex flex-wrap gap-2 justify-end">
@@ -147,13 +389,20 @@ const SessionDetail = () => {
                 className="flex items-center justify-between rounded-lg bg-secondary p-3 animate-fade-in"
                 style={{ animationDelay: `${i * 30}ms` }}
               >
-                <span className={`rounded-full px-3 py-1 text-sm font-bold ${
-                  action.score === 1 ? 'bg-success/20 text-success' :
-                  action.score === -1 ? 'bg-destructive/20 text-destructive' :
-                  'bg-muted text-muted-foreground'
-                }`}>
-                  {action.score > 0 ? '+1' : action.score === 0 ? '0' : '-1'}
-                </span>
+                <div className="flex items-center gap-2">
+                  {editing && (
+                    <button onClick={() => removeAction(action.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                  <span className={`rounded-full px-3 py-1 text-sm font-bold ${
+                    action.score === 1 ? 'bg-success/20 text-success' :
+                    action.score === -1 ? 'bg-destructive/20 text-destructive' :
+                    'bg-muted text-muted-foreground'
+                  }`}>
+                    {action.score > 0 ? '+1' : action.score === 0 ? '0' : '-1'}
+                  </span>
+                </div>
                 <div className="flex-1 text-right mx-3">
                   <p className="text-sm text-foreground">{action.description}</p>
                   <p className="text-xs text-muted-foreground">{action.type}</p>
