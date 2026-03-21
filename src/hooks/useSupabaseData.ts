@@ -133,19 +133,20 @@ export function useSession(sessionId: string | undefined) {
   const [actions, setActions] = useState<GameActionData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetch = useCallback(async () => {
     if (!sessionId) { setLoading(false); return; }
-    Promise.all([
+    const [sessRes, actRes] = await Promise.all([
       supabase.from('sessions').select('*').eq('id', sessionId).single(),
       supabase.from('game_actions').select('*').eq('session_id', sessionId).order('quarter').order('minute'),
-    ]).then(([sessRes, actRes]) => {
-      if (sessRes.data) setSession(sessRes.data as unknown as SessionData);
-      if (actRes.data) setActions(actRes.data as unknown as GameActionData[]);
-      setLoading(false);
-    });
+    ]);
+    if (sessRes.data) setSession(sessRes.data as unknown as SessionData);
+    if (actRes.data) setActions(actRes.data as unknown as GameActionData[]);
+    setLoading(false);
   }, [sessionId]);
 
-  return { session, actions, loading };
+  useEffect(() => { fetch(); }, [fetch]);
+
+  return { session, actions, loading, refetch: fetch };
 }
 
 // Get player average score
