@@ -32,6 +32,7 @@ interface Entry {
   percentage: number;
   video_url?: string | null;
   player_name?: string;
+  status?: string;
 }
 
 const PERIOD_LABELS: Record<string, string> = {
@@ -134,7 +135,6 @@ const WeeklyChallenges = () => {
   const handleSubmitEntry = async (challengeId: string, attempts: number, made: number, videoUrl: string) => {
     if (!videoUrl) { toast.error('חובה להעלות סרטון הוכחה'); return; }
     const percentage = attempts > 0 ? Math.round((made / attempts) * 100) : 0;
-    const challenge = challenges.find(c => c.id === challengeId);
     
     const { error } = await supabase.from('challenge_entries').upsert({
       challenge_id: challengeId,
@@ -143,30 +143,46 @@ const WeeklyChallenges = () => {
       made,
       percentage,
       video_url: videoUrl,
+      status: 'pending',
     }, { onConflict: 'challenge_id,player_id' });
     
     if (error) { toast.error('שגיאה בשליחת תוצאות'); return; }
     
-    // Award bonus points if challenge met and bonus_points > 0
+    toast.success('התוצאות נשלחו וממתינות לאישור המאמן!');
+    fetchChallenges();
+  };
+
+  const handleApproveEntry = async (entryId: string, challengeId: string, playerId: string, percentage: number, attempts: number) => {
+    const challenge = challenges.find(c => c.id === challengeId);
+    const { error } = await supabase.from('challenge_entries').update({ status: 'approved' }).eq('id', entryId);
+    if (error) { toast.error('שגיאה באישור'); return; }
+    
+    // Award bonus points if challenge met
     if (challenge && challenge.bonus_points > 0 && percentage >= challenge.target_percentage && attempts >= challenge.target_attempts) {
       const { data: stats } = await supabase
         .from('courtiq_player_stats')
         .select('total_points')
-        .eq('player_id', user?.id)
+        .eq('player_id', playerId)
         .maybeSingle();
       
       if (stats) {
         await supabase.from('courtiq_player_stats')
           .update({ total_points: (stats.total_points || 0) + challenge.bonus_points })
-          .eq('player_id', user?.id);
+          .eq('player_id', playerId);
       } else {
         await supabase.from('courtiq_player_stats')
-          .insert({ player_id: user?.id, total_points: challenge.bonus_points });
+          .insert({ player_id: playerId, total_points: challenge.bonus_points });
       }
-      toast.success(`🎉 השלמת את האתגר! קיבלת ${challenge.bonus_points} נקודות בונוס!`);
-    } else {
-      toast.success('תוצאות נשלחו!');
     }
+    
+    toast.success('ההגשה אושרה!');
+    fetchChallenges();
+  };
+
+  const handleRejectEntry = async (entryId: string) => {
+    const { error } = await supabase.from('challenge_entries').update({ status: 'rejected' }).eq('id', entryId);
+    if (error) { toast.error('שגיאה בדחייה'); return; }
+    toast.info('ההגשה נדחתה');
     fetchChallenges();
   };
 
@@ -267,6 +283,8 @@ const WeeklyChallenges = () => {
             getZoneLabel={getZoneLabel}
             getMedalIcon={getMedalIcon}
             onSubmitEntry={handleSubmitEntry}
+            onApproveEntry={handleApproveEntry}
+            onRejectEntry={handleRejectEntry}
           />
         ))
       )}
@@ -275,11 +293,13 @@ const WeeklyChallenges = () => {
 };
 
 const ChallengeCard = ({
-  challenge, entries, isCoach, userId, getZoneLabel, getMedalIcon, onSubmitEntry
+  challenge, entries, isCoach, userId, getZoneLabel, getMedalIcon, onSubmitEntry, onApproveEntry, onRejectEntry
 }: {
   challenge: Challenge; entries: Entry[]; isCoach: boolean; userId?: string;
   getZoneLabel: (z: string | null) => string; getMedalIcon: (i: number) => JSX.Element;
   onSubmitEntry: (id: string, attempts: number, made: number, videoUrl: string) => void;
+  onApproveEntry: (entryId: string, challengeId: string, playerId: string, percentage: number, attempts: number) => void;
+  onRejectEntry: (entryId: string) => void;
 }) => {
   const [attempts, setAttempts] = useState('');
   const [made, setMade] = useState('');
@@ -287,6 +307,8 @@ const ChallengeCard = ({
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const myEntry = entries.find(e => e.player_id === userId);
+  const approvedEntries = entries.filter(e => e.status === 'approved');
+  const pendingEntries = entries.filter(e => e.status === 'pending');
 
   const handleVideoUpload = async (file: File) => {
     if (!file.type.startsWith('video/')) { toast.error('יש להעלות קובץ וידאו בלבד'); return; }
@@ -325,12 +347,34 @@ const ChallengeCard = ({
         </div>
       </div>
 
-      {/* Leaderboard */}
-      {entries.length > 0 && (
+      {/* Pending entries (coach view) */}
+      {isCoach && pendingEntries.length > 0 && (
+        <div className="rounded-lg bg-yellow-500/10 border border-yellow-500/30 p-3 mb-3">
+          <h4 className="text-xs font-medium text-yellow-400 text-right mb-2">ממתינים לאישור ({pendingEntries.length})</h4>
+          <div className="space-y-2">
+            {pendingEntries.map(e => (
+              <div key={e.id} className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="ghost" onClick={() => onRejectEntry(e.id)} className="h-7 px-2 text-destructive text-xs">דחה</Button>
+                  <Button size="sm" onClick={() => onApproveEntry(e.id, challenge.id, e.player_id, e.percentage, e.attempts)} className="h-7 px-2 gradient-accent text-accent-foreground text-xs">אשר</Button>
+                  <span className="font-bold text-foreground">{e.percentage}% ({e.made}/{e.attempts})</span>
+                  {e.video_url && (
+                    <a href={e.video_url} target="_blank" rel="noopener noreferrer" className="text-accent"><Video className="h-3 w-3" /></a>
+                  )}
+                </div>
+                <span className="text-foreground">{e.player_name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Approved leaderboard */}
+      {approvedEntries.length > 0 && (
         <div className="rounded-lg bg-secondary p-3 mb-3">
           <h4 className="text-xs font-medium text-muted-foreground text-right mb-2">טבלת מובילים</h4>
           <div className="space-y-1.5">
-            {entries.map((e, i) => (
+            {approvedEntries.map((e, i) => (
               <div key={e.id} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <span className={`font-bold ${e.percentage >= challenge.target_percentage && e.attempts >= challenge.target_attempts ? 'text-success' : 'text-foreground'}`}>
@@ -355,8 +399,21 @@ const ChallengeCard = ({
         </div>
       )}
 
-      {/* Submit entry (player only) with mandatory video */}
-      {!isCoach && (
+      {/* Player pending status */}
+      {!isCoach && myEntry && myEntry.status === 'pending' && (
+        <div className="rounded-lg bg-yellow-500/10 border border-yellow-500/30 p-3 text-center">
+          <p className="text-sm text-yellow-400 font-medium">⏳ ההגשה שלך ממתינה לאישור המאמן</p>
+          <p className="text-xs text-muted-foreground mt-1">{myEntry.percentage}% ({myEntry.made}/{myEntry.attempts})</p>
+        </div>
+      )}
+      {!isCoach && myEntry && myEntry.status === 'rejected' && (
+        <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-3 text-center">
+          <p className="text-sm text-destructive font-medium">❌ ההגשה נדחתה - ניתן לשלוח שוב</p>
+        </div>
+      )}
+
+      {/* Submit entry (player only) - show if no entry or rejected */}
+      {!isCoach && (!myEntry || myEntry.status === 'rejected') && (
         <div className="space-y-2">
           <input
             ref={fileRef}
@@ -392,15 +449,15 @@ const ChallengeCard = ({
               disabled={!attempts || !made || !videoUrl}
               className="gradient-accent text-accent-foreground shrink-0"
             >
-              {myEntry ? 'עדכן' : 'שלח'}
+              שלח
             </Button>
             <div className="flex-1 space-y-1">
               <Label className="text-xs text-right block">קלועות</Label>
-              <Input type="number" min={0} value={made} onChange={e => setMade(e.target.value)} className="h-8 text-right" placeholder={myEntry ? String(myEntry.made) : '0'} />
+              <Input type="number" min={0} value={made} onChange={e => setMade(e.target.value)} className="h-8 text-right" placeholder="0" />
             </div>
             <div className="flex-1 space-y-1">
               <Label className="text-xs text-right block">ניסיונות</Label>
-              <Input type="number" min={1} value={attempts} onChange={e => setAttempts(e.target.value)} className="h-8 text-right" placeholder={myEntry ? String(myEntry.attempts) : '0'} />
+              <Input type="number" min={1} value={attempts} onChange={e => setAttempts(e.target.value)} className="h-8 text-right" placeholder="0" />
             </div>
           </div>
         </div>

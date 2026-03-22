@@ -49,6 +49,7 @@ export type Database = {
           made: number | null
           percentage: number | null
           player_id: string
+          status: string
           submitted_at: string
           video_url: string | null
         }
@@ -59,6 +60,7 @@ export type Database = {
           made?: number | null
           percentage?: number | null
           player_id: string
+          status?: string
           submitted_at?: string
           video_url?: string | null
         }
@@ -69,6 +71,7 @@ export type Database = {
           made?: number | null
           percentage?: number | null
           player_id?: string
+          status?: string
           submitted_at?: string
           video_url?: string | null
         }
