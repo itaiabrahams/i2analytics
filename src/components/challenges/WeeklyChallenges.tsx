@@ -32,6 +32,7 @@ interface Entry {
   percentage: number;
   video_url?: string | null;
   player_name?: string;
+  status?: string;
 }
 
 const PERIOD_LABELS: Record<string, string> = {
