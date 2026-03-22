@@ -49,8 +49,9 @@ const LoginPage = () => {
     setPassword('');
     setDisplayName('');
     setPhone('');
-    setTeam('');
+    setClub('');
     setAge('');
+    setAgeCategory('');
     setRole('player');
     setCoachId('');
     setTeamCoachApproved(false);
