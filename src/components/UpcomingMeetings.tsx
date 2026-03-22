@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Video, Calendar, Clock, ExternalLink, Pencil, Play } from 'lucide-react';
+import { Video, Calendar, Clock, ExternalLink, Pencil, Play, ChevronDown, ChevronUp, Link2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ const UpcomingMeetings = ({ playerId }: UpcomingMeetingsProps) => {
   const navigate = useNavigate();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [editMeeting, setEditMeeting] = useState<Meeting | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const fetchMeetings = async () => {
     const { data } = await supabase
@@ -55,7 +56,6 @@ const UpcomingMeetings = ({ playerId }: UpcomingMeetingsProps) => {
   if (meetings.length === 0) return null;
 
   const isCoach = auth.role === 'coach';
-  const now = new Date();
 
   return (
     <div className="gradient-card rounded-xl p-4 mb-6">
@@ -66,23 +66,18 @@ const UpcomingMeetings = ({ playerId }: UpcomingMeetingsProps) => {
       <div className="space-y-2">
         {meetings.map(m => {
           const d = new Date(m.scheduled_at);
-          const isPast = d <= now;
+          const isExpanded = expandedId === m.id;
           return (
-            <div key={m.id} className={`bg-secondary rounded-lg p-3 ${isPast ? 'border border-accent/30' : ''}`}>
-              <div className="flex items-center justify-between">
+            <div key={m.id} className="bg-secondary rounded-lg overflow-hidden">
+              {/* Clickable header */}
+              <button
+                onClick={() => setExpandedId(isExpanded ? null : m.id)}
+                className="w-full p-3 flex items-center justify-between hover:bg-muted/50 transition-colors"
+              >
                 <div className="flex items-center gap-2">
-                  {isCoach && (
-                    <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => setEditMeeting(m)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  )}
-                  {m.meeting_url && (
-                    <a href={m.meeting_url} target="_blank" rel="noopener noreferrer">
-                      <Button variant="ghost" size="sm" className="text-accent">
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                    </a>
-                  )}
+                  {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                  {m.video_url && <Video className="h-3.5 w-3.5 text-accent" />}
+                  {m.meeting_url && <Link2 className="h-3.5 w-3.5 text-accent" />}
                 </div>
                 <div className="text-right flex-1">
                   <p className="text-sm font-medium text-foreground">{m.title}</p>
@@ -92,18 +87,50 @@ const UpcomingMeetings = ({ playerId }: UpcomingMeetingsProps) => {
                     <span>{d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
                     <Calendar className="h-3 w-3" />
                   </p>
-                  {m.notes && <p className="text-xs text-muted-foreground mt-1">{m.notes}</p>}
                 </div>
-              </div>
-              {isPast && (
-                <Button
-                  onClick={() => handleStartSession(m)}
-                  className="w-full mt-2 gradient-accent text-accent-foreground font-semibold gap-2"
-                  size="sm"
-                >
-                  <Play className="h-4 w-4" />
-                  התחל סשן מהפגישה הזו
-                </Button>
+              </button>
+
+              {/* Expanded details */}
+              {isExpanded && (
+                <div className="px-3 pb-3 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {m.notes && (
+                    <p className="text-xs text-muted-foreground text-right bg-muted/50 rounded p-2">{m.notes}</p>
+                  )}
+
+                  <div className="flex flex-wrap gap-2 justify-end">
+                    {m.video_url && (
+                      <a href={m.video_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm" className="gap-1.5 text-accent border-accent/30">
+                          <Video className="h-3.5 w-3.5" />
+                          צפה בוידאו
+                        </Button>
+                      </a>
+                    )}
+                    {m.meeting_url && (
+                      <a href={m.meeting_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm" className="gap-1.5 text-accent border-accent/30">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          הצטרף לשיחה
+                        </Button>
+                      </a>
+                    )}
+                    {isCoach && (
+                      <Button variant="outline" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setEditMeeting(m)}>
+                        <Pencil className="h-3.5 w-3.5" />
+                        ערוך
+                      </Button>
+                    )}
+                  </div>
+
+                  <Button
+                    onClick={() => handleStartSession(m)}
+                    className="w-full gradient-accent text-accent-foreground font-semibold gap-2"
+                    size="sm"
+                  >
+                    <Play className="h-4 w-4" />
+                    התחל סשן מהפגישה הזו
+                  </Button>
+                </div>
               )}
             </div>
           );
