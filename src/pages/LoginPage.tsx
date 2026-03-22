@@ -271,26 +271,42 @@ const LoginPage = () => {
               {role === 'player' && (
                 <>
                   <div className="space-y-2">
-                    <Label>קבוצה</Label>
+                    <Label>מועדון</Label>
                     <Input
-                      placeholder="שם הקבוצה"
-                      value={team}
-                      onChange={e => { setTeam(e.target.value); setError(''); }}
+                      placeholder="שם המועדון"
+                      value={club}
+                      onChange={e => { setClub(e.target.value); setError(''); }}
                       className="h-12 bg-secondary border-border text-foreground"
                       maxLength={100}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>גיל</Label>
-                    <Input
-                      type="number"
-                      placeholder="הגיל שלך"
-                      value={age}
-                      onChange={e => { setAge(e.target.value); setError(''); }}
-                      className="h-12 bg-secondary border-border text-foreground"
-                      min={8}
-                      max={50}
-                    />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>גיל</Label>
+                      <Input
+                        type="number"
+                        placeholder="הגיל שלך"
+                        value={age}
+                        onChange={e => { setAge(e.target.value); setError(''); }}
+                        className="h-12 bg-secondary border-border text-foreground"
+                        min={8}
+                        max={50}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>קבוצת גיל</Label>
+                      <Select value={ageCategory} onValueChange={v => { setAgeCategory(v); setError(''); }}>
+                        <SelectTrigger className="h-12 bg-secondary border-border text-foreground">
+                          <SelectValue placeholder="בחר קבוצה" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover border-border">
+                          <SelectItem value="U14">U14</SelectItem>
+                          <SelectItem value="U15">U15</SelectItem>
+                          <SelectItem value="U16">U16</SelectItem>
+                          <SelectItem value="U18">U18</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </>
               )}

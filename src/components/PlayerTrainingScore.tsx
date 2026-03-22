@@ -147,15 +147,19 @@ const PlayerTrainingScore = ({ playerId, isCoach }: PlayerTrainingScoreProps) =>
       <div className="mt-3 grid grid-cols-2 gap-3">
         <div className="rounded-lg bg-secondary p-3">
           <div className="flex items-center justify-between mb-1">
-            <span className={`text-lg font-bold ${getScoreColor(data.shotScore)}`}>{data.shotScore}</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-lg font-bold text-foreground">{data.totalMade}</span>
+              <span className="text-xs text-muted-foreground">/ {data.totalAttempts}</span>
+            </div>
             <div className="flex items-center gap-1">
               <span className="text-xs text-muted-foreground">קליעה</span>
               <Target className="h-3.5 w-3.5 text-accent" />
             </div>
           </div>
           <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-            <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${data.shotScore}%` }} />
+            <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${data.shootingPct}%` }} />
           </div>
+          <p className="text-[10px] text-muted-foreground mt-1 text-left">{data.shootingPct}%</p>
         </div>
         <div className="rounded-lg bg-secondary p-3">
           <div className="flex items-center justify-between mb-1">
