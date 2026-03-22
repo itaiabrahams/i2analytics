@@ -119,8 +119,9 @@ const LoginPage = () => {
       role === 'player' && subscriptionTier === 'premium' ? coachId : undefined,
       role === 'player' ? subscriptionTier : 'free',
       phone.trim() || undefined,
-      team.trim() || undefined,
-      age ? parseInt(age) : undefined
+      club.trim() || undefined,
+      age ? parseInt(age) : undefined,
+      ageCategory || undefined
     );
     if (result.error) {
       setError(result.error);
