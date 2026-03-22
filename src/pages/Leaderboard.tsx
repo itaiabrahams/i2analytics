@@ -202,7 +202,7 @@ const Leaderboard = () => {
 
     // Sort
     if (rankingType === 'shooting') {
-      result.sort((a, b) => b.shootingPct - a.shootingPct || b.attempts - a.attempts);
+      result.sort((a, b) => b.made - a.made || b.attempts - a.attempts);
     } else if (rankingType === 'quiz') {
       result.sort((a, b) => b.quizPoints - a.quizPoints || b.quizAccuracy - a.quizAccuracy);
     } else {
