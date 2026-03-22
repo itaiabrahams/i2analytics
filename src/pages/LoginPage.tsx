@@ -88,8 +88,12 @@ const LoginPage = () => {
         setError('יש למלא גיל (8-50)');
         return;
       }
-      if (!team.trim()) {
-        setError('יש למלא שם קבוצה');
+      if (!club.trim()) {
+        setError('יש למלא שם מועדון');
+        return;
+      }
+      if (!ageCategory) {
+        setError('יש לבחור קבוצת גיל');
         return;
       }
     }
