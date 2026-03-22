@@ -68,39 +68,43 @@ const UpcomingMeetings = ({ playerId }: UpcomingMeetingsProps) => {
           const d = new Date(m.scheduled_at);
           const isPast = d <= now;
           return (
-            <div key={m.id} className={`flex items-center justify-between bg-secondary rounded-lg p-3 ${isPast ? 'border border-accent/30' : ''}`}>
-              <div className="flex items-center gap-2">
-                {isCoach && (
-                  <>
-                    {isPast && (
-                      <Button variant="ghost" size="sm" className="text-success" onClick={() => handleStartSession(m)}>
-                        <Play className="h-4 w-4" />
-                      </Button>
-                    )}
+            <div key={m.id} className={`bg-secondary rounded-lg p-3 ${isPast ? 'border border-accent/30' : ''}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {isCoach && (
                     <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => setEditMeeting(m)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                  </>
-                )}
-                {m.meeting_url && (
-                  <a href={m.meeting_url} target="_blank" rel="noopener noreferrer">
-                    <Button variant="ghost" size="sm" className="text-accent">
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </a>
-                )}
+                  )}
+                  {m.meeting_url && (
+                    <a href={m.meeting_url} target="_blank" rel="noopener noreferrer">
+                      <Button variant="ghost" size="sm" className="text-accent">
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </a>
+                  )}
+                </div>
+                <div className="text-right flex-1">
+                  <p className="text-sm font-medium text-foreground">{m.title}</p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-2 justify-end">
+                    <span>{d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}</span>
+                    <Clock className="h-3 w-3" />
+                    <span>{d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+                    <Calendar className="h-3 w-3" />
+                  </p>
+                  {m.notes && <p className="text-xs text-muted-foreground mt-1">{m.notes}</p>}
+                </div>
               </div>
-              <div className="text-right flex-1">
-                <p className="text-sm font-medium text-foreground">{m.title}</p>
-                <p className="text-xs text-muted-foreground flex items-center gap-2 justify-end">
-                  <span>{d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}</span>
-                  <Clock className="h-3 w-3" />
-                  <span>{d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                  <Calendar className="h-3 w-3" />
-                </p>
-                {isPast && <span className="text-xs text-accent font-medium">הפגישה עברה — ניתן להתחיל סשן</span>}
-                {m.notes && <p className="text-xs text-muted-foreground mt-1">{m.notes}</p>}
-              </div>
+              {isPast && (
+                <Button
+                  onClick={() => handleStartSession(m)}
+                  className="w-full mt-2 gradient-accent text-accent-foreground font-semibold gap-2"
+                  size="sm"
+                >
+                  <Play className="h-4 w-4" />
+                  התחל סשן מהפגישה הזו
+                </Button>
+              )}
             </div>
           );
         })}
