@@ -283,6 +283,8 @@ const WeeklyChallenges = () => {
             getZoneLabel={getZoneLabel}
             getMedalIcon={getMedalIcon}
             onSubmitEntry={handleSubmitEntry}
+            onApproveEntry={handleApproveEntry}
+            onRejectEntry={handleRejectEntry}
           />
         ))
       )}
