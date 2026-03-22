@@ -293,11 +293,13 @@ const WeeklyChallenges = () => {
 };
 
 const ChallengeCard = ({
-  challenge, entries, isCoach, userId, getZoneLabel, getMedalIcon, onSubmitEntry
+  challenge, entries, isCoach, userId, getZoneLabel, getMedalIcon, onSubmitEntry, onApproveEntry, onRejectEntry
 }: {
   challenge: Challenge; entries: Entry[]; isCoach: boolean; userId?: string;
   getZoneLabel: (z: string | null) => string; getMedalIcon: (i: number) => JSX.Element;
   onSubmitEntry: (id: string, attempts: number, made: number, videoUrl: string) => void;
+  onApproveEntry: (entryId: string, challengeId: string, playerId: string, percentage: number, attempts: number) => void;
+  onRejectEntry: (entryId: string) => void;
 }) => {
   const [attempts, setAttempts] = useState('');
   const [made, setMade] = useState('');
