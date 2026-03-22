@@ -125,6 +125,14 @@ const NewSession = () => {
         if (actionsError) throw actionsError;
       }
 
+      // If created from a scheduled meeting, mark it as completed
+      if (meetingId) {
+        await supabase
+          .from('scheduled_meetings')
+          .update({ status: 'completed' })
+          .eq('id', meetingId);
+      }
+
       toast.success('הסשן נשמר בהצלחה!');
       navigate(`/player/${playerId}`);
     } catch (err: any) {
