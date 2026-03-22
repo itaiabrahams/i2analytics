@@ -135,7 +135,6 @@ const WeeklyChallenges = () => {
   const handleSubmitEntry = async (challengeId: string, attempts: number, made: number, videoUrl: string) => {
     if (!videoUrl) { toast.error('חובה להעלות סרטון הוכחה'); return; }
     const percentage = attempts > 0 ? Math.round((made / attempts) * 100) : 0;
-    const challenge = challenges.find(c => c.id === challengeId);
     
     const { error } = await supabase.from('challenge_entries').upsert({
       challenge_id: challengeId,
@@ -144,30 +143,46 @@ const WeeklyChallenges = () => {
       made,
       percentage,
       video_url: videoUrl,
+      status: 'pending',
     }, { onConflict: 'challenge_id,player_id' });
     
     if (error) { toast.error('שגיאה בשליחת תוצאות'); return; }
     
-    // Award bonus points if challenge met and bonus_points > 0
+    toast.success('התוצאות נשלחו וממתינות לאישור המאמן!');
+    fetchChallenges();
+  };
+
+  const handleApproveEntry = async (entryId: string, challengeId: string, playerId: string, percentage: number, attempts: number) => {
+    const challenge = challenges.find(c => c.id === challengeId);
+    const { error } = await supabase.from('challenge_entries').update({ status: 'approved' }).eq('id', entryId);
+    if (error) { toast.error('שגיאה באישור'); return; }
+    
+    // Award bonus points if challenge met
     if (challenge && challenge.bonus_points > 0 && percentage >= challenge.target_percentage && attempts >= challenge.target_attempts) {
       const { data: stats } = await supabase
         .from('courtiq_player_stats')
         .select('total_points')
-        .eq('player_id', user?.id)
+        .eq('player_id', playerId)
         .maybeSingle();
       
       if (stats) {
         await supabase.from('courtiq_player_stats')
           .update({ total_points: (stats.total_points || 0) + challenge.bonus_points })
-          .eq('player_id', user?.id);
+          .eq('player_id', playerId);
       } else {
         await supabase.from('courtiq_player_stats')
-          .insert({ player_id: user?.id, total_points: challenge.bonus_points });
+          .insert({ player_id: playerId, total_points: challenge.bonus_points });
       }
-      toast.success(`🎉 השלמת את האתגר! קיבלת ${challenge.bonus_points} נקודות בונוס!`);
-    } else {
-      toast.success('תוצאות נשלחו!');
     }
+    
+    toast.success('ההגשה אושרה!');
+    fetchChallenges();
+  };
+
+  const handleRejectEntry = async (entryId: string) => {
+    const { error } = await supabase.from('challenge_entries').update({ status: 'rejected' }).eq('id', entryId);
+    if (error) { toast.error('שגיאה בדחייה'); return; }
+    toast.info('ההגשה נדחתה');
     fetchChallenges();
   };
 
