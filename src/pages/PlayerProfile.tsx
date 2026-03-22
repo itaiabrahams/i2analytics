@@ -139,6 +139,10 @@ const PlayerProfile = () => {
             </Button>
           ) : (
             <div className="flex items-center gap-2 flex-wrap">
+              <Button variant="default" onClick={() => navigate('/personal-coaching')} className="gradient-accent text-accent-foreground">
+                <Video className="ml-2 h-4 w-4" />
+                ליווי אישי
+              </Button>
               <Button variant="outline" onClick={() => navigate('/shots')} className="text-muted-foreground">
                 <Target className="ml-2 h-4 w-4" />
                 מעקב קליעות
