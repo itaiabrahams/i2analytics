@@ -119,6 +119,7 @@ const AppRoutes = () => {
             <Route path="/courtiq/profile" element={<CourtIQProfilePage />} />
             <Route path="/courtiq/admin" element={<CourtIQAdminPage />} />
             <Route path="/workout-plans" element={<WorkoutPlansPage />} />
+            <Route path="/personal-coaching" element={<PersonalCoachingPage />} />
             <Route path="/admin-tasks" element={<AdminTasksPage />} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
             <Route path="*" element={<NotFound />} />
