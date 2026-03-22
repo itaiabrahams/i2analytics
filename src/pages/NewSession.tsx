@@ -166,7 +166,9 @@ const NewSession = () => {
           <ArrowRight className="mr-2 h-4 w-4" />
         </Button>
 
-        <h1 className="text-2xl font-bold text-foreground mb-2">סשן חדש עבור {player.display_name}</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">
+          {meetingId ? `סשן מפגישה: ${meetingTitle}` : `סשן חדש עבור ${player.display_name}`}
+        </h1>
 
         {/* Step indicator */}
         <div className="flex items-center justify-between mb-6 gradient-card rounded-xl p-4">
