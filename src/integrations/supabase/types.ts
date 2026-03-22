@@ -956,6 +956,51 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_plans: {
+        Row: {
+          emoji: string
+          id: string
+          image_url: string | null
+          month: number
+          month_index: number
+          month_label: string
+          shooting_image_url: string | null
+          subtitle: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          year: number
+        }
+        Insert: {
+          emoji?: string
+          id?: string
+          image_url?: string | null
+          month?: number
+          month_index: number
+          month_label?: string
+          shooting_image_url?: string | null
+          subtitle?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          year?: number
+        }
+        Update: {
+          emoji?: string
+          id?: string
+          image_url?: string | null
+          month?: number
+          month_index?: number
+          month_label?: string
+          shooting_image_url?: string | null
+          subtitle?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          year?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
