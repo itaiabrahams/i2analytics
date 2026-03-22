@@ -347,12 +347,34 @@ const ChallengeCard = ({
         </div>
       </div>
 
-      {/* Leaderboard */}
-      {entries.length > 0 && (
+      {/* Pending entries (coach view) */}
+      {isCoach && pendingEntries.length > 0 && (
+        <div className="rounded-lg bg-yellow-500/10 border border-yellow-500/30 p-3 mb-3">
+          <h4 className="text-xs font-medium text-yellow-400 text-right mb-2">ממתינים לאישור ({pendingEntries.length})</h4>
+          <div className="space-y-2">
+            {pendingEntries.map(e => (
+              <div key={e.id} className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="ghost" onClick={() => onRejectEntry(e.id)} className="h-7 px-2 text-destructive text-xs">דחה</Button>
+                  <Button size="sm" onClick={() => onApproveEntry(e.id, challenge.id, e.player_id, e.percentage, e.attempts)} className="h-7 px-2 gradient-accent text-accent-foreground text-xs">אשר</Button>
+                  <span className="font-bold text-foreground">{e.percentage}% ({e.made}/{e.attempts})</span>
+                  {e.video_url && (
+                    <a href={e.video_url} target="_blank" rel="noopener noreferrer" className="text-accent"><Video className="h-3 w-3" /></a>
+                  )}
+                </div>
+                <span className="text-foreground">{e.player_name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Approved leaderboard */}
+      {approvedEntries.length > 0 && (
         <div className="rounded-lg bg-secondary p-3 mb-3">
           <h4 className="text-xs font-medium text-muted-foreground text-right mb-2">טבלת מובילים</h4>
           <div className="space-y-1.5">
-            {entries.map((e, i) => (
+            {approvedEntries.map((e, i) => (
               <div key={e.id} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <span className={`font-bold ${e.percentage >= challenge.target_percentage && e.attempts >= challenge.target_attempts ? 'text-success' : 'text-foreground'}`}>
