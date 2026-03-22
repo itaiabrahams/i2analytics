@@ -307,6 +307,8 @@ const ChallengeCard = ({
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const myEntry = entries.find(e => e.player_id === userId);
+  const approvedEntries = entries.filter(e => e.status === 'approved');
+  const pendingEntries = entries.filter(e => e.status === 'pending');
 
   const handleVideoUpload = async (file: File) => {
     if (!file.type.startsWith('video/')) { toast.error('יש להעלות קובץ וידאו בלבד'); return; }
