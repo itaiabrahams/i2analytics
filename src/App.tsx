@@ -24,6 +24,7 @@ import CourtIQAdminPage from "./pages/CourtIQAdminPage";
 import AdminTasksPage from "./pages/AdminTasksPage";
 import RoleSwitcher from "./components/RoleSwitcher";
 import WorkoutPlansPage from "./pages/WorkoutPlansPage";
+import PersonalCoachingPage from "./pages/PersonalCoachingPage";
 import FloatingLogo from "./components/FloatingLogo";
 import MobileTopBar from "./components/MobileTopBar";
 
@@ -118,6 +119,7 @@ const AppRoutes = () => {
             <Route path="/courtiq/profile" element={<CourtIQProfilePage />} />
             <Route path="/courtiq/admin" element={<CourtIQAdminPage />} />
             <Route path="/workout-plans" element={<WorkoutPlansPage />} />
+            <Route path="/personal-coaching" element={<PersonalCoachingPage />} />
             <Route path="/admin-tasks" element={<AdminTasksPage />} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
             <Route path="*" element={<NotFound />} />
