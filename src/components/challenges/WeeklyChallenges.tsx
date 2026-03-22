@@ -399,8 +399,21 @@ const ChallengeCard = ({
         </div>
       )}
 
-      {/* Submit entry (player only) with mandatory video */}
-      {!isCoach && (
+      {/* Player pending status */}
+      {!isCoach && myEntry && myEntry.status === 'pending' && (
+        <div className="rounded-lg bg-yellow-500/10 border border-yellow-500/30 p-3 text-center">
+          <p className="text-sm text-yellow-400 font-medium">⏳ ההגשה שלך ממתינה לאישור המאמן</p>
+          <p className="text-xs text-muted-foreground mt-1">{myEntry.percentage}% ({myEntry.made}/{myEntry.attempts})</p>
+        </div>
+      )}
+      {!isCoach && myEntry && myEntry.status === 'rejected' && (
+        <div className="rounded-lg bg-destructive/10 border border-destructive/30 p-3 text-center">
+          <p className="text-sm text-destructive font-medium">❌ ההגשה נדחתה - ניתן לשלוח שוב</p>
+        </div>
+      )}
+
+      {/* Submit entry (player only) - show if no entry or rejected */}
+      {!isCoach && (!myEntry || myEntry.status === 'rejected') && (
         <div className="space-y-2">
           <input
             ref={fileRef}
@@ -436,15 +449,15 @@ const ChallengeCard = ({
               disabled={!attempts || !made || !videoUrl}
               className="gradient-accent text-accent-foreground shrink-0"
             >
-              {myEntry ? 'עדכן' : 'שלח'}
+              שלח
             </Button>
             <div className="flex-1 space-y-1">
               <Label className="text-xs text-right block">קלועות</Label>
-              <Input type="number" min={0} value={made} onChange={e => setMade(e.target.value)} className="h-8 text-right" placeholder={myEntry ? String(myEntry.made) : '0'} />
+              <Input type="number" min={0} value={made} onChange={e => setMade(e.target.value)} className="h-8 text-right" placeholder="0" />
             </div>
             <div className="flex-1 space-y-1">
               <Label className="text-xs text-right block">ניסיונות</Label>
-              <Input type="number" min={1} value={attempts} onChange={e => setAttempts(e.target.value)} className="h-8 text-right" placeholder={myEntry ? String(myEntry.attempts) : '0'} />
+              <Input type="number" min={1} value={attempts} onChange={e => setAttempts(e.target.value)} className="h-8 text-right" placeholder="0" />
             </div>
           </div>
         </div>
