@@ -31,12 +31,17 @@ const NewSession = () => {
   const navigate = useNavigate();
   const { player, loading } = usePlayer(playerId);
 
+  // Check for pre-filled data from a scheduled meeting
+  const searchParams = new URLSearchParams(window.location.search);
+  const meetingId = searchParams.get('meetingId');
+  const meetingTitle = searchParams.get('title');
+
   const [step, setStep] = useState(0);
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [opponent, setOpponent] = useState('');
-  const [videoUrl, setVideoUrl] = useState('');
-  const [meetingUrl, setMeetingUrl] = useState('');
-  const [coachNotes, setCoachNotes] = useState('');
+  const [date, setDate] = useState(searchParams.get('date') || new Date().toISOString().slice(0, 10));
+  const [opponent, setOpponent] = useState(meetingTitle || '');
+  const [videoUrl, setVideoUrl] = useState(searchParams.get('videoUrl') || '');
+  const [meetingUrl, setMeetingUrl] = useState(searchParams.get('meetingUrl') || '');
+  const [coachNotes, setCoachNotes] = useState(searchParams.get('notes') || '');
   const [gameStats, setGameStats] = useState({
     points: 0, assists: 0, rebounds: 0, steals: 0, turnovers: 0, fgPercentage: 0,
   });
@@ -120,6 +125,14 @@ const NewSession = () => {
         if (actionsError) throw actionsError;
       }
 
+      // If created from a scheduled meeting, mark it as completed
+      if (meetingId) {
+        await supabase
+          .from('scheduled_meetings')
+          .update({ status: 'completed' })
+          .eq('id', meetingId);
+      }
+
       toast.success('הסשן נשמר בהצלחה!');
       navigate(`/player/${playerId}`);
     } catch (err: any) {
@@ -153,7 +166,9 @@ const NewSession = () => {
           <ArrowRight className="mr-2 h-4 w-4" />
         </Button>
 
-        <h1 className="text-2xl font-bold text-foreground mb-2">סשן חדש עבור {player.display_name}</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">
+          {meetingId ? `סשן מפגישה: ${meetingTitle}` : `סשן חדש עבור ${player.display_name}`}
+        </h1>
 
         {/* Step indicator */}
         <div className="flex items-center justify-between mb-6 gradient-card rounded-xl p-4">

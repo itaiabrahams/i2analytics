@@ -675,6 +675,7 @@ export type Database = {
           status: string
           title: string
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           coach_id: string
@@ -687,6 +688,7 @@ export type Database = {
           status?: string
           title: string
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           coach_id?: string
@@ -699,6 +701,7 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
       }

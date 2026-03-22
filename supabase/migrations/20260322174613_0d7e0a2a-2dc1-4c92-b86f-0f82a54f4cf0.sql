@@ -1,0 +1,1 @@
+ALTER TABLE public.scheduled_meetings ADD COLUMN video_url text DEFAULT NULL;
