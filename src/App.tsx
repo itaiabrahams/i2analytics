@@ -24,6 +24,7 @@ import CourtIQAdminPage from "./pages/CourtIQAdminPage";
 import AdminTasksPage from "./pages/AdminTasksPage";
 import RoleSwitcher from "./components/RoleSwitcher";
 import WorkoutPlansPage from "./pages/WorkoutPlansPage";
+import PersonalCoachingPage from "./pages/PersonalCoachingPage";
 import FloatingLogo from "./components/FloatingLogo";
 import MobileTopBar from "./components/MobileTopBar";
 
