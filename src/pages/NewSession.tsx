@@ -102,7 +102,8 @@ const NewSession = () => {
           turnovers: gameStats.turnovers,
           fg_percentage: gameStats.fgPercentage,
           overall_score: parseFloat(overallScore.toFixed(2)),
-        })
+          status: 'open',
+        } as any)
         .select()
         .single();
 
@@ -133,8 +134,8 @@ const NewSession = () => {
           .eq('id', meetingId);
       }
 
-      toast.success('הסשן נשמר בהצלחה!');
-      navigate(`/player/${playerId}`);
+      toast.success('הסשן נשמר בהצלחה! הסשן פתוח ותוכל להמשיך לערוך אותו.');
+      navigate(`/session/${sessionData.id}`);
     } catch (err: any) {
       toast.error('שגיאה בשמירת הסשן: ' + err.message);
     } finally {
