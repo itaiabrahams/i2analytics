@@ -297,12 +297,42 @@ const PlayerProfile = () => {
         {/* Session history */}
         {!isBasicPlan && (
           <div className="gradient-card rounded-xl p-4">
+            {/* Open sessions */}
+            {sessions.filter(s => (s as any).status === 'open').length > 0 && (
+              <div className="mb-4">
+                <h3 className="mb-3 text-right font-semibold text-accent flex items-center gap-2 justify-end">
+                  <span>סשנים פתוחים</span>
+                  <Clock className="h-4 w-4" />
+                </h3>
+                <div className="space-y-2">
+                  {sessions.filter(s => (s as any).status === 'open').map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => navigate(`/session/${s.id}`)}
+                      className="w-full rounded-lg bg-accent/10 border border-accent/30 p-4 text-right transition-colors hover:bg-accent/20 animate-fade-in flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium bg-accent/20 text-accent px-2 py-1 rounded-full">פתוח</span>
+                        <span className={`text-xl font-bold ${Number(s.overall_score) > 0 ? 'text-success' : Number(s.overall_score) < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                          {Number(s.overall_score).toFixed(2)}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">נגד {s.opponent}</p>
+                        <p className="text-sm text-muted-foreground">{new Date(s.date).toLocaleDateString('he-IL')}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <h3 className="mb-4 text-right font-semibold text-foreground">היסטוריית סשנים</h3>
             <div className="space-y-2">
-              {sessions.length === 0 ? (
+              {sessions.filter(s => (s as any).status !== 'open').length === 0 && sessions.filter(s => (s as any).status === 'open').length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">אין סשנים עדיין</p>
               ) : (
-                [...sessions].reverse().map((s, i) => (
+                [...sessions].filter(s => (s as any).status !== 'open').reverse().map((s, i) => (
                   <button
                     key={s.id}
                     onClick={() => navigate(`/session/${s.id}`)}
