@@ -39,6 +39,32 @@ const ShotCalendar = ({
 }: ShotCalendarProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+
+  const handleEdit = (s: ShotSession) => {
+    setEditingId(s.id);
+    setEditTitle(s.title);
+  };
+
+  const handleSaveEdit = async (id: string) => {
+    if (!editTitle.trim()) return;
+    const { error } = await supabase.from('shot_sessions').update({ title: editTitle.trim() }).eq('id', id);
+    if (error) { toast.error('שגיאה בעדכון'); return; }
+    toast.success('האימון עודכן');
+    setEditingId(null);
+    onSessionCreated();
+  };
+
+  const handleDelete = async (s: ShotSession) => {
+    if (!confirm(`למחוק את האימון "${s.title}"? כל הנתונים יימחקו.`)) return;
+    // Delete shots first, then session
+    await supabase.from('shots').delete().eq('session_id', s.id);
+    const { error } = await supabase.from('shot_sessions').delete().eq('id', s.id);
+    if (error) { toast.error('שגיאה במחיקה'); return; }
+    toast.success('האימון נמחק');
+    onSessionCreated();
+  };
 
   const handleDateChange = (date: Date | undefined) => {
     setSelectedDate(date);
