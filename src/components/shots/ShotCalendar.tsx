@@ -139,18 +139,51 @@ const ShotCalendar = ({
           {sessionsForDate.length > 0 ? (
             <div className="space-y-2">
               {sessionsForDate.map(s => (
-                <button
-                  key={s.id}
-                  onClick={() => onSelectSession(s.id)}
-                  className={`w-full rounded-xl p-3.5 text-right text-sm font-medium transition-all active:scale-[0.97] ${
-                    s.id === activeSessionId
-                      ? 'gradient-accent text-accent-foreground shadow-md'
-                      : 'bg-secondary text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {s.title || 'אימון'}
-                  {s.video_url && <span className="mr-2 text-xs">🎥</span>}
-                </button>
+                <div key={s.id} className="flex items-center gap-1.5">
+                  {editingId === s.id ? (
+                    <div className="flex items-center gap-1.5 w-full">
+                      <button onClick={() => setEditingId(null)} className="text-muted-foreground hover:text-destructive p-1">
+                        <X className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handleSaveEdit(s.id)} className="text-success p-1">
+                        <Check className="h-4 w-4" />
+                      </button>
+                      <Input
+                        value={editTitle}
+                        onChange={e => setEditTitle(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleSaveEdit(s.id)}
+                        className="flex-1 h-9 text-right text-sm bg-secondary border-border"
+                        autoFocus
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleDelete(s)}
+                        className="text-muted-foreground hover:text-destructive p-1.5 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleEdit(s)}
+                        className="text-muted-foreground hover:text-accent p-1.5 rounded-lg transition-colors"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => onSelectSession(s.id)}
+                        className={`flex-1 rounded-xl p-3.5 text-right text-sm font-medium transition-all active:scale-[0.97] ${
+                          s.id === activeSessionId
+                            ? 'gradient-accent text-accent-foreground shadow-md'
+                            : 'bg-secondary text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {s.title || 'אימון'}
+                        {s.video_url && <span className="mr-2 text-xs">🎥</span>}
+                      </button>
+                    </>
+                  )}
+                </div>
               ))}
             </div>
           ) : (
