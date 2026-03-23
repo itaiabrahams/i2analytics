@@ -134,8 +134,8 @@ const NewSession = () => {
           .eq('id', meetingId);
       }
 
-      toast.success('הסשן נשמר בהצלחה!');
-      navigate(`/player/${playerId}`);
+      toast.success('הסשן נשמר בהצלחה! הסשן פתוח ותוכל להמשיך לערוך אותו.');
+      navigate(`/session/${sessionData.id}`);
     } catch (err: any) {
       toast.error('שגיאה בשמירת הסשן: ' + err.message);
     } finally {
