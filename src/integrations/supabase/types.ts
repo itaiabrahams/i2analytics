@@ -720,6 +720,7 @@ export type Database = {
           player_id: string
           points: number
           rebounds: number
+          status: string
           steals: number
           turnovers: number
           updated_at: string
@@ -739,6 +740,7 @@ export type Database = {
           player_id: string
           points?: number
           rebounds?: number
+          status?: string
           steals?: number
           turnovers?: number
           updated_at?: string
@@ -758,6 +760,7 @@ export type Database = {
           player_id?: string
           points?: number
           rebounds?: number
+          status?: string
           steals?: number
           turnovers?: number
           updated_at?: string
