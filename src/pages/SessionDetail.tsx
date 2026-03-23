@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowRight, ExternalLink, Pencil, Plus, Trash2, Save, X } from 'lucide-react';
+import { ArrowRight, ExternalLink, Pencil, Plus, Trash2, Save, X, CheckCircle2, Clock } from 'lucide-react';
 import { useState } from 'react';
 import { ACTION_TYPES } from '@/lib/types';
 import VideoMeeting from '@/components/VideoMeeting';
@@ -22,6 +22,8 @@ interface LocalAction {
   isNew?: boolean;
 }
 
+const QUARTERS = [1, 2, 3, 4] as const;
+
 const SessionDetail = () => {
   const { sessionId } = useParams();
   const { auth } = useAuth();
@@ -29,6 +31,7 @@ const SessionDetail = () => {
   const [filter, setFilter] = useState<string>('all');
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [activeQuarter, setActiveQuarter] = useState<number | 'all'>('all');
 
   const { session, actions, loading, refetch } = useSession(sessionId);
   const { player } = usePlayer(session?.player_id);
@@ -51,6 +54,8 @@ const SessionDetail = () => {
 
   if (!session) return <div className="p-8 text-center text-foreground">סשן לא נמצא</div>;
 
+  const sessionStatus = (session as any).status || 'completed';
+  const isOpen = sessionStatus === 'open';
   const canEdit = auth.role === 'coach' || auth.playerId === session.player_id;
 
   const startEditing = () => {
@@ -66,6 +71,14 @@ const SessionDetail = () => {
     setEditNotes(session.coach_notes || '');
     setEditing(true);
   };
+
+  // Auto-enter edit mode for open sessions
+  if (isOpen && canEdit && !editing && actions !== undefined) {
+    // Trigger edit on first render for open sessions
+    setTimeout(() => {
+      if (!editing) startEditing();
+    }, 0);
+  }
 
   const cancelEditing = () => {
     setEditing(false);
@@ -97,25 +110,31 @@ const SessionDetail = () => {
     setEditActions(prev => prev.filter(a => a.id !== id));
   };
 
-  const handleSave = async () => {
+  const handleSave = async (finishSession = false) => {
     setSaving(true);
     try {
       const newOverall = editActions.length > 0
         ? editActions.reduce((s, a) => s + a.score, 0) / editActions.length
         : 0;
 
+      const updateData: any = {
+        points: editStats.points,
+        assists: editStats.assists,
+        rebounds: editStats.rebounds,
+        steals: editStats.steals,
+        turnovers: editStats.turnovers,
+        fg_percentage: editStats.fgPercentage,
+        overall_score: parseFloat(newOverall.toFixed(2)),
+        coach_notes: editNotes,
+      };
+
+      if (finishSession) {
+        updateData.status = 'completed';
+      }
+
       const { error: sessionError } = await supabase
         .from('sessions')
-        .update({
-          points: editStats.points,
-          assists: editStats.assists,
-          rebounds: editStats.rebounds,
-          steals: editStats.steals,
-          turnovers: editStats.turnovers,
-          fg_percentage: editStats.fgPercentage,
-          overall_score: parseFloat(newOverall.toFixed(2)),
-          coach_notes: editNotes,
-        })
+        .update(updateData)
         .eq('id', session.id);
 
       if (sessionError) throw sessionError;
@@ -146,7 +165,11 @@ const SessionDetail = () => {
         if (insertError) throw insertError;
       }
 
-      toast.success('הסשן עודכן בהצלחה!');
+      if (finishSession) {
+        toast.success('הסשן הושלם ונסגר בהצלחה! 🎉');
+      } else {
+        toast.success('הסשן נשמר — תוכל להמשיך מאוחר יותר');
+      }
       setEditing(false);
       if (refetch) refetch();
     } catch (err: any) {
@@ -156,11 +179,35 @@ const SessionDetail = () => {
     }
   };
 
+  const handleReopenSession = async () => {
+    const { error } = await supabase
+      .from('sessions')
+      .update({ status: 'open' } as any)
+      .eq('id', session.id);
+    if (error) { toast.error('שגיאה'); return; }
+    toast.success('הסשן נפתח מחדש');
+    if (refetch) refetch();
+  };
+
   const displayActions = editing ? editActions : actions;
   const plusActions = displayActions.filter(a => a.score === 1).length;
   const zeroActions = displayActions.filter(a => a.score === 0).length;
   const minusActions = displayActions.filter(a => a.score === -1).length;
-  const filteredActions = filter === 'all' ? displayActions : displayActions.filter(a => a.type === filter);
+
+  // Quarter filtering
+  const quarterFilteredActions = activeQuarter === 'all'
+    ? displayActions
+    : displayActions.filter(a => a.quarter === activeQuarter);
+  const filteredActions = filter === 'all' ? quarterFilteredActions : quarterFilteredActions.filter(a => a.type === filter);
+
+  // Quarter stats
+  const getQuarterStats = (q: number) => {
+    const qa = displayActions.filter(a => a.quarter === q);
+    const plus = qa.filter(a => a.score === 1).length;
+    const minus = qa.filter(a => a.score === -1).length;
+    const avg = qa.length > 0 ? qa.reduce((s, a) => s + a.score, 0) / qa.length : 0;
+    return { total: qa.length, plus, minus, avg };
+  };
 
   const backPath = auth.role === 'coach' ? `/player/${session.player_id}` : `/player/${auth.playerId}`;
 
@@ -168,23 +215,45 @@ const SessionDetail = () => {
     <div className="min-h-screen p-4 md:p-8">
       <div className="mx-auto max-w-4xl">
         <div className="flex items-center justify-between mb-4">
-          <div>
-            {canEdit && !editing && (
+          <div className="flex items-center gap-2">
+            {/* Status badge */}
+            <span className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full ${
+              isOpen ? 'bg-accent/20 text-accent' : 'bg-success/20 text-success'
+            }`}>
+              {isOpen ? <Clock className="h-3 w-3" /> : <CheckCircle2 className="h-3 w-3" />}
+              {isOpen ? 'סשן פתוח' : 'הושלם'}
+            </span>
+
+            {canEdit && !editing && !isOpen && (
               <Button variant="outline" size="sm" onClick={startEditing} className="gap-1.5">
                 <Pencil className="h-4 w-4" />
-                ערוך סשן
+                ערוך
+              </Button>
+            )}
+            {canEdit && !isOpen && (
+              <Button variant="outline" size="sm" onClick={handleReopenSession} className="gap-1.5 text-accent border-accent/30">
+                <Clock className="h-4 w-4" />
+                פתח מחדש
               </Button>
             )}
             {editing && (
               <div className="flex gap-2">
-                <Button size="sm" onClick={handleSave} disabled={saving} className="gradient-accent text-accent-foreground gap-1.5">
+                <Button size="sm" onClick={() => handleSave(false)} disabled={saving} className="gradient-accent text-accent-foreground gap-1.5">
                   <Save className="h-4 w-4" />
                   {saving ? 'שומר...' : 'שמור'}
                 </Button>
-                <Button size="sm" variant="outline" onClick={cancelEditing} className="gap-1.5">
-                  <X className="h-4 w-4" />
-                  ביטול
-                </Button>
+                {isOpen && (
+                  <Button size="sm" onClick={() => handleSave(true)} disabled={saving} className="bg-success hover:bg-success/90 text-success-foreground gap-1.5">
+                    <CheckCircle2 className="h-4 w-4" />
+                    סיים סשן
+                  </Button>
+                )}
+                {!isOpen && (
+                  <Button size="sm" variant="outline" onClick={cancelEditing} className="gap-1.5">
+                    <X className="h-4 w-4" />
+                    ביטול
+                  </Button>
+                )}
               </div>
             )}
           </div>
@@ -194,7 +263,15 @@ const SessionDetail = () => {
           </Button>
         </div>
 
-        {editing && (
+        {/* Open session banner */}
+        {isOpen && (
+          <div className="rounded-xl bg-accent/10 border border-accent/30 p-3 mb-4 text-center text-sm text-accent font-medium flex items-center justify-center gap-2">
+            <Clock className="h-4 w-4" />
+            סשן פתוח — ניתן להמשיך לעבוד עליו ולחזור מאוחר יותר. לחץ &quot;סיים סשן&quot; כשתסיים.
+          </div>
+        )}
+
+        {editing && !isOpen && (
           <div className="rounded-xl bg-accent/10 border border-accent/30 p-3 mb-4 text-center text-sm text-accent font-medium">
             מצב עריכה — ניתן לעדכן סטטיסטיקות, ניקוד ופעולות
           </div>
@@ -225,21 +302,86 @@ const SessionDetail = () => {
           </div>
         </div>
 
+        {/* Quarter tabs */}
+        <div className="gradient-card rounded-xl p-4 mb-6">
+          <h3 className="text-right font-semibold text-foreground mb-3">ניתוח לפי רבעים</h3>
+          <div className="flex gap-2 justify-end flex-wrap mb-3">
+            <button
+              onClick={() => setActiveQuarter('all')}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                activeQuarter === 'all' ? 'gradient-accent text-accent-foreground shadow-md' : 'bg-secondary text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              הכל
+            </button>
+            {QUARTERS.map(q => {
+              const stats = getQuarterStats(q);
+              return (
+                <button
+                  key={q}
+                  onClick={() => setActiveQuarter(q)}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors relative ${
+                    activeQuarter === q ? 'gradient-accent text-accent-foreground shadow-md' : 'bg-secondary text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Q{q}
+                  {stats.total > 0 && (
+                    <span className="mr-1 text-[10px] opacity-75">({stats.total})</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Quarter summary cards */}
+          <div className="grid grid-cols-4 gap-2">
+            {QUARTERS.map(q => {
+              const stats = getQuarterStats(q);
+              return (
+                <button
+                  key={q}
+                  onClick={() => setActiveQuarter(q)}
+                  className={`rounded-xl p-3 text-center transition-all ${
+                    activeQuarter === q ? 'ring-2 ring-accent bg-accent/10' : 'bg-secondary'
+                  }`}
+                >
+                  <p className="text-xs text-muted-foreground mb-1">רבע {q}</p>
+                  <p className={`text-lg font-bold ${stats.avg > 0 ? 'text-success' : stats.avg < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                    {stats.total > 0 ? stats.avg.toFixed(2) : '—'}
+                  </p>
+                  <div className="flex justify-center gap-2 mt-1">
+                    <span className="text-[10px] text-success">+{stats.plus}</span>
+                    <span className="text-[10px] text-destructive">-{stats.minus}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Distribution + Game stats */}
         <div className="grid gap-4 md:grid-cols-2 mb-6">
           <div className="gradient-card rounded-xl p-4">
-            <h3 className="mb-3 text-right font-semibold text-foreground">התפלגות פעולות</h3>
+            <h3 className="mb-3 text-right font-semibold text-foreground">
+              התפלגות פעולות {activeQuarter !== 'all' ? `(Q${activeQuarter})` : ''}
+            </h3>
             <div className="flex justify-around">
               <div className="text-center">
-                <p className="text-3xl font-bold text-destructive">{minusActions}</p>
+                <p className="text-3xl font-bold text-destructive">
+                  {activeQuarter === 'all' ? minusActions : quarterFilteredActions.filter(a => a.score === -1).length}
+                </p>
                 <p className="text-sm text-muted-foreground">-1</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-muted-foreground">{zeroActions}</p>
+                <p className="text-3xl font-bold text-muted-foreground">
+                  {activeQuarter === 'all' ? zeroActions : quarterFilteredActions.filter(a => a.score === 0).length}
+                </p>
                 <p className="text-sm text-muted-foreground">0</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-success">{plusActions}</p>
+                <p className="text-3xl font-bold text-success">
+                  {activeQuarter === 'all' ? plusActions : quarterFilteredActions.filter(a => a.score === 1).length}
+                </p>
                 <p className="text-sm text-muted-foreground">+1</p>
               </div>
             </div>
@@ -311,7 +453,10 @@ const SessionDetail = () => {
         {/* Actions log */}
         <div className="gradient-card rounded-xl p-4">
           <div className="mb-4 flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">{filteredActions.length} פעולות</span>
+            <span className="text-sm text-muted-foreground">
+              {filteredActions.length} פעולות
+              {activeQuarter !== 'all' && ` (Q${activeQuarter})`}
+            </span>
             <h3 className="font-semibold text-foreground">יומן פעולות</h3>
           </div>
 
@@ -417,6 +562,29 @@ const SessionDetail = () => {
             )}
           </div>
         </div>
+
+        {/* Bottom action bar for open sessions */}
+        {isOpen && editing && (
+          <div className="sticky bottom-4 mt-6 flex gap-3">
+            <Button
+              onClick={() => handleSave(false)}
+              disabled={saving}
+              variant="outline"
+              className="flex-1 h-12 text-foreground border-border font-semibold"
+            >
+              <Save className="ml-2 h-4 w-4" />
+              שמור והמשך מאוחר יותר
+            </Button>
+            <Button
+              onClick={() => handleSave(true)}
+              disabled={saving}
+              className="flex-1 h-12 bg-success hover:bg-success/90 text-success-foreground font-semibold text-lg"
+            >
+              <CheckCircle2 className="ml-2 h-5 w-5" />
+              סיים סשן
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
