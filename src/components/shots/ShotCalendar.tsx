@@ -1,9 +1,12 @@
 import { useState, useMemo } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { Plus, CalendarDays } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Plus, CalendarDays, Pencil, Trash2, Check, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { he } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import NewTrainingWizard from '@/components/shots/NewTrainingWizard';
 
 interface ShotSession {
