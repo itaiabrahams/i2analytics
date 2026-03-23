@@ -102,7 +102,8 @@ const NewSession = () => {
           turnovers: gameStats.turnovers,
           fg_percentage: gameStats.fgPercentage,
           overall_score: parseFloat(overallScore.toFixed(2)),
-        })
+          status: 'open',
+        } as any)
         .select()
         .single();
 
