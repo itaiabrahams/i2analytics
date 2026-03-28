@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowRight, ExternalLink, Pencil, Plus, Trash2, Save, X, CheckCircle2, Clock } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ACTION_TYPES } from '@/lib/types';
 import VideoMeeting from '@/components/VideoMeeting';
 import { useSession, usePlayer } from '@/hooks/useSupabaseData';
@@ -48,15 +48,57 @@ const SessionDetail = () => {
   const [actionType, setActionType] = useState('');
   const [actionDesc, setActionDesc] = useState('');
 
+  // Auto-enter edit mode for open sessions
+  const [autoEditTriggered, setAutoEditTriggered] = useState(false);
+
+  const sessionStatus = session ? ((session as any).status || 'completed') : 'completed';
+  const isOpen = sessionStatus === 'open';
+  const canEdit = session ? (auth.role === 'coach' || auth.playerId === session.player_id) : false;
+
+  useEffect(() => {
+    if (!session || !canEdit || editing || autoEditTriggered) return;
+    if (isOpen && actions !== undefined) {
+      setAutoEditTriggered(true);
+      setEditStats({
+        points: session.points,
+        assists: session.assists,
+        rebounds: session.rebounds,
+        steals: session.steals,
+        turnovers: session.turnovers,
+        fgPercentage: session.fg_percentage,
+      });
+      setEditActions(actions.map(a => ({ ...a, isNew: false })));
+      setEditNotes(session.coach_notes || '');
+      setEditing(true);
+    }
+  }, [session, isOpen, canEdit, editing, autoEditTriggered, actions]);
+
+  // Sync realtime changes into edit state when session/actions update from other user
+  const [lastSyncedAt, setLastSyncedAt] = useState('');
+  useEffect(() => {
+    if (!session || !editing) return;
+    const sessionUpdatedAt = (session as any).updated_at || '';
+    if (lastSyncedAt && sessionUpdatedAt !== lastSyncedAt) {
+      setEditStats({
+        points: session.points,
+        assists: session.assists,
+        rebounds: session.rebounds,
+        steals: session.steals,
+        turnovers: session.turnovers,
+        fgPercentage: session.fg_percentage,
+      });
+      setEditNotes(session.coach_notes || '');
+      setEditActions(actions.map(a => ({ ...a, isNew: false })));
+      toast.info('הסשן עודכן על ידי משתמש אחר — הנתונים סונכרנו');
+    }
+    setLastSyncedAt(sessionUpdatedAt);
+  }, [session, actions]);
+
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
   }
 
   if (!session) return <div className="p-8 text-center text-foreground">סשן לא נמצא</div>;
-
-  const sessionStatus = (session as any).status || 'completed';
-  const isOpen = sessionStatus === 'open';
-  const canEdit = auth.role === 'coach' || auth.playerId === session.player_id;
 
   const startEditing = () => {
     setEditStats({
@@ -71,14 +113,6 @@ const SessionDetail = () => {
     setEditNotes(session.coach_notes || '');
     setEditing(true);
   };
-
-  // Auto-enter edit mode for open sessions
-  if (isOpen && canEdit && !editing && actions !== undefined) {
-    // Trigger edit on first render for open sessions
-    setTimeout(() => {
-      if (!editing) startEditing();
-    }, 0);
-  }
 
   const cancelEditing = () => {
     setEditing(false);
