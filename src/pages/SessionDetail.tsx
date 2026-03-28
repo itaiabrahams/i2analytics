@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowRight, ExternalLink, Pencil, Plus, Trash2, Save, X, CheckCircle2, Clock } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ACTION_TYPES } from '@/lib/types';
 import VideoMeeting from '@/components/VideoMeeting';
 import { useSession, usePlayer } from '@/hooks/useSupabaseData';
