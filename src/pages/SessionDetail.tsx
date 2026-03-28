@@ -73,12 +73,35 @@ const SessionDetail = () => {
   };
 
   // Auto-enter edit mode for open sessions
-  if (isOpen && canEdit && !editing && actions !== undefined) {
-    // Trigger edit on first render for open sessions
-    setTimeout(() => {
-      if (!editing) startEditing();
-    }, 0);
-  }
+  const [autoEditTriggered, setAutoEditTriggered] = useState(false);
+  useEffect(() => {
+    if (isOpen && canEdit && !editing && !autoEditTriggered && actions !== undefined) {
+      setAutoEditTriggered(true);
+      startEditing();
+    }
+  }, [isOpen, canEdit, editing, autoEditTriggered, actions]);
+
+  // Sync realtime changes into edit state when session/actions update from other user
+  const [lastSyncedAt, setLastSyncedAt] = useState('');
+  useEffect(() => {
+    if (!session || !editing) return;
+    const sessionUpdatedAt = (session as any).updated_at || '';
+    if (lastSyncedAt && sessionUpdatedAt !== lastSyncedAt) {
+      // Another user saved — refresh edit state
+      setEditStats({
+        points: session.points,
+        assists: session.assists,
+        rebounds: session.rebounds,
+        steals: session.steals,
+        turnovers: session.turnovers,
+        fgPercentage: session.fg_percentage,
+      });
+      setEditNotes(session.coach_notes || '');
+      setEditActions(actions.map(a => ({ ...a, isNew: false })));
+      toast.info('הסשן עודכן על ידי משתמש אחר — הנתונים סונכרנו');
+    }
+    setLastSyncedAt(sessionUpdatedAt);
+  }, [session, actions]);
 
   const cancelEditing = () => {
     setEditing(false);
