@@ -127,7 +127,7 @@ export function usePlayerSessions(playerId: string | undefined) {
   return { sessions, loading, refetch: fetch };
 }
 
-// Get a single session with actions
+// Get a single session with actions — with realtime sync
 export function useSession(sessionId: string | undefined) {
   const [session, setSession] = useState<SessionData | null>(null);
   const [actions, setActions] = useState<GameActionData[]>([]);
@@ -145,6 +145,46 @@ export function useSession(sessionId: string | undefined) {
   }, [sessionId]);
 
   useEffect(() => { fetch(); }, [fetch]);
+
+  // Realtime subscription for live sync between coach and player
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const channel = supabase
+      .channel(`session-${sessionId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'sessions',
+        filter: `id=eq.${sessionId}`,
+      }, (payload) => {
+        if (payload.new) {
+          setSession(payload.new as unknown as SessionData);
+        }
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'game_actions',
+        filter: `session_id=eq.${sessionId}`,
+      }, () => {
+        // Refetch all actions on any change to keep order consistent
+        supabase
+          .from('game_actions')
+          .select('*')
+          .eq('session_id', sessionId)
+          .order('quarter')
+          .order('minute')
+          .then(({ data }) => {
+            if (data) setActions(data as unknown as GameActionData[]);
+          });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [sessionId]);
 
   return { session, actions, loading, refetch: fetch };
 }
