@@ -48,38 +48,30 @@ const SessionDetail = () => {
   const [actionType, setActionType] = useState('');
   const [actionDesc, setActionDesc] = useState('');
 
-  if (loading) {
-    return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
-  }
-
-  if (!session) return <div className="p-8 text-center text-foreground">סשן לא נמצא</div>;
-
-  const sessionStatus = (session as any).status || 'completed';
-  const isOpen = sessionStatus === 'open';
-  const canEdit = auth.role === 'coach' || auth.playerId === session.player_id;
-
-  const startEditing = () => {
-    setEditStats({
-      points: session.points,
-      assists: session.assists,
-      rebounds: session.rebounds,
-      steals: session.steals,
-      turnovers: session.turnovers,
-      fgPercentage: session.fg_percentage,
-    });
-    setEditActions(actions.map(a => ({ ...a, isNew: false })));
-    setEditNotes(session.coach_notes || '');
-    setEditing(true);
-  };
-
   // Auto-enter edit mode for open sessions
   const [autoEditTriggered, setAutoEditTriggered] = useState(false);
+
+  const sessionStatus = session ? ((session as any).status || 'completed') : 'completed';
+  const isOpen = sessionStatus === 'open';
+  const canEdit = session ? (auth.role === 'coach' || auth.playerId === session.player_id) : false;
+
   useEffect(() => {
-    if (isOpen && canEdit && !editing && !autoEditTriggered && actions !== undefined) {
+    if (!session || !canEdit || editing || autoEditTriggered) return;
+    if (isOpen && actions !== undefined) {
       setAutoEditTriggered(true);
-      startEditing();
+      setEditStats({
+        points: session.points,
+        assists: session.assists,
+        rebounds: session.rebounds,
+        steals: session.steals,
+        turnovers: session.turnovers,
+        fgPercentage: session.fg_percentage,
+      });
+      setEditActions(actions.map(a => ({ ...a, isNew: false })));
+      setEditNotes(session.coach_notes || '');
+      setEditing(true);
     }
-  }, [isOpen, canEdit, editing, autoEditTriggered, actions]);
+  }, [session, isOpen, canEdit, editing, autoEditTriggered, actions]);
 
   // Sync realtime changes into edit state when session/actions update from other user
   const [lastSyncedAt, setLastSyncedAt] = useState('');
@@ -87,7 +79,6 @@ const SessionDetail = () => {
     if (!session || !editing) return;
     const sessionUpdatedAt = (session as any).updated_at || '';
     if (lastSyncedAt && sessionUpdatedAt !== lastSyncedAt) {
-      // Another user saved — refresh edit state
       setEditStats({
         points: session.points,
         assists: session.assists,
@@ -102,6 +93,26 @@ const SessionDetail = () => {
     }
     setLastSyncedAt(sessionUpdatedAt);
   }, [session, actions]);
+
+  if (loading) {
+    return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
+  }
+
+  if (!session) return <div className="p-8 text-center text-foreground">סשן לא נמצא</div>;
+
+  const startEditing = () => {
+    setEditStats({
+      points: session.points,
+      assists: session.assists,
+      rebounds: session.rebounds,
+      steals: session.steals,
+      turnovers: session.turnovers,
+      fgPercentage: session.fg_percentage,
+    });
+    setEditActions(actions.map(a => ({ ...a, isNew: false })));
+    setEditNotes(session.coach_notes || '');
+    setEditing(true);
+  };
 
   const cancelEditing = () => {
     setEditing(false);
