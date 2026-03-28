@@ -94,36 +94,6 @@ const SessionDetail = () => {
     setLastSyncedAt(sessionUpdatedAt);
   }, [session, actions]);
 
-  if (loading) {
-    return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
-  }
-
-  if (!session) return <div className="p-8 text-center text-foreground">סשן לא נמצא</div>;
-
-  const startEditing = () => {
-    setEditStats({
-      points: session.points,
-      assists: session.assists,
-      rebounds: session.rebounds,
-      steals: session.steals,
-      turnovers: session.turnovers,
-      fgPercentage: session.fg_percentage,
-    });
-    setEditActions(actions.map(a => ({ ...a, isNew: false })));
-    setEditNotes(session.coach_notes || '');
-    setEditing(true);
-  };
-
-  const cancelEditing = () => {
-    setEditing(false);
-  };
-
-  const overallScore = editing
-    ? editActions.length > 0
-      ? editActions.reduce((s, a) => s + a.score, 0) / editActions.length
-      : 0
-    : Number(session.overall_score);
-
   // --- Auto-save helpers ---
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestEditStats = useRef(editStats);
@@ -169,6 +139,36 @@ const SessionDetail = () => {
   useEffect(() => {
     return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
   }, []);
+
+  if (loading) {
+    return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
+  }
+
+  if (!session) return <div className="p-8 text-center text-foreground">סשן לא נמצא</div>;
+
+  const startEditing = () => {
+    setEditStats({
+      points: session.points,
+      assists: session.assists,
+      rebounds: session.rebounds,
+      steals: session.steals,
+      turnovers: session.turnovers,
+      fgPercentage: session.fg_percentage,
+    });
+    setEditActions(actions.map(a => ({ ...a, isNew: false })));
+    setEditNotes(session.coach_notes || '');
+    setEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setEditing(false);
+  };
+
+  const overallScore = editing
+    ? editActions.length > 0
+      ? editActions.reduce((s, a) => s + a.score, 0) / editActions.length
+      : 0
+    : Number(session.overall_score);
 
   const addAction = async () => {
     if (!actionType || !actionDesc || !actionMinute || !session) return;
