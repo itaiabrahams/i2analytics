@@ -215,6 +215,9 @@ const SessionDetail = () => {
   const handleSave = async (finishSession = false) => {
     setSaving(true);
     try {
+      // Flush any pending auto-save
+      if (autoSaveTimer.current) { clearTimeout(autoSaveTimer.current); autoSaveTimer.current = null; }
+
       const newOverall = editActions.length > 0
         ? editActions.reduce((s, a) => s + a.score, 0) / editActions.length
         : 0;
@@ -241,36 +244,10 @@ const SessionDetail = () => {
 
       if (sessionError) throw sessionError;
 
-      // Delete all existing actions
-      const { error: deleteError } = await supabase
-        .from('game_actions')
-        .delete()
-        .eq('session_id', session.id);
-
-      if (deleteError) throw deleteError;
-
-      // Re-insert all actions
-      if (editActions.length > 0) {
-        const actionsToInsert = editActions.map(a => ({
-          session_id: session.id,
-          quarter: a.quarter,
-          minute: a.minute,
-          score: a.score,
-          description: a.description,
-          type: a.type,
-        }));
-
-        const { error: insertError } = await supabase
-          .from('game_actions')
-          .insert(actionsToInsert);
-
-        if (insertError) throw insertError;
-      }
-
       if (finishSession) {
         toast.success('הסשן הושלם ונסגר בהצלחה! 🎉');
       } else {
-        toast.success('הסשן נשמר — תוכל להמשיך מאוחר יותר');
+        toast.success('הסשן נשמר בהצלחה');
       }
       setEditing(false);
       if (refetch) refetch();
