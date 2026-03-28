@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowRight, ExternalLink, Pencil, Plus, Trash2, Save, X, CheckCircle2, Clock } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ACTION_TYPES } from '@/lib/types';
 import VideoMeeting from '@/components/VideoMeeting';
 import { useSession, usePlayer } from '@/hooks/useSupabaseData';
@@ -94,6 +94,52 @@ const SessionDetail = () => {
     setLastSyncedAt(sessionUpdatedAt);
   }, [session, actions]);
 
+  // --- Auto-save helpers ---
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestEditStats = useRef(editStats);
+  const latestEditNotes = useRef(editNotes);
+  const latestEditActions = useRef(editActions);
+  latestEditStats.current = editStats;
+  latestEditNotes.current = editNotes;
+  latestEditActions.current = editActions;
+
+  const autoSaveSession = useCallback(async () => {
+    if (!session) return;
+    const acts = latestEditActions.current;
+    const newOverall = acts.length > 0
+      ? acts.reduce((s, a) => s + a.score, 0) / acts.length
+      : 0;
+    const stats = latestEditStats.current;
+    await supabase.from('sessions').update({
+      points: stats.points,
+      assists: stats.assists,
+      rebounds: stats.rebounds,
+      steals: stats.steals,
+      turnovers: stats.turnovers,
+      fg_percentage: stats.fgPercentage,
+      overall_score: parseFloat(newOverall.toFixed(2)),
+      coach_notes: latestEditNotes.current,
+    } as any).eq('id', session.id);
+  }, [session]);
+
+  const scheduleAutoSave = useCallback(() => {
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => autoSaveSession(), 1500);
+  }, [autoSaveSession]);
+
+  // Auto-save when stats or notes change
+  const [statsInitialized, setStatsInitialized] = useState(false);
+  useEffect(() => {
+    if (!editing || !session) return;
+    if (!statsInitialized) { setStatsInitialized(true); return; }
+    scheduleAutoSave();
+  }, [editStats, editNotes]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => { if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current); };
+  }, []);
+
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center"><p className="text-muted-foreground">טוען...</p></div>;
   }
@@ -124,8 +170,8 @@ const SessionDetail = () => {
       : 0
     : Number(session.overall_score);
 
-  const addAction = () => {
-    if (!actionType || !actionDesc || !actionMinute) return;
+  const addAction = async () => {
+    if (!actionType || !actionDesc || !actionMinute || !session) return;
     const newAction: LocalAction = {
       id: `new-${Date.now()}`,
       quarter: parseInt(actionQuarter),
@@ -138,15 +184,40 @@ const SessionDetail = () => {
     setEditActions(prev => [...prev, newAction].sort((a, b) => a.quarter - b.quarter || a.minute - b.minute));
     setActionDesc('');
     setActionMinute('');
+
+    // Immediately save to DB
+    const { data } = await supabase.from('game_actions').insert({
+      session_id: session.id,
+      quarter: newAction.quarter,
+      minute: newAction.minute,
+      score: newAction.score,
+      description: newAction.description,
+      type: newAction.type,
+    }).select('id').single();
+
+    if (data) {
+      setEditActions(prev => prev.map(a => a.id === newAction.id ? { ...a, id: data.id, isNew: false } : a));
+    }
+    // Also save session stats
+    autoSaveSession();
   };
 
-  const removeAction = (id: string) => {
+  const removeAction = async (id: string) => {
     setEditActions(prev => prev.filter(a => a.id !== id));
+    // Delete from DB immediately if it's a saved action
+    if (!id.startsWith('new-')) {
+      await supabase.from('game_actions').delete().eq('id', id);
+    }
+    // Update session stats
+    autoSaveSession();
   };
 
   const handleSave = async (finishSession = false) => {
     setSaving(true);
     try {
+      // Flush any pending auto-save
+      if (autoSaveTimer.current) { clearTimeout(autoSaveTimer.current); autoSaveTimer.current = null; }
+
       const newOverall = editActions.length > 0
         ? editActions.reduce((s, a) => s + a.score, 0) / editActions.length
         : 0;
@@ -173,36 +244,10 @@ const SessionDetail = () => {
 
       if (sessionError) throw sessionError;
 
-      // Delete all existing actions
-      const { error: deleteError } = await supabase
-        .from('game_actions')
-        .delete()
-        .eq('session_id', session.id);
-
-      if (deleteError) throw deleteError;
-
-      // Re-insert all actions
-      if (editActions.length > 0) {
-        const actionsToInsert = editActions.map(a => ({
-          session_id: session.id,
-          quarter: a.quarter,
-          minute: a.minute,
-          score: a.score,
-          description: a.description,
-          type: a.type,
-        }));
-
-        const { error: insertError } = await supabase
-          .from('game_actions')
-          .insert(actionsToInsert);
-
-        if (insertError) throw insertError;
-      }
-
       if (finishSession) {
         toast.success('הסשן הושלם ונסגר בהצלחה! 🎉');
       } else {
-        toast.success('הסשן נשמר — תוכל להמשיך מאוחר יותר');
+        toast.success('הסשן נשמר בהצלחה');
       }
       setEditing(false);
       if (refetch) refetch();
