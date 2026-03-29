@@ -97,23 +97,36 @@ const NewSession = () => {
       let sessionId: string;
 
       if (existingSessions && existingSessions.length > 0) {
-        // Merge into existing session — update stats & metadata
+        // Merge into existing session — only update fields that have values
         sessionId = existingSessions[0].id;
+        const updatePayload: Record<string, any> = {
+          coach_id: user.id,
+          points: gameStats.points,
+          assists: gameStats.assists,
+          rebounds: gameStats.rebounds,
+          steals: gameStats.steals,
+          turnovers: gameStats.turnovers,
+          fg_percentage: gameStats.fgPercentage,
+        };
+        if (videoUrl) updatePayload.video_url = videoUrl;
+        if (meetingUrl) updatePayload.meeting_url = meetingUrl;
+        if (coachNotes) updatePayload.coach_notes = coachNotes;
+        // Don't overwrite overall_score if we have no local actions — 
+        // preserve the player's video scoring. If coach added actions too, recalculate from all.
+        if (actions.length > 0) {
+          // Fetch existing actions to recalculate combined score
+          const { data: existingActions } = await supabase
+            .from('game_actions')
+            .select('score')
+            .eq('session_id', sessionId);
+          const allScores = [...(existingActions || []).map(a => a.score), ...actions.map(a => a.score)];
+          if (allScores.length > 0) {
+            updatePayload.overall_score = parseFloat((allScores.reduce((s, v) => s + v, 0) / allScores.length).toFixed(2));
+          }
+        }
         const { error: updateError } = await supabase
           .from('sessions')
-          .update({
-            coach_id: user.id,
-            video_url: videoUrl || undefined,
-            meeting_url: meetingUrl || undefined,
-            coach_notes: coachNotes || undefined,
-            points: gameStats.points,
-            assists: gameStats.assists,
-            rebounds: gameStats.rebounds,
-            steals: gameStats.steals,
-            turnovers: gameStats.turnovers,
-            fg_percentage: gameStats.fgPercentage,
-            overall_score: parseFloat(overallScore.toFixed(2)) || undefined,
-          })
+          .update(updatePayload)
           .eq('id', sessionId);
         if (updateError) throw updateError;
       } else {
