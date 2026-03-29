@@ -80,11 +80,19 @@ const PersonalCoachingPage = () => {
     if (!opponent || !date || !user) return;
     setSaving(true);
     try {
+      // Get the player's assigned coach
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('coach_id')
+        .eq('user_id', user.id)
+        .single();
+      const assignedCoachId = profile?.coach_id || user.id;
+
       const { data, error } = await supabase
         .from('sessions')
         .insert({
           player_id: user.id,
-          coach_id: user.id, // self-session
+          coach_id: assignedCoachId,
           date,
           opponent,
           video_url: videoUrl || '',
