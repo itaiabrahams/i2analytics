@@ -473,9 +473,9 @@ const SessionDetail = () => {
                   ['points', 'נקודות'],
                   ['assists', 'אסיסטים'],
                   ['rebounds', 'ריבאונדים'],
-                  ['steals', 'גניבות'],
-                  ['turnovers', 'טורנוברים'],
-                  ['fgPercentage', '% קליעה'],
+                  ['steals', 'חטיפות'],
+                  ['turnovers', 'איבודים'],
+                  ['fgPercentage', 'אחוזים מהשדה'],
                 ] as [string, string][]).map(([key, label]) => (
                   <div key={key} className="rounded-lg bg-secondary p-2">
                     <Input
@@ -495,9 +495,9 @@ const SessionDetail = () => {
                   { label: 'נקודות', value: session.points },
                   { label: 'אסיסטים', value: session.assists },
                   { label: 'ריבאונדים', value: session.rebounds },
-                  { label: 'גניבות', value: session.steals },
-                  { label: 'טורנוברים', value: session.turnovers },
-                  { label: '% קליעה', value: `${session.fg_percentage}%` },
+                  { label: 'חטיפות', value: session.steals },
+                  { label: 'איבודים', value: session.turnovers },
+                  { label: 'אחוזים מהשדה', value: `${session.fg_percentage}%` },
                 ].map((s, i) => (
                   <div key={i} className="rounded-lg bg-secondary p-2">
                     <p className="text-lg font-bold text-foreground">{s.value}</p>
