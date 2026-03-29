@@ -119,7 +119,7 @@ const PlayerProfile = () => {
     נקודות: s.points,
     אסיסטים: s.assists,
     ריבאונדים: s.rebounds,
-    טורנוברים: s.turnovers,
+    איבודים: s.turnovers,
   }));
 
   const courtIQAccuracy = courtIQStats.totalAnswered > 0

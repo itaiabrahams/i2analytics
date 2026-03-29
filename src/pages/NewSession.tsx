@@ -284,9 +284,9 @@ const NewSession = () => {
                 ['points', 'נקודות'],
                 ['assists', 'אסיסטים'],
                 ['rebounds', 'ריבאונדים'],
-                ['steals', 'גניבות'],
-                ['turnovers', 'טורנוברים'],
-                ['fgPercentage', '% קליעה'],
+                ['steals', 'חטיפות'],
+                ['turnovers', 'איבודים'],
+                ['fgPercentage', 'אחוזים מהשדה'],
               ] as [string, string][]).map(([key, label]) => (
                 <div key={key}>
                   <label className="text-xs text-muted-foreground block text-right mb-1">{label}</label>
