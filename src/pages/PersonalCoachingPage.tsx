@@ -88,33 +88,52 @@ const PersonalCoachingPage = () => {
         .single();
       const assignedCoachId = profile?.coach_id || user.id;
 
-      const { data, error } = await supabase
+      // Check if a session already exists for this player+date+opponent
+      const { data: existingSessions } = await supabase
         .from('sessions')
-        .insert({
-          player_id: user.id,
-          coach_id: assignedCoachId,
-          date,
-          opponent,
-          video_url: videoUrl || '',
-          coach_notes: coachNotes || '',
-          points: 0,
-          assists: 0,
-          rebounds: 0,
-          steals: 0,
-          turnovers: 0,
-          fg_percentage: 0,
-          overall_score: 0,
-        })
-        .select()
-        .single();
+        .select('id')
+        .eq('player_id', user.id)
+        .eq('date', date)
+        .eq('opponent', opponent)
+        .limit(1);
 
-      if (error) throw error;
-      toast.success('סשן חדש נוצר!');
+      let targetSessionId: string;
+
+      if (existingSessions && existingSessions.length > 0) {
+        // Session already exists — navigate to it instead of creating a duplicate
+        targetSessionId = existingSessions[0].id;
+        toast.success('נמצא סשן קיים למשחק הזה, מעביר אליו...');
+      } else {
+        const { data, error } = await supabase
+          .from('sessions')
+          .insert({
+            player_id: user.id,
+            coach_id: assignedCoachId,
+            date,
+            opponent,
+            video_url: videoUrl || '',
+            coach_notes: coachNotes || '',
+            points: 0,
+            assists: 0,
+            rebounds: 0,
+            steals: 0,
+            turnovers: 0,
+            fg_percentage: 0,
+            overall_score: 0,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        targetSessionId = data.id;
+        toast.success('סשן חדש נוצר!');
+      }
+
       setNewSessionOpen(false);
       setOpponent('');
       setVideoUrl('');
       setCoachNotes('');
-      navigate(`/session/${data.id}`);
+      navigate(`/session/${targetSessionId}`);
     } catch (err: any) {
       toast.error('שגיאה: ' + err.message);
     } finally {

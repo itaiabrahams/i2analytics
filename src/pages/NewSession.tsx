@@ -85,33 +85,68 @@ const NewSession = () => {
     setSaving(true);
 
     try {
-      const { data: sessionData, error: sessionError } = await supabase
+      // Check if a session already exists for this player+date+opponent (to avoid duplicates)
+      const { data: existingSessions } = await supabase
         .from('sessions')
-        .insert({
-          player_id: playerId!,
-          coach_id: user.id,
-          date,
-          opponent,
-          video_url: videoUrl,
-          meeting_url: meetingUrl,
-          coach_notes: coachNotes,
-          points: gameStats.points,
-          assists: gameStats.assists,
-          rebounds: gameStats.rebounds,
-          steals: gameStats.steals,
-          turnovers: gameStats.turnovers,
-          fg_percentage: gameStats.fgPercentage,
-          overall_score: parseFloat(overallScore.toFixed(2)),
-          status: 'open',
-        } as any)
-        .select()
-        .single();
+        .select('id')
+        .eq('player_id', playerId!)
+        .eq('date', date)
+        .eq('opponent', opponent)
+        .limit(1);
 
-      if (sessionError) throw sessionError;
+      let sessionId: string;
+
+      if (existingSessions && existingSessions.length > 0) {
+        // Merge into existing session — update stats & metadata
+        sessionId = existingSessions[0].id;
+        const { error: updateError } = await supabase
+          .from('sessions')
+          .update({
+            coach_id: user.id,
+            video_url: videoUrl || undefined,
+            meeting_url: meetingUrl || undefined,
+            coach_notes: coachNotes || undefined,
+            points: gameStats.points,
+            assists: gameStats.assists,
+            rebounds: gameStats.rebounds,
+            steals: gameStats.steals,
+            turnovers: gameStats.turnovers,
+            fg_percentage: gameStats.fgPercentage,
+            overall_score: parseFloat(overallScore.toFixed(2)) || undefined,
+          })
+          .eq('id', sessionId);
+        if (updateError) throw updateError;
+      } else {
+        // Create new session
+        const { data: sessionData, error: sessionError } = await supabase
+          .from('sessions')
+          .insert({
+            player_id: playerId!,
+            coach_id: user.id,
+            date,
+            opponent,
+            video_url: videoUrl,
+            meeting_url: meetingUrl,
+            coach_notes: coachNotes,
+            points: gameStats.points,
+            assists: gameStats.assists,
+            rebounds: gameStats.rebounds,
+            steals: gameStats.steals,
+            turnovers: gameStats.turnovers,
+            fg_percentage: gameStats.fgPercentage,
+            overall_score: parseFloat(overallScore.toFixed(2)),
+            status: 'open',
+          } as any)
+          .select()
+          .single();
+
+        if (sessionError) throw sessionError;
+        sessionId = sessionData.id;
+      }
 
       if (actions.length > 0) {
         const actionsToInsert = actions.map(a => ({
-          session_id: sessionData.id,
+          session_id: sessionId,
           quarter: a.quarter,
           minute: a.minute,
           score: a.score,
@@ -135,7 +170,7 @@ const NewSession = () => {
       }
 
       toast.success('הסשן נשמר בהצלחה! הסשן פתוח ותוכל להמשיך לערוך אותו.');
-      navigate(`/session/${sessionData.id}`);
+      navigate(`/session/${sessionId}`);
     } catch (err: any) {
       toast.error('שגיאה בשמירת הסשן: ' + err.message);
     } finally {
