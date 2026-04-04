@@ -37,15 +37,17 @@ const BasicPlayerNav = () => {
       {/* Top bar with upgrade + logout */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border px-3 py-2 flex items-center justify-between safe-area-top">
         <div className="flex items-center gap-1.5">
-          <Button
-            size="sm"
-            onClick={() => setUpgradeOpen(true)}
-            className="gradient-accent text-accent-foreground gap-1 font-semibold text-xs h-8 px-2.5"
-          >
-            <Crown className="h-3.5 w-3.5" />
-            <span className="hidden xs:inline">שדרג לליווי אישי</span>
-            <span className="xs:hidden">שדרג</span>
-          </Button>
+          {!isPremium && (
+            <Button
+              size="sm"
+              onClick={() => setUpgradeOpen(true)}
+              className="gradient-accent text-accent-foreground gap-1 font-semibold text-xs h-8 px-2.5"
+            >
+              <Crown className="h-3.5 w-3.5" />
+              <span className="hidden xs:inline">שדרג לליווי אישי</span>
+              <span className="xs:hidden">שדרג</span>
+            </Button>
+          )}
           <a href="https://wa.me/972526124759" target="_blank" rel="noopener noreferrer" className="text-success text-xs font-medium flex items-center gap-1 hover:underline">
             <span>💬</span>
             <span className="hidden sm:inline">לשאלות — 052-6124759</span>
