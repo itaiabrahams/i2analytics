@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { BarChart3, Video, Target, Users, TrendingUp, Shield, ChevronDown, Check, Zap, Crown, Crosshair, Brain, Dumbbell } from 'lucide-react';
 import LoginPage from './LoginPage';
 import FantasyInfoDialog from '@/components/FantasyInfoDialog';
+import euroleagueLogo from '@/assets/euroleague-logo.png';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
