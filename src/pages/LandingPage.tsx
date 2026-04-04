@@ -35,6 +35,7 @@ function AnimatedSection({ children, className = '' }: { children: React.ReactNo
 
 const LandingPage = () => {
   const [showLogin, setShowLogin] = useState(false);
+  const [fantasyOpen, setFantasyOpen] = useState(false);
 
   if (showLogin) {
     return <LoginPage />;
