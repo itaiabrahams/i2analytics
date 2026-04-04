@@ -386,6 +386,7 @@ const PlayerProfile = () => {
                 avatarUrl={(player as any).avatar_url}
               />
             )}
+            <FantasyInfoDialog open={fantasyOpen} onOpenChange={setFantasyOpen} />
           </>
         )}
       </div>
