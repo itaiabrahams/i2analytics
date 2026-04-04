@@ -155,9 +155,21 @@ const LandingPage = () => {
               <div className="text-3xl mb-2">🏆</div>
               <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">פנטזי יורוליג — ליגת I2</h3>
               <p className="text-muted-foreground mb-4">הצטרפו לליגת הפנטזי של I2 Analytics ביורוליג! בנו קבוצה והתחרו מול שחקנים ומאמנים אחרים</p>
-              <span className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2 text-accent-foreground font-bold text-sm">
-                הצטרף לליגה
-                <Star className="h-4 w-4" />
+              <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                <span className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2 text-accent-foreground font-bold text-sm">
+                  הצטרף לליגה
+                  <Star className="h-4 w-4" />
+                </span>
+              </div>
+            </a>
+            <a
+              href="https://chat.whatsapp.com/CcDosZDAL7OBReZ2ZR7gJV?mode=gi_t"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block mt-3 text-center"
+            >
+              <span className="inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-500/10 px-5 py-2 text-sm font-semibold text-green-400 hover:bg-green-500/20 transition-colors">
+                💬 קבוצת וואטסאפ של הליגה
               </span>
             </a>
           </motion.div>

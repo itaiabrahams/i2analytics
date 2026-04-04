@@ -169,6 +169,7 @@ const CoachDashboard = () => {
     { label: 'ניהול משתמשים', icon: Shield, onClick: () => navigate('/manage-users') },
     { label: 'משימות', icon: ClipboardList, onClick: () => navigate('/admin-tasks') },
     { label: '🏆 פנטזי יורוליג', icon: Crown, onClick: () => window.open('https://fantasychallenge.euroleaguebasketball.net/euroleague/en/league/join?code=171640-WXKD2', '_blank') },
+    { label: '💬 וואטסאפ פנטזי', icon: Users, onClick: () => window.open('https://chat.whatsapp.com/CcDosZDAL7OBReZ2ZR7gJV?mode=gi_t', '_blank') },
   ];
 
   return (
