@@ -3,6 +3,7 @@ import { Target, Trophy, BarChart3, Crown, LogOut, Brain, Star } from 'lucide-re
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import UpgradeDialog from './UpgradeDialog';
+import FantasyInfoDialog from './FantasyInfoDialog';
 import { useAuth } from '@/contexts/AuthContext';
 
 const BasicPlayerNav = () => {
