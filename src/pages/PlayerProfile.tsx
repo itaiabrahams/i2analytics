@@ -158,7 +158,7 @@ const PlayerProfile = () => {
                 כרטיס שחקן
               </Button>
               <Button variant="outline" onClick={() => setFantasyOpen(true)} className="text-accent border-accent/50 hover:bg-accent/10">
-                🏆 פנטזי יורוליג
+                <img src={euroleagueLogo} alt="EuroLeague" className="h-4 w-4 object-contain ml-1" /> פנטזי יורוליג
               </Button>
               <NotificationBell />
               <Button variant="ghost" onClick={logout} className="text-muted-foreground">
