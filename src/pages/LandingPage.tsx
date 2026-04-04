@@ -521,6 +521,7 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+      <FantasyInfoDialog open={fantasyOpen} onOpenChange={setFantasyOpen} />
     </div>
   );
 };
