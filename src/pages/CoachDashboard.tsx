@@ -310,6 +310,7 @@ const CoachDashboard = () => {
       </div>
       <AddPlayerDialog open={addPlayerOpen} onOpenChange={setAddPlayerOpen} onSaved={refetch} />
       <EditPlayerDialog open={!!editPlayer} onOpenChange={(o) => { if (!o) setEditPlayer(null); }} player={editPlayer} onSaved={refetch} />
+      <FantasyInfoDialog open={fantasyOpen} onOpenChange={setFantasyOpen} />
     </div>
   );
 };

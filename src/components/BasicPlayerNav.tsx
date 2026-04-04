@@ -79,6 +79,7 @@ const BasicPlayerNav = () => {
       </div>
 
       <UpgradeDialog open={upgradeOpen} onOpenChange={setUpgradeOpen} />
+      <FantasyInfoDialog open={fantasyOpen} onOpenChange={setFantasyOpen} />
     </>
   );
 };
