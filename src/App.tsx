@@ -75,6 +75,7 @@ const AppRoutes = () => {
   }
 
   const isBasicPlayer = role === 'player' && profile?.subscription_tier === 'basic';
+  const isPremiumPlayer = role === 'player' && !isBasicPlayer;
 
   return (
     <BrowserRouter>
