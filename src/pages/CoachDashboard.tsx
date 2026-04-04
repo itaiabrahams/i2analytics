@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogOut, TrendingUp, TrendingDown, Minus, Users, Plus, Shield, Brain, ArrowRight, Dumbbell, Target, Crown, Menu, X, Crosshair, ArrowLeftRight, Pencil, ClipboardList } from 'lucide-react';
+import euroleagueLogo from '@/assets/euroleague-logo.png';
 import EditPlayerDialog from '@/components/EditPlayerDialog';
 import NotificationBell from '@/components/NotificationBell';
 import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
@@ -170,8 +171,8 @@ const CoachDashboard = () => {
     { label: 'Court IQ', icon: Brain, onClick: () => navigate('/courtiq/admin') },
     { label: 'ניהול משתמשים', icon: Shield, onClick: () => navigate('/manage-users') },
     { label: 'משימות', icon: ClipboardList, onClick: () => navigate('/admin-tasks') },
-    { label: '🏆 פנטזי יורוליג', icon: Crown, onClick: () => setFantasyOpen(true) },
-    { label: '💬 וואטסאפ פנטזי', icon: Users, onClick: () => window.open('https://chat.whatsapp.com/CcDosZDAL7OBReZ2ZR7gJV?mode=gi_t', '_blank') },
+    { label: 'פנטזי יורוליג', icon: null, onClick: () => setFantasyOpen(true), customIcon: euroleagueLogo },
+    { label: 'וואטסאפ פנטזי', icon: Users, onClick: () => window.open('https://chat.whatsapp.com/CcDosZDAL7OBReZ2ZR7gJV?mode=gi_t', '_blank') },
   ];
 
   return (
@@ -206,7 +207,11 @@ const CoachDashboard = () => {
                       onClick={() => { item.onClick(); setMenuOpen(false); }}
                       className="flex w-full items-center gap-3 px-4 py-3 text-right text-sm text-foreground hover:bg-accent/10 transition-colors"
                     >
-                      <item.icon className="h-4 w-4 text-accent flex-shrink-0" />
+                      {item.customIcon ? (
+                        <img src={item.customIcon} alt="" className="h-4 w-4 object-contain flex-shrink-0" />
+                      ) : (
+                        <item.icon className="h-4 w-4 text-accent flex-shrink-0" />
+                      )}
                       {item.label}
                     </button>
                   ))}
