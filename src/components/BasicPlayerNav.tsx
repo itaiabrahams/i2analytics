@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Target, Trophy, BarChart3, Crown, LogOut, Brain } from 'lucide-react';
+import { Target, Trophy, BarChart3, Crown, LogOut, Brain, Video, Home } from 'lucide-react';
 import euroleagueLogo from '@/assets/euroleague-logo.png';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -10,11 +10,19 @@ import { useAuth } from '@/contexts/AuthContext';
 const BasicPlayerNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, profile } = useAuth();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [fantasyOpen, setFantasyOpen] = useState(false);
 
-  const tabs = [
+  const isPremium = profile?.subscription_tier !== 'basic';
+
+  const tabs = isPremium ? [
+    { path: '/', icon: Home, label: 'בית' },
+    { path: '/shots', icon: Target, label: 'קליעות' },
+    { path: '/challenges', icon: Trophy, label: 'אתגרים' },
+    { path: '/courtiq', icon: Brain, label: 'Court IQ' },
+    { path: 'fantasy', icon: null, label: 'פנטזי', action: () => setFantasyOpen(true), customIcon: true },
+  ] : [
     { path: '/shots', icon: Target, label: 'קליעות' },
     { path: '/challenges', icon: Trophy, label: 'אתגרים' },
     { path: '/courtiq', icon: Brain, label: 'Court IQ' },
