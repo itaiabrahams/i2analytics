@@ -136,6 +136,34 @@ const LandingPage = () => {
         </div>
       </header>
 
+      {/* Fantasy EuroLeague Banner */}
+      <section className="py-8 px-6 md:px-12">
+        <AnimatedSection>
+          <motion.div
+            variants={scaleIn}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto"
+          >
+            <a
+              href="https://fantasychallenge.euroleaguebasketball.net/euroleague/en/league/join?code=171640-WXKD2"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-2xl border border-accent/30 bg-gradient-to-l from-accent/10 via-secondary/50 to-accent/10 p-6 md:p-8 text-center hover:border-accent/60 transition-all hover:shadow-lg hover:shadow-accent/10"
+            >
+              <div className="text-3xl mb-2">🏆</div>
+              <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">פנטזי יורוליג — ליגת I2</h3>
+              <p className="text-muted-foreground mb-4">הצטרפו לליגת הפנטזי של I2 Analytics ביורוליג! בנו קבוצה והתחרו מול שחקנים ומאמנים אחרים</p>
+              <span className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2 text-accent-foreground font-bold text-sm">
+                הצטרף לליגה
+                <Star className="h-4 w-4" />
+              </span>
+            </a>
+          </motion.div>
+        </AnimatedSection>
+      </section>
+
       {/* Features Section */}
       <section id="features" className="py-24 px-6 md:px-12">
         <AnimatedSection>
