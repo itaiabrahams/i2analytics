@@ -3,6 +3,7 @@ import { motion, useInView } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { BarChart3, Video, Target, Users, TrendingUp, Shield, ChevronDown, Check, Star, Zap, Crown, Crosshair, Brain, Dumbbell } from 'lucide-react';
 import LoginPage from './LoginPage';
+import FantasyInfoDialog from '@/components/FantasyInfoDialog';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
