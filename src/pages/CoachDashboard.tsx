@@ -207,7 +207,11 @@ const CoachDashboard = () => {
                       onClick={() => { item.onClick(); setMenuOpen(false); }}
                       className="flex w-full items-center gap-3 px-4 py-3 text-right text-sm text-foreground hover:bg-accent/10 transition-colors"
                     >
-                      <item.icon className="h-4 w-4 text-accent flex-shrink-0" />
+                      {item.customIcon ? (
+                        <img src={item.customIcon} alt="" className="h-4 w-4 object-contain flex-shrink-0" />
+                      ) : (
+                        <item.icon className="h-4 w-4 text-accent flex-shrink-0" />
+                      )}
                       {item.label}
                     </button>
                   ))}
