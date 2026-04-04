@@ -70,7 +70,11 @@ const BasicPlayerNav = () => {
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <tab.icon className={`h-5 w-5 ${isActive ? 'drop-shadow-[0_0_6px_hsl(var(--accent)/0.5)]' : ''}`} />
+                {tab.customIcon ? (
+                  <img src={euroleagueLogo} alt="EuroLeague" className="h-5 w-5 object-contain" loading="lazy" />
+                ) : (
+                  <tab.icon className={`h-5 w-5 ${isActive ? 'drop-shadow-[0_0_6px_hsl(var(--accent)/0.5)]' : ''}`} />
+                )}
                 <span className="text-[10px] sm:text-xs font-medium">{tab.label}</span>
                 {isActive && <div className="h-0.5 w-4 rounded-full bg-accent" />}
               </button>
