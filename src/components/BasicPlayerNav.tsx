@@ -11,13 +11,14 @@ const BasicPlayerNav = () => {
   const location = useLocation();
   const { logout } = useAuth();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [fantasyOpen, setFantasyOpen] = useState(false);
 
   const tabs = [
     { path: '/shots', icon: Target, label: 'קליעות' },
     { path: '/challenges', icon: Trophy, label: 'אתגרים' },
     { path: '/courtiq', icon: Brain, label: 'Court IQ' },
     { path: '/leaderboard', icon: BarChart3, label: 'דירוג' },
-    { path: 'https://fantasychallenge.euroleaguebasketball.net/euroleague/en/league/join?code=171640-WXKD2', icon: Star, label: 'פנטזי', external: true },
+    { path: 'fantasy', icon: Star, label: 'פנטזי', action: () => setFantasyOpen(true) },
   ];
 
   const currentPath = location.pathname;
