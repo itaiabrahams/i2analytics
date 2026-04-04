@@ -168,6 +168,7 @@ const CoachDashboard = () => {
     { label: 'Court IQ', icon: Brain, onClick: () => navigate('/courtiq/admin') },
     { label: 'ניהול משתמשים', icon: Shield, onClick: () => navigate('/manage-users') },
     { label: 'משימות', icon: ClipboardList, onClick: () => navigate('/admin-tasks') },
+    { label: '🏆 פנטזי יורוליג', icon: Crown, onClick: () => window.open('https://fantasychallenge.euroleaguebasketball.net/euroleague/en/league/join?code=171640-WXKD2', '_blank') },
   ];
 
   return (

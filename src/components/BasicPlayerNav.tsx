@@ -55,12 +55,12 @@ const BasicPlayerNav = () => {
       {/* Bottom navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border safe-area-bottom">
         <div className="flex items-center justify-around py-1.5 px-2 max-w-md mx-auto">
-          {tabs.map(tab => {
-            const isActive = currentPath === tab.path || (tab.path === '/shots' && currentPath === '/');
+          {tabs.map((tab: any) => {
+            const isActive = !tab.external && (currentPath === tab.path || (tab.path === '/shots' && currentPath === '/'));
             return (
               <button
                 key={tab.path}
-                onClick={() => navigate(tab.path)}
+                onClick={() => tab.external ? window.open(tab.path, '_blank') : navigate(tab.path)}
                 className={`flex flex-col items-center gap-0.5 min-w-[56px] min-h-[44px] justify-center px-2 py-1 rounded-xl transition-all ${
                   isActive
                     ? 'text-accent scale-105'
