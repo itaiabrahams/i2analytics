@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import FantasyInfoDialog from '@/components/FantasyInfoDialog';
-import euroleagueLogo from '@/assets/euroleague-logo.png';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Plus, LogOut, Video, Target, Brain, User, FileText, Clock } from 'lucide-react';
+import { ArrowRight, Plus, Video, Target, Brain, FileText, Clock } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import ScheduleMeetingDialog from '@/components/ScheduleMeetingDialog';
 import NotificationBell from '@/components/NotificationBell';
@@ -21,11 +19,10 @@ import PlayerTrainingScore from '@/components/PlayerTrainingScore';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
-  const { auth, logout } = useAuth();
+  const { auth } = useAuth();
   const navigate = useNavigate();
   const [meetingOpen, setMeetingOpen] = useState(false);
   const [scoutReportOpen, setScoutReportOpen] = useState(false);
-  const [fantasyOpen, setFantasyOpen] = useState(false);
   const [monthlyAttempts, setMonthlyAttempts] = useState(0);
   const [shotTotals, setShotTotals] = useState({ attempts: 0, made: 0 });
   const [courtIQStats, setCourtIQStats] = useState({ totalPoints: 0, totalAnswered: 0, totalCorrect: 0, currentStreak: 0 });
@@ -34,7 +31,6 @@ const PlayerProfile = () => {
   const { sessions, loading: sessionsLoading } = usePlayerSessions(id);
   const avgScore = usePlayerAvgScore(id);
 
-  // Fetch shot tracker + Court IQ summary
   useEffect(() => {
     const fetchPerformanceData = async () => {
       if (!id) return;
@@ -106,7 +102,6 @@ const PlayerProfile = () => {
 
   const isBasicPlan = (player as any).subscription_tier === 'basic';
 
-  // Aggregate stats
   const totalSessions = sessions.length;
   const avgPoints = totalSessions > 0 ? (sessions.reduce((s, ses) => s + ses.points, 0) / totalSessions).toFixed(1) : '0';
   const avgAssists = totalSessions > 0 ? (sessions.reduce((s, ses) => s + ses.assists, 0) / totalSessions).toFixed(1) : '0';
@@ -129,47 +124,17 @@ const PlayerProfile = () => {
     ? Math.round((courtIQStats.totalCorrect / courtIQStats.totalAnswered) * 100)
     : 0;
 
-
   return (
-    <div className="min-h-screen p-4 md:p-8">
+    <div className="min-h-screen px-4 pb-4 md:px-8 md:pb-8">
       <div className="mx-auto max-w-5xl">
-        {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          {auth.role === 'coach' ? (
-            <Button variant="ghost" onClick={() => navigate('/')} className="text-muted-foreground">
+        {auth.role === 'coach' ? (
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Button variant="ghost" onClick={() => navigate('/')} className="w-fit text-muted-foreground">
               חזרה ללוח בקרה
               <ArrowRight className="mr-2 h-4 w-4" />
             </Button>
-          ) : (
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button variant="default" onClick={() => navigate('/personal-coaching')} className="gradient-accent text-accent-foreground">
-                <Video className="ml-2 h-4 w-4" />
-                ליווי אישי
-              </Button>
-              <Button variant="outline" onClick={() => navigate('/shots')} className="text-muted-foreground">
-                <Target className="ml-2 h-4 w-4" />
-                מעקב קליעות
-              </Button>
-              <Button variant="outline" onClick={() => navigate('/courtiq')} className="text-muted-foreground">
-                <Brain className="ml-2 h-4 w-4" />
-                Court IQ
-              </Button>
-              <Button variant="outline" onClick={() => navigate('/courtiq/profile')} className="text-muted-foreground">
-                <User className="ml-2 h-4 w-4" />
-                כרטיס שחקן
-              </Button>
-              <Button variant="outline" onClick={() => setFantasyOpen(true)} className="text-accent border-accent/50 hover:bg-accent/10">
-                <img src={euroleagueLogo} alt="EuroLeague" className="h-4 w-4 object-contain ml-1" /> פנטזי יורוליג
-              </Button>
-              <NotificationBell />
-              <Button variant="ghost" onClick={logout} className="text-muted-foreground">
-                <LogOut className="ml-2 h-4 w-4" />
-                יציאה
-              </Button>
-            </div>
-          )}
-          {auth.role === 'coach' && (
-            <div className="flex gap-2 flex-wrap">
+
+            <div className="flex gap-2 flex-wrap justify-end">
               <Button variant="outline" onClick={() => navigate(`/player/${id}/shots`)} className="text-muted-foreground">
                 <Target className="ml-2 h-4 w-4" />
                 מעקב קליעות
@@ -191,43 +156,45 @@ const PlayerProfile = () => {
                 </>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="mb-4 flex items-center justify-end">
+            <NotificationBell />
+          </div>
+        )}
 
-        {/* Player info */}
-        <div className="gradient-card rounded-xl p-6 mb-6 animate-fade-in">
-          <div className="flex items-center justify-between">
-            <div className="stat-glow rounded-xl bg-secondary p-4 text-center">
+        <div className="gradient-card mb-6 rounded-xl p-4 sm:p-6 animate-fade-in">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center justify-between gap-3 text-right">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground sm:text-3xl">{player.display_name}</h1>
+                <p className="text-sm text-muted-foreground sm:text-base">{player.position} · גיל {player.age} · {player.team}</p>
+              </div>
+              {(player as any).avatar_url ? (
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border-2 border-accent">
+                  <img src={(player as any).avatar_url} alt={player.display_name} className="h-full w-full object-cover" />
+                </div>
+              ) : (
+                <div className={`flex shrink-0 items-center justify-center rounded-xl border px-3 py-1 ${getTierBadgeStyle(getPlayerTier(monthlyAttempts).tier)}`}>
+                  <span className="text-sm font-black">{getPlayerTier(monthlyAttempts).label}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="stat-glow w-full rounded-xl bg-secondary p-4 text-center sm:w-auto sm:min-w-[116px]">
               <p className="text-3xl font-bold text-accent">{avgScore.toFixed(2)}</p>
               <p className={`text-lg font-bold ${getGradeColor(getLetterGrade(avgScore))}`}>
                 {getLetterGrade(avgScore)}
               </p>
               <p className="text-xs text-muted-foreground">ציון ממוצע</p>
             </div>
-            <div className="text-right flex items-center gap-3">
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">{player.display_name}</h1>
-                <p className="text-muted-foreground">{player.position} · גיל {player.age} · {player.team}</p>
-              </div>
-              {(player as any).avatar_url ? (
-                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-accent shrink-0">
-                  <img src={(player as any).avatar_url} alt={player.display_name} className="w-full h-full object-cover" />
-                </div>
-              ) : (
-                <div className={`flex items-center justify-center h-auto px-3 py-1 rounded-xl shrink-0 border ${getTierBadgeStyle(getPlayerTier(monthlyAttempts).tier)}`}>
-                  <span className="text-sm font-black">{getPlayerTier(monthlyAttempts).label}</span>
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
-        {/* Upcoming meetings */}
         {!isBasicPlan && <UpcomingMeetings playerId={id} />}
 
-        {/* Aggregate stats */}
         {!isBasicPlan && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4">
             {[
               { label: 'סה"כ סשנים', value: totalSessions, color: 'text-foreground' },
               { label: 'ממוצע נקודות', value: avgPoints, color: 'text-success' },
@@ -242,12 +209,10 @@ const PlayerProfile = () => {
           </div>
         )}
 
-        {/* Training Score - visible for ALL players */}
         <PlayerTrainingScore playerId={id} isCoach={auth.role === 'coach'} />
 
-        {/* Charts */}
         {!isBasicPlan && sessions.length > 1 && (
-          <div className="grid gap-4 md:grid-cols-2 mb-6">
+          <div className="grid gap-4 mb-6 md:grid-cols-2">
             <div className="gradient-card rounded-xl p-4">
               <h3 className="mb-4 text-right font-semibold text-foreground">התקדמות ציון וידאו</h3>
               <ResponsiveContainer width="100%" height={200}>
@@ -278,32 +243,27 @@ const PlayerProfile = () => {
           </div>
         )}
 
-        {/* Ratings, Goals & Team Coach Feedback */}
         {!isBasicPlan && (
-          <div className="grid gap-4 md:grid-cols-2 mb-6">
+          <div className="grid gap-4 mb-6 md:grid-cols-2">
             <PlayerGoals playerId={id} isCoach={auth.role === 'coach'} />
             <PlayerRatings playerId={id} isCoach={auth.role === 'coach'} />
           </div>
         )}
 
-        {/* Technique Videos */}
         {!isBasicPlan && (
           <div className="mb-6">
             <TechniqueVideos playerId={id} isOwnProfile={auth.role === 'player'} />
           </div>
         )}
 
-        {/* Team Coach Feedback */}
         {!isBasicPlan && (
           <div className="mb-6">
             <TeamCoachFeedbackSection playerId={id} isPlayer={auth.role === 'player'} />
           </div>
         )}
 
-        {/* Session history */}
         {!isBasicPlan && (
           <div className="gradient-card rounded-xl p-4">
-            {/* Open sessions */}
             {sessions.filter(s => (s as any).status === 'open').length > 0 && (
               <div className="mb-4">
                 <h3 className="mb-3 text-right font-semibold text-accent flex items-center gap-2 justify-end">
@@ -362,7 +322,6 @@ const PlayerProfile = () => {
           </div>
         )}
 
-        {/* WhatsApp contact */}
         {auth.role === 'player' && (
           <div className="mt-6 text-center">
             <a href="https://wa.me/972526124759" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-success hover:underline text-sm font-medium">
@@ -387,7 +346,6 @@ const PlayerProfile = () => {
                 avatarUrl={(player as any).avatar_url}
               />
             )}
-            <FantasyInfoDialog open={fantasyOpen} onOpenChange={setFantasyOpen} />
           </>
         )}
       </div>

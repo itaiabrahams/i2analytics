@@ -76,48 +76,52 @@ const AppRoutes = () => {
 
   const isBasicPlayer = role === 'player' && profile?.subscription_tier === 'basic';
   const isPremiumPlayer = role === 'player' && !isBasicPlayer;
+  const playerPageSpacingClass = "pt-[calc(env(safe-area-inset-top,0px)+4.25rem)] pb-[calc(env(safe-area-inset-bottom,0px)+5.25rem)]";
 
-  const PremiumPlayerWrap = ({ children }: { children: React.ReactNode }) => (
-    <><BasicPlayerNav /><div className="pt-14 pb-20">{children}</div></>
+  const PlayerNavWrap = ({ children }: { children: React.ReactNode }) => (
+    <>
+      <BasicPlayerNav />
+      <div className={playerPageSpacingClass}>{children}</div>
+    </>
   );
 
   return (
     <BrowserRouter>
-      {!role || role === 'coach' ? <MobileTopBar /> : null}
+      {role === 'coach' ? <MobileTopBar /> : null}
       <FloatingLogo />
       <RoleSwitcher />
       <Routes>
         {isBasicPlayer ? (
           <>
-            <Route path="/" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ShotTracker /></div></>} />
-            <Route path="/shots" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ShotTracker /></div></>} />
-            <Route path="/shot-tracker" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ShotTracker /></div></>} />
-            <Route path="/shot-tracker/*" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ShotTracker /></div></>} />
-            <Route path="/challenges" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ChallengesPage /></div></>} />
-            <Route path="/leaderboard" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><Leaderboard /></div></>} />
-            <Route path="/courtiq" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><CourtIQPage /></div></>} />
-            <Route path="/workout-plans" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><WorkoutPlansPage /></div></>} />
-            <Route path="/courtiq/leaderboard" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><CourtIQLeaderboardPage /></div></>} />
-            <Route path="/courtiq/profile" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><CourtIQProfilePage /></div></>} />
+            <Route path="/" element={<PlayerNavWrap><ShotTracker /></PlayerNavWrap>} />
+            <Route path="/shots" element={<PlayerNavWrap><ShotTracker /></PlayerNavWrap>} />
+            <Route path="/shot-tracker" element={<PlayerNavWrap><ShotTracker /></PlayerNavWrap>} />
+            <Route path="/shot-tracker/*" element={<PlayerNavWrap><ShotTracker /></PlayerNavWrap>} />
+            <Route path="/challenges" element={<PlayerNavWrap><ChallengesPage /></PlayerNavWrap>} />
+            <Route path="/leaderboard" element={<PlayerNavWrap><Leaderboard /></PlayerNavWrap>} />
+            <Route path="/courtiq" element={<PlayerNavWrap><CourtIQPage /></PlayerNavWrap>} />
+            <Route path="/workout-plans" element={<PlayerNavWrap><WorkoutPlansPage /></PlayerNavWrap>} />
+            <Route path="/courtiq/leaderboard" element={<PlayerNavWrap><CourtIQLeaderboardPage /></PlayerNavWrap>} />
+            <Route path="/courtiq/profile" element={<PlayerNavWrap><CourtIQProfilePage /></PlayerNavWrap>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
-            <Route path="*" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ShotTracker /></div></>} />
+            <Route path="*" element={<PlayerNavWrap><ShotTracker /></PlayerNavWrap>} />
           </>
         ) : isPremiumPlayer ? (
           <>
-            <Route path="/" element={<PremiumPlayerWrap><PlayerProfile /></PremiumPlayerWrap>} />
-            <Route path="/shots" element={<PremiumPlayerWrap><ShotTracker /></PremiumPlayerWrap>} />
-            <Route path="/shot-tracker" element={<PremiumPlayerWrap><ShotTracker /></PremiumPlayerWrap>} />
-            <Route path="/shot-tracker/*" element={<PremiumPlayerWrap><ShotTracker /></PremiumPlayerWrap>} />
-            <Route path="/challenges" element={<PremiumPlayerWrap><ChallengesPage /></PremiumPlayerWrap>} />
-            <Route path="/leaderboard" element={<PremiumPlayerWrap><Leaderboard /></PremiumPlayerWrap>} />
-            <Route path="/courtiq" element={<PremiumPlayerWrap><CourtIQPage /></PremiumPlayerWrap>} />
-            <Route path="/courtiq/leaderboard" element={<PremiumPlayerWrap><CourtIQLeaderboardPage /></PremiumPlayerWrap>} />
-            <Route path="/courtiq/profile" element={<PremiumPlayerWrap><CourtIQProfilePage /></PremiumPlayerWrap>} />
-            <Route path="/workout-plans" element={<PremiumPlayerWrap><WorkoutPlansPage /></PremiumPlayerWrap>} />
-            <Route path="/personal-coaching" element={<PremiumPlayerWrap><PersonalCoachingPage /></PremiumPlayerWrap>} />
-            <Route path="/session/:sessionId" element={<PremiumPlayerWrap><SessionDetail /></PremiumPlayerWrap>} />
+            <Route path="/" element={<PlayerNavWrap><PlayerProfile /></PlayerNavWrap>} />
+            <Route path="/shots" element={<PlayerNavWrap><ShotTracker /></PlayerNavWrap>} />
+            <Route path="/shot-tracker" element={<PlayerNavWrap><ShotTracker /></PlayerNavWrap>} />
+            <Route path="/shot-tracker/*" element={<PlayerNavWrap><ShotTracker /></PlayerNavWrap>} />
+            <Route path="/challenges" element={<PlayerNavWrap><ChallengesPage /></PlayerNavWrap>} />
+            <Route path="/leaderboard" element={<PlayerNavWrap><Leaderboard /></PlayerNavWrap>} />
+            <Route path="/courtiq" element={<PlayerNavWrap><CourtIQPage /></PlayerNavWrap>} />
+            <Route path="/courtiq/leaderboard" element={<PlayerNavWrap><CourtIQLeaderboardPage /></PlayerNavWrap>} />
+            <Route path="/courtiq/profile" element={<PlayerNavWrap><CourtIQProfilePage /></PlayerNavWrap>} />
+            <Route path="/workout-plans" element={<PlayerNavWrap><WorkoutPlansPage /></PlayerNavWrap>} />
+            <Route path="/personal-coaching" element={<PlayerNavWrap><PersonalCoachingPage /></PlayerNavWrap>} />
+            <Route path="/session/:sessionId" element={<PlayerNavWrap><SessionDetail /></PlayerNavWrap>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
-            <Route path="*" element={<PremiumPlayerWrap><PlayerProfile /></PremiumPlayerWrap>} />
+            <Route path="*" element={<PlayerNavWrap><PlayerProfile /></PlayerNavWrap>} />
           </>
         ) : (
           <>
