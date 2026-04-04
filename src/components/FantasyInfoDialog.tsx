@@ -1,7 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Crown, Download, Users, Copy } from 'lucide-react';
+import { Download, Copy } from 'lucide-react';
 import { toast } from 'sonner';
+import euroleagueLogo from '@/assets/euroleague-logo.png';
 
 const LEAGUE_CODE = '171640-WXKD2';
 const APP_STORE_LINK = 'https://apps.apple.com/il/app/euroleague-fantasy-challenge/id1581590467?l=he';
