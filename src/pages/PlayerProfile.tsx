@@ -158,6 +158,9 @@ const PlayerProfile = () => {
               <Button variant="outline" onClick={() => window.open('https://fantasychallenge.euroleaguebasketball.net/euroleague/en/league/join?code=171640-WXKD2', '_blank')} className="text-accent border-accent/50 hover:bg-accent/10">
                 🏆 פנטזי יורוליג
               </Button>
+              <Button variant="outline" onClick={() => window.open('https://chat.whatsapp.com/CcDosZDAL7OBReZ2ZR7gJV?mode=gi_t', '_blank')} className="text-green-400 border-green-500/30 hover:bg-green-500/10">
+                💬 וואטסאפ פנטזי
+              </Button>
               <NotificationBell />
               <Button variant="ghost" onClick={logout} className="text-muted-foreground">
                 <LogOut className="ml-2 h-4 w-4" />
