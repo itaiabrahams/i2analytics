@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Target, Trophy, BarChart3, Crown, LogOut, Brain, Video, Home } from 'lucide-react';
+import { Target, Trophy, BarChart3, Crown, LogOut, Brain, Video, User } from 'lucide-react';
 import euroleagueLogo from '@/assets/euroleague-logo.png';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -14,10 +14,11 @@ const BasicPlayerNav = () => {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [fantasyOpen, setFantasyOpen] = useState(false);
 
-  const isPremium = profile?.subscription_tier !== 'basic';
+  const isPremium = profile?.subscription_tier === 'premium' || profile?.subscription_tier === 'free';
 
   const tabs = isPremium ? [
-    { path: '/', icon: Home, label: 'בית' },
+    { path: '/', icon: User, label: 'פרופיל' },
+    { path: '/personal-coaching', icon: Video, label: 'ליווי' },
     { path: '/shots', icon: Target, label: 'קליעות' },
     { path: '/challenges', icon: Trophy, label: 'אתגרים' },
     { path: '/courtiq', icon: Brain, label: 'Court IQ' },
@@ -34,7 +35,6 @@ const BasicPlayerNav = () => {
 
   return (
     <>
-      {/* Top bar with upgrade + logout */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border px-3 py-2 flex items-center justify-between safe-area-top">
         <div className="flex items-center gap-1.5">
           {!isPremium && (
@@ -65,19 +65,21 @@ const BasicPlayerNav = () => {
         </div>
       </div>
 
-      {/* Bottom navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border safe-area-bottom">
         <div className="flex items-center justify-around py-1.5 px-2 max-w-md mx-auto">
           {tabs.map((tab: any) => {
-            const isActive = !tab.action && (currentPath === tab.path || (tab.path === '/shots' && currentPath === '/') || (tab.path === '/' && currentPath === '/'));
+            const isActive = !tab.action && (
+              currentPath === tab.path ||
+              (tab.path === '/shots' && currentPath === '/') ||
+              (tab.path === '/' && currentPath === '/')
+            );
+
             return (
               <button
                 key={tab.path}
                 onClick={() => tab.action ? tab.action() : navigate(tab.path)}
                 className={`flex flex-col items-center gap-0.5 min-w-[56px] min-h-[44px] justify-center px-2 py-1 rounded-xl transition-all ${
-                  isActive
-                    ? 'text-accent scale-105'
-                    : 'text-muted-foreground hover:text-foreground'
+                  isActive ? 'text-accent scale-105' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {tab.customIcon ? (
