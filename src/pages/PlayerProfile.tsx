@@ -24,6 +24,7 @@ const PlayerProfile = () => {
   const navigate = useNavigate();
   const [meetingOpen, setMeetingOpen] = useState(false);
   const [scoutReportOpen, setScoutReportOpen] = useState(false);
+  const [fantasyOpen, setFantasyOpen] = useState(false);
   const [monthlyAttempts, setMonthlyAttempts] = useState(0);
   const [shotTotals, setShotTotals] = useState({ attempts: 0, made: 0 });
   const [courtIQStats, setCourtIQStats] = useState({ totalPoints: 0, totalAnswered: 0, totalCorrect: 0, currentStreak: 0 });
