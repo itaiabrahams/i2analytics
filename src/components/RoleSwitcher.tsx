@@ -56,7 +56,7 @@ const RoleSwitcher = () => {
       disabled={switching}
       size="sm"
       variant="outline"
-      className="fixed bottom-4 left-4 z-50 gap-2 rounded-full border-accent/50 bg-background/90 backdrop-blur-sm shadow-lg hover:bg-accent hover:text-accent-foreground"
+      className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+5.5rem)] left-4 z-[60] gap-2 rounded-full border-accent/50 bg-background/90 backdrop-blur-sm shadow-lg hover:bg-accent hover:text-accent-foreground"
     >
       <ArrowLeftRight className="h-4 w-4" />
       {switching ? 'מחליף...' : `עבור ל${targetRole === 'coach' ? 'מאמן' : 'שחקן'}`}
