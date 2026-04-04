@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Target, Trophy, BarChart3, Crown, LogOut, Brain } from 'lucide-react';
+import { Target, Trophy, BarChart3, Crown, LogOut, Brain, Video, Home } from 'lucide-react';
 import euroleagueLogo from '@/assets/euroleague-logo.png';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -10,11 +10,19 @@ import { useAuth } from '@/contexts/AuthContext';
 const BasicPlayerNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, profile } = useAuth();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [fantasyOpen, setFantasyOpen] = useState(false);
 
-  const tabs = [
+  const isPremium = profile?.subscription_tier !== 'basic';
+
+  const tabs = isPremium ? [
+    { path: '/', icon: Home, label: 'בית' },
+    { path: '/shots', icon: Target, label: 'קליעות' },
+    { path: '/challenges', icon: Trophy, label: 'אתגרים' },
+    { path: '/courtiq', icon: Brain, label: 'Court IQ' },
+    { path: 'fantasy', icon: null, label: 'פנטזי', action: () => setFantasyOpen(true), customIcon: true },
+  ] : [
     { path: '/shots', icon: Target, label: 'קליעות' },
     { path: '/challenges', icon: Trophy, label: 'אתגרים' },
     { path: '/courtiq', icon: Brain, label: 'Court IQ' },
@@ -29,15 +37,17 @@ const BasicPlayerNav = () => {
       {/* Top bar with upgrade + logout */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border px-3 py-2 flex items-center justify-between safe-area-top">
         <div className="flex items-center gap-1.5">
-          <Button
-            size="sm"
-            onClick={() => setUpgradeOpen(true)}
-            className="gradient-accent text-accent-foreground gap-1 font-semibold text-xs h-8 px-2.5"
-          >
-            <Crown className="h-3.5 w-3.5" />
-            <span className="hidden xs:inline">שדרג לליווי אישי</span>
-            <span className="xs:hidden">שדרג</span>
-          </Button>
+          {!isPremium && (
+            <Button
+              size="sm"
+              onClick={() => setUpgradeOpen(true)}
+              className="gradient-accent text-accent-foreground gap-1 font-semibold text-xs h-8 px-2.5"
+            >
+              <Crown className="h-3.5 w-3.5" />
+              <span className="hidden xs:inline">שדרג לליווי אישי</span>
+              <span className="xs:hidden">שדרג</span>
+            </Button>
+          )}
           <a href="https://wa.me/972526124759" target="_blank" rel="noopener noreferrer" className="text-success text-xs font-medium flex items-center gap-1 hover:underline">
             <span>💬</span>
             <span className="hidden sm:inline">לשאלות — 052-6124759</span>
@@ -59,7 +69,7 @@ const BasicPlayerNav = () => {
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border safe-area-bottom">
         <div className="flex items-center justify-around py-1.5 px-2 max-w-md mx-auto">
           {tabs.map((tab: any) => {
-            const isActive = !tab.action && (currentPath === tab.path || (tab.path === '/shots' && currentPath === '/'));
+            const isActive = !tab.action && (currentPath === tab.path || (tab.path === '/shots' && currentPath === '/') || (tab.path === '/' && currentPath === '/'));
             return (
               <button
                 key={tab.path}

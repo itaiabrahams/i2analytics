@@ -75,10 +75,15 @@ const AppRoutes = () => {
   }
 
   const isBasicPlayer = role === 'player' && profile?.subscription_tier === 'basic';
+  const isPremiumPlayer = role === 'player' && !isBasicPlayer;
+
+  const PremiumPlayerWrap = ({ children }: { children: React.ReactNode }) => (
+    <><BasicPlayerNav /><div className="pt-14 pb-20">{children}</div></>
+  );
 
   return (
     <BrowserRouter>
-      <MobileTopBar />
+      {!role || role === 'coach' ? <MobileTopBar /> : null}
       <FloatingLogo />
       <RoleSwitcher />
       <Routes>
@@ -97,9 +102,26 @@ const AppRoutes = () => {
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
             <Route path="*" element={<><BasicPlayerNav /><div className="pt-14 pb-20"><ShotTracker /></div></>} />
           </>
+        ) : isPremiumPlayer ? (
+          <>
+            <Route path="/" element={<PremiumPlayerWrap><PlayerProfile /></PremiumPlayerWrap>} />
+            <Route path="/shots" element={<PremiumPlayerWrap><ShotTracker /></PremiumPlayerWrap>} />
+            <Route path="/shot-tracker" element={<PremiumPlayerWrap><ShotTracker /></PremiumPlayerWrap>} />
+            <Route path="/shot-tracker/*" element={<PremiumPlayerWrap><ShotTracker /></PremiumPlayerWrap>} />
+            <Route path="/challenges" element={<PremiumPlayerWrap><ChallengesPage /></PremiumPlayerWrap>} />
+            <Route path="/leaderboard" element={<PremiumPlayerWrap><Leaderboard /></PremiumPlayerWrap>} />
+            <Route path="/courtiq" element={<PremiumPlayerWrap><CourtIQPage /></PremiumPlayerWrap>} />
+            <Route path="/courtiq/leaderboard" element={<PremiumPlayerWrap><CourtIQLeaderboardPage /></PremiumPlayerWrap>} />
+            <Route path="/courtiq/profile" element={<PremiumPlayerWrap><CourtIQProfilePage /></PremiumPlayerWrap>} />
+            <Route path="/workout-plans" element={<PremiumPlayerWrap><WorkoutPlansPage /></PremiumPlayerWrap>} />
+            <Route path="/personal-coaching" element={<PremiumPlayerWrap><PersonalCoachingPage /></PremiumPlayerWrap>} />
+            <Route path="/session/:sessionId" element={<PremiumPlayerWrap><SessionDetail /></PremiumPlayerWrap>} />
+            <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
+            <Route path="*" element={<PremiumPlayerWrap><PlayerProfile /></PremiumPlayerWrap>} />
+          </>
         ) : (
           <>
-            <Route path="/" element={role === 'coach' ? <CoachDashboard /> : <PlayerProfile />} />
+            <Route path="/" element={<CoachDashboard />} />
             <Route path="/player/:playerId" element={<PlayerProfile />} />
             <Route path="/player/:playerId/new-session" element={<NewSession />} />
             <Route path="/session/:sessionId" element={<SessionDetail />} />
