@@ -19,7 +19,7 @@ const BasicPlayerNav = () => {
     { path: '/challenges', icon: Trophy, label: 'אתגרים' },
     { path: '/courtiq', icon: Brain, label: 'Court IQ' },
     { path: '/leaderboard', icon: BarChart3, label: 'דירוג' },
-    { path: 'fantasy', icon: Star, label: 'פנטזי', action: () => setFantasyOpen(true) },
+    { path: 'fantasy', icon: null, label: 'פנטזי', action: () => setFantasyOpen(true), customIcon: true },
   ];
 
   const currentPath = location.pathname;
