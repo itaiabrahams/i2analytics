@@ -24,7 +24,8 @@ const FantasyInfoDialog = ({ open, onOpenChange }: FantasyInfoDialogProps) => {
       <DialogContent className="max-w-md text-right" dir="rtl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-black flex items-center gap-2 justify-end">
-            🏆 פנטזי יורוליג - ליגת I2
+            פנטזי יורוליג - ליגת I2
+            <img src={euroleagueLogo} alt="EuroLeague" className="h-8 w-8 object-contain" />
           </DialogTitle>
         </DialogHeader>
 
