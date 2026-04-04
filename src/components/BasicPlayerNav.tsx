@@ -6,6 +6,7 @@ import { useState } from 'react';
 import UpgradeDialog from './UpgradeDialog';
 import FantasyInfoDialog from './FantasyInfoDialog';
 import { useAuth } from '@/contexts/AuthContext';
+import RoleSwitcher from './RoleSwitcher';
 
 const BasicPlayerNav = () => {
   const navigate = useNavigate();
@@ -59,7 +60,8 @@ const BasicPlayerNav = () => {
           <div className="flex items-center justify-center h-7 w-7 rounded-lg gradient-accent">
             <span className="text-xs font-black text-accent-foreground">I2</span>
           </div>
-          <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground h-8 w-8">
+          <RoleSwitcher inline className="shrink-0" />
+          <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground h-8 w-8 shrink-0">
             <LogOut className="h-4 w-4" />
           </Button>
         </div>

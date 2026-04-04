@@ -89,7 +89,7 @@ const AppRoutes = () => {
     <BrowserRouter>
       {role === 'coach' ? <MobileTopBar /> : null}
       <FloatingLogo />
-      <RoleSwitcher />
+      {role === 'coach' ? <RoleSwitcher /> : null}
       <Routes>
         {isBasicPlayer ? (
           <>
