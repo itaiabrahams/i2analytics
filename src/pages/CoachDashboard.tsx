@@ -7,6 +7,7 @@ import EditPlayerDialog from '@/components/EditPlayerDialog';
 import NotificationBell from '@/components/NotificationBell';
 import { usePlayers, usePlayerSessionCounts } from '@/hooks/useSupabaseData';
 import AddPlayerDialog from '@/components/AddPlayerDialog';
+import FantasyInfoDialog from '@/components/FantasyInfoDialog';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,6 +43,7 @@ const CoachDashboard = () => {
   const [activeSection, setActiveSection] = useState<'premium' | 'basic'>('premium');
   const [menuOpen, setMenuOpen] = useState(false);
   const [editPlayer, setEditPlayer] = useState<{ user_id: string; display_name: string; team: string | null; age: number | null } | null>(null);
+  const [fantasyOpen, setFantasyOpen] = useState(false);
 
   const buildPlayerData = (list: typeof players) => list.map(p => {
     const sc = sessionCounts[p.user_id] || { count: 0, avgScore: 0, latestScores: [] };
@@ -168,7 +170,7 @@ const CoachDashboard = () => {
     { label: 'Court IQ', icon: Brain, onClick: () => navigate('/courtiq/admin') },
     { label: 'ניהול משתמשים', icon: Shield, onClick: () => navigate('/manage-users') },
     { label: 'משימות', icon: ClipboardList, onClick: () => navigate('/admin-tasks') },
-    { label: '🏆 פנטזי יורוליג', icon: Crown, onClick: () => window.open('https://fantasychallenge.euroleaguebasketball.net/euroleague/en/league/join?code=171640-WXKD2', '_blank') },
+    { label: '🏆 פנטזי יורוליג', icon: Crown, onClick: () => setFantasyOpen(true) },
     { label: '💬 וואטסאפ פנטזי', icon: Users, onClick: () => window.open('https://chat.whatsapp.com/CcDosZDAL7OBReZ2ZR7gJV?mode=gi_t', '_blank') },
   ];
 
@@ -308,6 +310,7 @@ const CoachDashboard = () => {
       </div>
       <AddPlayerDialog open={addPlayerOpen} onOpenChange={setAddPlayerOpen} onSaved={refetch} />
       <EditPlayerDialog open={!!editPlayer} onOpenChange={(o) => { if (!o) setEditPlayer(null); }} player={editPlayer} onSaved={refetch} />
+      <FantasyInfoDialog open={fantasyOpen} onOpenChange={setFantasyOpen} />
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { motion, useInView } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { BarChart3, Video, Target, Users, TrendingUp, Shield, ChevronDown, Check, Star, Zap, Crown, Crosshair, Brain, Dumbbell } from 'lucide-react';
 import LoginPage from './LoginPage';
+import FantasyInfoDialog from '@/components/FantasyInfoDialog';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -34,6 +35,7 @@ function AnimatedSection({ children, className = '' }: { children: React.ReactNo
 
 const LandingPage = () => {
   const [showLogin, setShowLogin] = useState(false);
+  const [fantasyOpen, setFantasyOpen] = useState(false);
 
   if (showLogin) {
     return <LoginPage />;
@@ -146,32 +148,18 @@ const LandingPage = () => {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto"
           >
-            <a
-              href="https://fantasychallenge.euroleaguebasketball.net/euroleague/en/league/join?code=171640-WXKD2"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block rounded-2xl border border-accent/30 bg-gradient-to-l from-accent/10 via-secondary/50 to-accent/10 p-6 md:p-8 text-center hover:border-accent/60 transition-all hover:shadow-lg hover:shadow-accent/10"
+            <button
+              onClick={() => setFantasyOpen(true)}
+              className="block w-full rounded-2xl border border-accent/30 bg-gradient-to-l from-accent/10 via-secondary/50 to-accent/10 p-6 md:p-8 text-center hover:border-accent/60 transition-all hover:shadow-lg hover:shadow-accent/10"
             >
               <div className="text-3xl mb-2">🏆</div>
               <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">פנטזי יורוליג — ליגת I2</h3>
               <p className="text-muted-foreground mb-4">הצטרפו לליגת הפנטזי של I2 Analytics ביורוליג! בנו קבוצה והתחרו מול שחקנים ומאמנים אחרים</p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-                <span className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2 text-accent-foreground font-bold text-sm">
-                  הצטרף לליגה
-                  <Star className="h-4 w-4" />
-                </span>
-              </div>
-            </a>
-            <a
-              href="https://chat.whatsapp.com/CcDosZDAL7OBReZ2ZR7gJV?mode=gi_t"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block mt-3 text-center"
-            >
-              <span className="inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-500/10 px-5 py-2 text-sm font-semibold text-green-400 hover:bg-green-500/20 transition-colors">
-                💬 קבוצת וואטסאפ של הליגה
+              <span className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2 text-accent-foreground font-bold text-sm">
+                הצטרף לליגה
+                <Star className="h-4 w-4" />
               </span>
-            </a>
+            </button>
           </motion.div>
         </AnimatedSection>
       </section>
@@ -533,6 +521,7 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+      <FantasyInfoDialog open={fantasyOpen} onOpenChange={setFantasyOpen} />
     </div>
   );
 };

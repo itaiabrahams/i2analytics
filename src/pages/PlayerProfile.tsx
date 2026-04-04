@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import FantasyInfoDialog from '@/components/FantasyInfoDialog';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ const PlayerProfile = () => {
   const navigate = useNavigate();
   const [meetingOpen, setMeetingOpen] = useState(false);
   const [scoutReportOpen, setScoutReportOpen] = useState(false);
+  const [fantasyOpen, setFantasyOpen] = useState(false);
   const [monthlyAttempts, setMonthlyAttempts] = useState(0);
   const [shotTotals, setShotTotals] = useState({ attempts: 0, made: 0 });
   const [courtIQStats, setCourtIQStats] = useState({ totalPoints: 0, totalAnswered: 0, totalCorrect: 0, currentStreak: 0 });
@@ -155,11 +157,8 @@ const PlayerProfile = () => {
                 <User className="ml-2 h-4 w-4" />
                 כרטיס שחקן
               </Button>
-              <Button variant="outline" onClick={() => window.open('https://fantasychallenge.euroleaguebasketball.net/euroleague/en/league/join?code=171640-WXKD2', '_blank')} className="text-accent border-accent/50 hover:bg-accent/10">
+              <Button variant="outline" onClick={() => setFantasyOpen(true)} className="text-accent border-accent/50 hover:bg-accent/10">
                 🏆 פנטזי יורוליג
-              </Button>
-              <Button variant="outline" onClick={() => window.open('https://chat.whatsapp.com/CcDosZDAL7OBReZ2ZR7gJV?mode=gi_t', '_blank')} className="text-green-400 border-green-500/30 hover:bg-green-500/10">
-                💬 וואטסאפ פנטזי
               </Button>
               <NotificationBell />
               <Button variant="ghost" onClick={logout} className="text-muted-foreground">
@@ -387,6 +386,7 @@ const PlayerProfile = () => {
                 avatarUrl={(player as any).avatar_url}
               />
             )}
+            <FantasyInfoDialog open={fantasyOpen} onOpenChange={setFantasyOpen} />
           </>
         )}
       </div>

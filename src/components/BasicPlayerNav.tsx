@@ -3,6 +3,7 @@ import { Target, Trophy, BarChart3, Crown, LogOut, Brain, Star } from 'lucide-re
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import UpgradeDialog from './UpgradeDialog';
+import FantasyInfoDialog from './FantasyInfoDialog';
 import { useAuth } from '@/contexts/AuthContext';
 
 const BasicPlayerNav = () => {
@@ -10,13 +11,14 @@ const BasicPlayerNav = () => {
   const location = useLocation();
   const { logout } = useAuth();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [fantasyOpen, setFantasyOpen] = useState(false);
 
   const tabs = [
     { path: '/shots', icon: Target, label: 'קליעות' },
     { path: '/challenges', icon: Trophy, label: 'אתגרים' },
     { path: '/courtiq', icon: Brain, label: 'Court IQ' },
     { path: '/leaderboard', icon: BarChart3, label: 'דירוג' },
-    { path: 'https://fantasychallenge.euroleaguebasketball.net/euroleague/en/league/join?code=171640-WXKD2', icon: Star, label: 'פנטזי', external: true },
+    { path: 'fantasy', icon: Star, label: 'פנטזי', action: () => setFantasyOpen(true) },
   ];
 
   const currentPath = location.pathname;
@@ -56,11 +58,11 @@ const BasicPlayerNav = () => {
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border safe-area-bottom">
         <div className="flex items-center justify-around py-1.5 px-2 max-w-md mx-auto">
           {tabs.map((tab: any) => {
-            const isActive = !tab.external && (currentPath === tab.path || (tab.path === '/shots' && currentPath === '/'));
+            const isActive = !tab.action && (currentPath === tab.path || (tab.path === '/shots' && currentPath === '/'));
             return (
               <button
                 key={tab.path}
-                onClick={() => tab.external ? window.open(tab.path, '_blank') : navigate(tab.path)}
+                onClick={() => tab.action ? tab.action() : navigate(tab.path)}
                 className={`flex flex-col items-center gap-0.5 min-w-[56px] min-h-[44px] justify-center px-2 py-1 rounded-xl transition-all ${
                   isActive
                     ? 'text-accent scale-105'
@@ -77,6 +79,7 @@ const BasicPlayerNav = () => {
       </div>
 
       <UpgradeDialog open={upgradeOpen} onOpenChange={setUpgradeOpen} />
+      <FantasyInfoDialog open={fantasyOpen} onOpenChange={setFantasyOpen} />
     </>
   );
 };
