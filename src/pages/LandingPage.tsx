@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { BarChart3, Video, Target, Users, TrendingUp, Shield, ChevronDown, Check, Star, Zap, Crown, Crosshair, Brain, Dumbbell } from 'lucide-react';
 import LoginPage from './LoginPage';
 import FantasyInfoDialog from '@/components/FantasyInfoDialog';
+import euroleagueLogo from '@/assets/euroleague-logo.png';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -152,12 +153,12 @@ const LandingPage = () => {
               onClick={() => setFantasyOpen(true)}
               className="block w-full rounded-2xl border border-accent/30 bg-gradient-to-l from-accent/10 via-secondary/50 to-accent/10 p-6 md:p-8 text-center hover:border-accent/60 transition-all hover:shadow-lg hover:shadow-accent/10"
             >
-              <div className="text-3xl mb-2">🏆</div>
+              <img src={euroleagueLogo} alt="EuroLeague" className="h-12 w-12 object-contain mx-auto mb-2" loading="lazy" />
               <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">פנטזי יורוליג — ליגת I2</h3>
               <p className="text-muted-foreground mb-4">הצטרפו לליגת הפנטזי של I2 Analytics ביורוליג! בנו קבוצה והתחרו מול שחקנים ומאמנים אחרים</p>
               <span className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2 text-accent-foreground font-bold text-sm">
                 הצטרף לליגה
-                <Star className="h-4 w-4" />
+                <img src={euroleagueLogo} alt="" className="h-4 w-4 object-contain" />
               </span>
             </button>
           </motion.div>
