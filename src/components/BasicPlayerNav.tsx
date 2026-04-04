@@ -16,6 +16,7 @@ const BasicPlayerNav = () => {
     { path: '/challenges', icon: Trophy, label: 'אתגרים' },
     { path: '/courtiq', icon: Brain, label: 'Court IQ' },
     { path: '/leaderboard', icon: BarChart3, label: 'דירוג' },
+    { path: 'https://fantasychallenge.euroleaguebasketball.net/euroleague/en/league/join?code=171640-WXKD2', icon: Star, label: 'פנטזי', external: true },
   ];
 
   const currentPath = location.pathname;
