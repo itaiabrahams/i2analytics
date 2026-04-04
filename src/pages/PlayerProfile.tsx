@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import FantasyInfoDialog from '@/components/FantasyInfoDialog';
+import euroleagueLogo from '@/assets/euroleague-logo.png';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
