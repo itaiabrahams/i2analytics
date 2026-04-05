@@ -159,8 +159,7 @@ const AccessibilityWidget = () => {
                 className="flex-1 h-8 text-[10px]"
                 onClick={() => {
                   setOpen(false);
-                  window.location.hash = '';
-                  window.location.pathname = '/accessibility';
+                  navigate('/accessibility');
                 }}
               >
                 הצהרת נגישות
