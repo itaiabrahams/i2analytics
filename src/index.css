@@ -133,3 +133,31 @@
     text-shadow: 0 0 20px hsl(24 100% 50% / 0.3);
   }
 }
+
+/* Accessibility: High Contrast */
+.a11y-high-contrast {
+  --foreground: 0 0% 100%;
+  --background: 0 0% 0%;
+  --card: 0 0% 5%;
+  --muted-foreground: 0 0% 80%;
+}
+.a11y-high-contrast * {
+  border-color: hsl(0 0% 60%) !important;
+}
+
+/* Accessibility: Stop Animations */
+.a11y-stop-animations *,
+.a11y-stop-animations *::before,
+.a11y-stop-animations *::after {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+/* Accessibility: Highlight Links */
+.a11y-highlight-links a,
+.a11y-highlight-links button {
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}

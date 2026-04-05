@@ -27,6 +27,8 @@ import WorkoutPlansPage from "./pages/WorkoutPlansPage";
 import PersonalCoachingPage from "./pages/PersonalCoachingPage";
 import FloatingLogo from "./components/FloatingLogo";
 import MobileTopBar from "./components/MobileTopBar";
+import AccessibilityWidget from "./components/AccessibilityWidget";
+import AccessibilityPage from "./pages/AccessibilityPage";
 
 const queryClient = new QueryClient();
 
