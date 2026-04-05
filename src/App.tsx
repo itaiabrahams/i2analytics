@@ -27,6 +27,8 @@ import WorkoutPlansPage from "./pages/WorkoutPlansPage";
 import PersonalCoachingPage from "./pages/PersonalCoachingPage";
 import FloatingLogo from "./components/FloatingLogo";
 import MobileTopBar from "./components/MobileTopBar";
+import AccessibilityWidget from "./components/AccessibilityWidget";
+import AccessibilityPage from "./pages/AccessibilityPage";
 
 const queryClient = new QueryClient();
 
@@ -62,8 +64,10 @@ const AppRoutes = () => {
   if (!role) {
     return (
       <BrowserRouter>
+        <AccessibilityWidget />
         <Routes>
           <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
+          <Route path="/accessibility" element={<AccessibilityPage />} />
           <Route path="*" element={<LandingPage />} />
         </Routes>
       </BrowserRouter>
@@ -94,6 +98,7 @@ const AppRoutes = () => {
     <BrowserRouter>
       {role === 'coach' ? <MobileTopBar /> : null}
       <FloatingLogo />
+      <AccessibilityWidget />
       {role === 'coach' ? <RoleSwitcher /> : null}
       <Routes>
         {isBasicPlayer ? (
@@ -108,6 +113,7 @@ const AppRoutes = () => {
             <Route path="/workout-plans" element={<PlayerNavWrap><WorkoutPlansPage /></PlayerNavWrap>} />
             <Route path="/courtiq/leaderboard" element={<PlayerNavWrap><CourtIQLeaderboardPage /></PlayerNavWrap>} />
             <Route path="/courtiq/profile" element={<PlayerNavWrap><CourtIQProfilePage /></PlayerNavWrap>} />
+            <Route path="/accessibility" element={<PlayerNavWrap><AccessibilityPage /></PlayerNavWrap>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
             <Route path="*" element={<PlayerNavWrap><ShotTracker /></PlayerNavWrap>} />
           </>
@@ -125,6 +131,7 @@ const AppRoutes = () => {
             <Route path="/workout-plans" element={<PlayerNavWrap><WorkoutPlansPage /></PlayerNavWrap>} />
             <Route path="/personal-coaching" element={<PlayerNavWrap><PersonalCoachingPage /></PlayerNavWrap>} />
             <Route path="/session/:sessionId" element={<PlayerNavWrap><SessionDetail /></PlayerNavWrap>} />
+            <Route path="/accessibility" element={<PlayerNavWrap><AccessibilityPage /></PlayerNavWrap>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
             <Route path="*" element={<PlayerNavWrap><PlayerProfile /></PlayerNavWrap>} />
           </>
@@ -152,6 +159,7 @@ const AppRoutes = () => {
             <Route path="/workout-plans" element={<CoachWrap><WorkoutPlansPage /></CoachWrap>} />
             <Route path="/personal-coaching" element={<CoachWrap><PersonalCoachingPage /></CoachWrap>} />
             <Route path="/admin-tasks" element={<CoachWrap><AdminTasksPage /></CoachWrap>} />
+            <Route path="/accessibility" element={<CoachWrap><AccessibilityPage /></CoachWrap>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
             <Route path="*" element={<CoachWrap><NotFound /></CoachWrap>} />
           </>
