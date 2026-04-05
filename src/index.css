@@ -6,49 +6,49 @@
 
 @layer base {
   :root {
-    --background: 220 40% 8%;
-    --foreground: 210 20% 92%;
+    --background: 222 47% 6%;
+    --foreground: 210 20% 95%;
 
-    --card: 220 35% 12%;
-    --card-foreground: 210 20% 92%;
+    --card: 222 40% 10%;
+    --card-foreground: 210 20% 95%;
 
-    --popover: 220 35% 14%;
-    --popover-foreground: 210 20% 92%;
+    --popover: 222 40% 12%;
+    --popover-foreground: 210 20% 95%;
 
-    --primary: 220 60% 25%;
+    --primary: 222 55% 22%;
     --primary-foreground: 210 20% 95%;
 
-    --secondary: 220 30% 18%;
+    --secondary: 222 30% 14%;
     --secondary-foreground: 210 20% 85%;
 
-    --muted: 220 25% 16%;
-    --muted-foreground: 215 15% 55%;
+    --muted: 222 25% 13%;
+    --muted-foreground: 215 15% 50%;
 
-    --accent: 25 95% 53%;
-    --accent-foreground: 220 40% 8%;
+    --accent: 24 100% 50%;
+    --accent-foreground: 222 47% 6%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 20% 95%;
 
-    --border: 220 25% 20%;
-    --input: 220 25% 20%;
-    --ring: 25 95% 53%;
+    --border: 222 20% 16%;
+    --input: 222 20% 16%;
+    --ring: 24 100% 50%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
-    --sidebar-background: 220 35% 10%;
+    --sidebar-background: 222 40% 8%;
     --sidebar-foreground: 210 20% 85%;
-    --sidebar-primary: 25 95% 53%;
-    --sidebar-primary-foreground: 220 40% 8%;
-    --sidebar-accent: 220 30% 18%;
+    --sidebar-primary: 24 100% 50%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 222 30% 14%;
     --sidebar-accent-foreground: 210 20% 85%;
-    --sidebar-border: 220 25% 20%;
-    --sidebar-ring: 25 95% 53%;
+    --sidebar-border: 222 20% 16%;
+    --sidebar-ring: 24 100% 50%;
 
-    --success: 142 71% 45%;
-    --success-foreground: 220 40% 8%;
+    --success: 152 69% 40%;
+    --success-foreground: 222 47% 6%;
     --warning: 38 92% 50%;
-    --warning-foreground: 220 40% 8%;
+    --warning-foreground: 222 47% 6%;
   }
 }
 
@@ -59,33 +59,48 @@
 
   html {
     direction: rtl;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
     @apply bg-background text-foreground font-heebo;
+    background-image: 
+      radial-gradient(ellipse 80% 50% at 50% -20%, hsl(24 100% 50% / 0.04), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 100%, hsl(222 55% 22% / 0.08), transparent);
+    background-attachment: fixed;
   }
 }
 
 @layer utilities {
   .gradient-card {
-    background: linear-gradient(135deg, hsl(220 35% 14%), hsl(220 35% 10%));
-    border: 1px solid hsl(220 25% 22%);
+    background: linear-gradient(145deg, hsl(222 40% 12%), hsl(222 40% 8%));
+    border: 1px solid hsl(222 20% 18%);
+    box-shadow: 0 2px 16px -4px hsl(222 47% 4% / 0.5);
   }
   
   .gradient-accent {
-    background: linear-gradient(135deg, hsl(25 95% 53%), hsl(15 90% 45%));
+    background: linear-gradient(135deg, hsl(24 100% 52%), hsl(16 95% 42%));
+    box-shadow: 0 4px 16px -4px hsl(24 100% 50% / 0.35);
   }
 
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(220 60% 30%), hsl(220 60% 20%));
+    background: linear-gradient(135deg, hsl(222 55% 28%), hsl(222 55% 18%));
+  }
+
+  .glass-card {
+    background: hsl(222 40% 10% / 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid hsl(222 20% 20% / 0.6);
   }
 
   .score-positive {
-    color: hsl(142 71% 45%);
+    color: hsl(152 69% 40%);
   }
 
   .score-neutral {
-    color: hsl(215 15% 55%);
+    color: hsl(215 15% 50%);
   }
 
   .score-negative {
@@ -93,7 +108,9 @@
   }
 
   .stat-glow {
-    box-shadow: 0 0 20px -5px hsl(25 95% 53% / 0.3);
+    box-shadow: 
+      0 0 24px -6px hsl(24 100% 50% / 0.25),
+      inset 0 1px 0 hsl(0 0% 100% / 0.03);
   }
 
   .safe-area-top {
@@ -102,5 +119,17 @@
 
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px hsl(24 100% 50% / 0.3);
   }
 }
