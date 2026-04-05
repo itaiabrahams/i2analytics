@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Accessibility, Plus, Minus, X, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
