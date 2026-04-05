@@ -64,8 +64,10 @@ const AppRoutes = () => {
   if (!role) {
     return (
       <BrowserRouter>
+        <AccessibilityWidget />
         <Routes>
           <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
+          <Route path="/accessibility" element={<AccessibilityPage />} />
           <Route path="*" element={<LandingPage />} />
         </Routes>
       </BrowserRouter>
