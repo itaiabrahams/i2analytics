@@ -77,12 +77,17 @@ const AppRoutes = () => {
   const isBasicPlayer = role === 'player' && profile?.subscription_tier === 'basic';
   const isPremiumPlayer = role === 'player' && !isBasicPlayer;
   const playerPageSpacingClass = "pt-[calc(env(safe-area-inset-top,0px)+4.25rem)] pb-[calc(env(safe-area-inset-bottom,0px)+5.25rem)]";
+  const coachPageSpacingClass = "pt-[calc(env(safe-area-inset-top,0px)+3.5rem)]";
 
   const PlayerNavWrap = ({ children }: { children: React.ReactNode }) => (
     <>
       <BasicPlayerNav />
       <div className={playerPageSpacingClass}>{children}</div>
     </>
+  );
+
+  const CoachWrap = ({ children }: { children: React.ReactNode }) => (
+    <div className={coachPageSpacingClass}>{children}</div>
   );
 
   return (
