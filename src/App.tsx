@@ -77,12 +77,17 @@ const AppRoutes = () => {
   const isBasicPlayer = role === 'player' && profile?.subscription_tier === 'basic';
   const isPremiumPlayer = role === 'player' && !isBasicPlayer;
   const playerPageSpacingClass = "pt-[calc(env(safe-area-inset-top,0px)+4.25rem)] pb-[calc(env(safe-area-inset-bottom,0px)+5.25rem)]";
+  const coachPageSpacingClass = "pt-[calc(env(safe-area-inset-top,0px)+3.5rem)]";
 
   const PlayerNavWrap = ({ children }: { children: React.ReactNode }) => (
     <>
       <BasicPlayerNav />
       <div className={playerPageSpacingClass}>{children}</div>
     </>
+  );
+
+  const CoachWrap = ({ children }: { children: React.ReactNode }) => (
+    <div className={coachPageSpacingClass}>{children}</div>
   );
 
   return (
@@ -125,30 +130,30 @@ const AppRoutes = () => {
           </>
         ) : (
           <>
-            <Route path="/" element={<CoachDashboard />} />
-            <Route path="/player/:playerId" element={<PlayerProfile />} />
-            <Route path="/player/:playerId/new-session" element={<NewSession />} />
-            <Route path="/session/:sessionId" element={<SessionDetail />} />
-            <Route path="/player/:playerId/shots" element={<ShotTracker />} />
-            <Route path="/player/:playerId/*" element={<PlayerProfile />} />
-            <Route path="/shot-tracker" element={<LegacyShotTrackerRedirect />} />
-            <Route path="/shot-tracker/*" element={<LegacyShotTrackerRedirect />} />
-            <Route path="/shot-tracker/:playerId" element={<LegacyShotTrackerRedirect />} />
-            <Route path="/shot-tracker/:playerId/*" element={<LegacyShotTrackerRedirect />} />
-            <Route path="/shots" element={<ShotTracker />} />
-            <Route path="/manage-users" element={<UserManagement />} />
-            <Route path="/challenges" element={<ChallengesPage />} />
-            <Route path="/player/:playerId/challenges" element={<ChallengesPage />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/courtiq" element={<CourtIQPage />} />
-            <Route path="/courtiq/leaderboard" element={<CourtIQLeaderboardPage />} />
-            <Route path="/courtiq/profile" element={<CourtIQProfilePage />} />
-            <Route path="/courtiq/admin" element={<CourtIQAdminPage />} />
-            <Route path="/workout-plans" element={<WorkoutPlansPage />} />
-            <Route path="/personal-coaching" element={<PersonalCoachingPage />} />
-            <Route path="/admin-tasks" element={<AdminTasksPage />} />
+            <Route path="/" element={<CoachWrap><CoachDashboard /></CoachWrap>} />
+            <Route path="/player/:playerId" element={<CoachWrap><PlayerProfile /></CoachWrap>} />
+            <Route path="/player/:playerId/new-session" element={<CoachWrap><NewSession /></CoachWrap>} />
+            <Route path="/session/:sessionId" element={<CoachWrap><SessionDetail /></CoachWrap>} />
+            <Route path="/player/:playerId/shots" element={<CoachWrap><ShotTracker /></CoachWrap>} />
+            <Route path="/player/:playerId/*" element={<CoachWrap><PlayerProfile /></CoachWrap>} />
+            <Route path="/shot-tracker" element={<CoachWrap><LegacyShotTrackerRedirect /></CoachWrap>} />
+            <Route path="/shot-tracker/*" element={<CoachWrap><LegacyShotTrackerRedirect /></CoachWrap>} />
+            <Route path="/shot-tracker/:playerId" element={<CoachWrap><LegacyShotTrackerRedirect /></CoachWrap>} />
+            <Route path="/shot-tracker/:playerId/*" element={<CoachWrap><LegacyShotTrackerRedirect /></CoachWrap>} />
+            <Route path="/shots" element={<CoachWrap><ShotTracker /></CoachWrap>} />
+            <Route path="/manage-users" element={<CoachWrap><UserManagement /></CoachWrap>} />
+            <Route path="/challenges" element={<CoachWrap><ChallengesPage /></CoachWrap>} />
+            <Route path="/player/:playerId/challenges" element={<CoachWrap><ChallengesPage /></CoachWrap>} />
+            <Route path="/leaderboard" element={<CoachWrap><Leaderboard /></CoachWrap>} />
+            <Route path="/courtiq" element={<CoachWrap><CourtIQPage /></CoachWrap>} />
+            <Route path="/courtiq/leaderboard" element={<CoachWrap><CourtIQLeaderboardPage /></CoachWrap>} />
+            <Route path="/courtiq/profile" element={<CoachWrap><CourtIQProfilePage /></CoachWrap>} />
+            <Route path="/courtiq/admin" element={<CoachWrap><CourtIQAdminPage /></CoachWrap>} />
+            <Route path="/workout-plans" element={<CoachWrap><WorkoutPlansPage /></CoachWrap>} />
+            <Route path="/personal-coaching" element={<CoachWrap><PersonalCoachingPage /></CoachWrap>} />
+            <Route path="/admin-tasks" element={<CoachWrap><AdminTasksPage /></CoachWrap>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<CoachWrap><NotFound /></CoachWrap>} />
           </>
         )}
       </Routes>
