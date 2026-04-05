@@ -7,13 +7,12 @@ const MobileTopBar = () => {
 
   return (
     <>
-      {/* Fixed visual bar */}
-      <div className="fixed top-0 left-0 right-0 z-40 h-11 gradient-accent flex items-center justify-center shadow-md"
-           style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-        <span className="text-sm font-black text-accent-foreground tracking-wider">I2 ANALYTICS</span>
+      <div className="fixed top-0 left-0 right-0 z-40 safe-area-top">
+        <div className="h-11 gradient-accent flex items-center justify-center">
+          <span className="text-[13px] font-black text-accent-foreground tracking-widest">I2 ANALYTICS</span>
+        </div>
       </div>
-      {/* Spacer to push page content below the bar */}
-      <div className="h-11" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }} />
+      <div className="h-11 safe-area-top" />
     </>
   );
 };
