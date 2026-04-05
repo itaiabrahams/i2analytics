@@ -129,6 +129,7 @@ const AppRoutes = () => {
             <Route path="/workout-plans" element={<PlayerNavWrap><WorkoutPlansPage /></PlayerNavWrap>} />
             <Route path="/personal-coaching" element={<PlayerNavWrap><PersonalCoachingPage /></PlayerNavWrap>} />
             <Route path="/session/:sessionId" element={<PlayerNavWrap><SessionDetail /></PlayerNavWrap>} />
+            <Route path="/accessibility" element={<PlayerNavWrap><AccessibilityPage /></PlayerNavWrap>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
             <Route path="*" element={<PlayerNavWrap><PlayerProfile /></PlayerNavWrap>} />
           </>
