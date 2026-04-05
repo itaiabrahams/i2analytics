@@ -20,6 +20,7 @@ const defaults: A11ySettings = {
 };
 
 const AccessibilityWidget = () => {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [settings, setSettings] = useState<A11ySettings>(() => {
     try {
