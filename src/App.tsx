@@ -96,6 +96,7 @@ const AppRoutes = () => {
     <BrowserRouter>
       {role === 'coach' ? <MobileTopBar /> : null}
       <FloatingLogo />
+      <AccessibilityWidget />
       {role === 'coach' ? <RoleSwitcher /> : null}
       <Routes>
         {isBasicPlayer ? (
