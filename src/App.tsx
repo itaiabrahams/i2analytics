@@ -157,6 +157,7 @@ const AppRoutes = () => {
             <Route path="/workout-plans" element={<CoachWrap><WorkoutPlansPage /></CoachWrap>} />
             <Route path="/personal-coaching" element={<CoachWrap><PersonalCoachingPage /></CoachWrap>} />
             <Route path="/admin-tasks" element={<CoachWrap><AdminTasksPage /></CoachWrap>} />
+            <Route path="/accessibility" element={<CoachWrap><AccessibilityPage /></CoachWrap>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
             <Route path="*" element={<CoachWrap><NotFound /></CoachWrap>} />
           </>
