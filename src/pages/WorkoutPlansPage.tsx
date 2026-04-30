@@ -8,6 +8,7 @@ import ShootingDrillsCard from '@/components/ShootingDrillsCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import WorkoutEditDialog from '@/components/WorkoutEditDialog';
+import cmsLogo from '@/assets/cms-logo-mark.png';
 
 interface WorkoutPlan {
   id: string;
