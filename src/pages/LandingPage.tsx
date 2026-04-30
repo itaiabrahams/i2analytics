@@ -5,6 +5,7 @@ import { BarChart3, Video, Target, Users, TrendingUp, Shield, ChevronDown, Check
 import LoginPage from './LoginPage';
 import FantasyInfoDialog from '@/components/FantasyInfoDialog';
 import euroleagueLogo from '@/assets/euroleague-logo.png';
+import cmsLogo from '@/assets/cms-logo-mark.png';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
