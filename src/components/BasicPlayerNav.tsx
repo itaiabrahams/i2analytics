@@ -55,10 +55,8 @@ const BasicPlayerNav = () => {
             </a>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-black text-foreground tracking-tight">I2</span>
-            <div className="flex items-center justify-center h-7 w-7 rounded-lg gradient-accent">
-              <span className="text-[10px] font-black text-accent-foreground">I2</span>
-            </div>
+            <img src={cmsLogo} alt="count my shots" className="h-8 w-auto object-contain drop-shadow-[0_0_8px_hsl(190,95%,55%,0.4)]" />
+
             <RoleSwitcher inline className="shrink-0" />
             <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground h-8 w-8 shrink-0 rounded-xl">
               <LogOut className="h-3.5 w-3.5" />
