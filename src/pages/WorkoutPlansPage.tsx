@@ -74,9 +74,7 @@ const WorkoutPlansPage = () => {
       <div className="mx-auto max-w-3xl">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center justify-center h-10 w-10 rounded-xl gradient-accent shrink-0">
-            <span className="text-lg font-black text-accent-foreground">I2</span>
-          </div>
+          <img src={cmsLogo} alt="count my shots" className="h-10 w-auto object-contain shrink-0 drop-shadow-[0_0_8px_hsl(190,95%,55%,0.4)]" />
           <div className="flex items-center gap-3">
             <div className="text-right">
               <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2 justify-end">
