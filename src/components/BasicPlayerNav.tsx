@@ -89,7 +89,7 @@ const BasicPlayerNav = () => {
                   {tab.customIcon ? (
                     <img src={euroleagueLogo} alt="EuroLeague" className="h-5 w-5 object-contain" loading="lazy" />
                   ) : (
-                    <tab.icon className={`h-5 w-5 ${isActive ? 'drop-shadow-[0_0_8px_hsl(24,100%,50%,0.5)]' : ''}`} />
+                    <tab.icon className={`h-5 w-5 ${isActive ? 'drop-shadow-[0_0_8px_hsl(190,95%,55%,0.6)]' : ''}`} />
                   )}
                   <span className="text-[10px] font-semibold leading-none">{tab.label}</span>
                   {isActive && <div className="h-0.5 w-5 rounded-full gradient-accent mt-0.5" />}
