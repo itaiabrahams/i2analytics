@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Target, Trophy, BarChart3, LogOut, Brain, Video, User } from 'lucide-react';
 import euroleagueLogo from '@/assets/euroleague-logo.png';
+import cmsLogo from '@/assets/cms-logo-mark.png';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import UpgradeDialog from './UpgradeDialog';
