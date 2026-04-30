@@ -77,43 +77,43 @@
 
 @layer utilities {
   .gradient-card {
-    background: linear-gradient(145deg, hsl(222 40% 12%), hsl(222 40% 8%));
-    border: 1px solid hsl(222 20% 18%);
-    box-shadow: 0 2px 16px -4px hsl(222 47% 4% / 0.5);
+    background: linear-gradient(145deg, hsl(215 50% 12%), hsl(215 50% 8%));
+    border: 1px solid hsl(210 40% 20%);
+    box-shadow: 0 2px 16px -4px hsl(215 55% 3% / 0.6);
   }
-  
+
   .gradient-accent {
-    background: linear-gradient(135deg, hsl(24 100% 52%), hsl(16 95% 42%));
-    box-shadow: 0 4px 16px -4px hsl(24 100% 50% / 0.35);
+    background: linear-gradient(135deg, hsl(190 95% 60%), hsl(205 90% 45%));
+    box-shadow: 0 4px 18px -4px hsl(190 95% 55% / 0.45);
   }
 
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(222 55% 28%), hsl(222 55% 18%));
+    background: linear-gradient(135deg, hsl(205 85% 38%), hsl(215 80% 22%));
   }
 
   .glass-card {
-    background: hsl(222 40% 10% / 0.7);
+    background: hsl(215 50% 10% / 0.7);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid hsl(222 20% 20% / 0.6);
+    border: 1px solid hsl(195 60% 40% / 0.25);
   }
 
   .score-positive {
-    color: hsl(152 69% 40%);
+    color: hsl(160 75% 45%);
   }
 
   .score-neutral {
-    color: hsl(215 15% 50%);
+    color: hsl(200 20% 60%);
   }
 
   .score-negative {
-    color: hsl(0 72% 51%);
+    color: hsl(0 72% 55%);
   }
 
   .stat-glow {
-    box-shadow: 
-      0 0 24px -6px hsl(24 100% 50% / 0.25),
-      inset 0 1px 0 hsl(0 0% 100% / 0.03);
+    box-shadow:
+      0 0 24px -6px hsl(190 95% 55% / 0.35),
+      inset 0 1px 0 hsl(195 100% 90% / 0.05);
   }
 
   .safe-area-top {
