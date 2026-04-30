@@ -54,10 +54,8 @@ const LandingPage = () => {
           className="flex items-center justify-between px-6 py-4 md:px-12"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
-              <span className="text-lg font-black text-accent-foreground">I2</span>
-            </div>
-            <span className="text-xl font-bold tracking-tight">I2 Analytics</span>
+            <img src={cmsLogo} alt="count my shots" className="h-12 w-auto object-contain drop-shadow-[0_0_10px_hsl(190,95%,55%,0.5)]" />
+            <span className="text-xl font-bold tracking-tight">count my shots</span>
           </div>
           <Button
             onClick={() => setShowLogin(true)}
