@@ -511,12 +511,10 @@ const LandingPage = () => {
           </a>
           <div className="flex flex-col md:flex-row items-center justify-between w-full gap-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
-                <span className="text-sm font-black text-accent-foreground">I2</span>
-              </div>
-              <span className="font-bold">I2 Analytics</span>
+              <img src={cmsLogo} alt="count my shots" className="h-9 w-auto object-contain" />
+              <span className="font-bold">count my shots</span>
             </div>
-            <p className="text-sm text-muted-foreground">© 2026 I2 Analytics. כל הזכויות שמורות.</p>
+            <p className="text-sm text-muted-foreground">© 2026 count my shots. כל הזכויות שמורות.</p>
           </div>
         </div>
       </footer>
