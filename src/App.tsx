@@ -29,6 +29,7 @@ import FloatingLogo from "./components/FloatingLogo";
 import MobileTopBar from "./components/MobileTopBar";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 import AccessibilityPage from "./pages/AccessibilityPage";
+import cmsLogo from "@/assets/cms-logo-mark.png";
 
 const queryClient = new QueryClient();
 
