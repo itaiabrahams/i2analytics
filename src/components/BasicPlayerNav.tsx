@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Target, Trophy, BarChart3, LogOut, Brain, Video, User } from 'lucide-react';
 import euroleagueLogo from '@/assets/euroleague-logo.png';
+import cmsLogo from '@/assets/cms-logo-mark.png';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import UpgradeDialog from './UpgradeDialog';
@@ -55,10 +56,8 @@ const BasicPlayerNav = () => {
             </a>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-black text-foreground tracking-tight">I2</span>
-            <div className="flex items-center justify-center h-7 w-7 rounded-lg gradient-accent">
-              <span className="text-[10px] font-black text-accent-foreground">I2</span>
-            </div>
+            <img src={cmsLogo} alt="count my shots" className="h-8 w-auto object-contain drop-shadow-[0_0_8px_hsl(190,95%,55%,0.4)]" />
+
             <RoleSwitcher inline className="shrink-0" />
             <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground h-8 w-8 shrink-0 rounded-xl">
               <LogOut className="h-3.5 w-3.5" />
@@ -89,7 +88,7 @@ const BasicPlayerNav = () => {
                   {tab.customIcon ? (
                     <img src={euroleagueLogo} alt="EuroLeague" className="h-5 w-5 object-contain" loading="lazy" />
                   ) : (
-                    <tab.icon className={`h-5 w-5 ${isActive ? 'drop-shadow-[0_0_8px_hsl(24,100%,50%,0.5)]' : ''}`} />
+                    <tab.icon className={`h-5 w-5 ${isActive ? 'drop-shadow-[0_0_8px_hsl(190,95%,55%,0.6)]' : ''}`} />
                   )}
                   <span className="text-[10px] font-semibold leading-none">{tab.label}</span>
                   {isActive && <div className="h-0.5 w-5 rounded-full gradient-accent mt-0.5" />}

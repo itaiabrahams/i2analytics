@@ -29,6 +29,7 @@ import FloatingLogo from "./components/FloatingLogo";
 import MobileTopBar from "./components/MobileTopBar";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 import AccessibilityPage from "./pages/AccessibilityPage";
+import cmsLogo from "@/assets/cms-logo-mark.png";
 
 const queryClient = new QueryClient();
 
@@ -52,9 +53,7 @@ const AppRoutes = () => {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl gradient-accent animate-pulse">
-            <span className="text-2xl font-black text-accent-foreground">I2</span>
-          </div>
+          <img src={cmsLogo} alt="count my shots" className="mx-auto mb-4 h-20 w-auto object-contain animate-pulse drop-shadow-[0_0_16px_hsl(190,95%,55%,0.5)]" />
           <p className="text-muted-foreground">טוען...</p>
         </div>
       </div>
