@@ -22,21 +22,19 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Verify caller is an admin
-    const userClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
+    const token = authHeader.replace(/^Bearer\s+/i, "");
     const {
       data: { user },
-    } = await userClient.auth.getUser();
-    if (!user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      error: authError,
+    } = await adminClient.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized", detail: authError?.message ?? "no user for token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
-
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     // Any approved coach is an admin — same definition the app UI uses
     const { data: callerProfile } = await adminClient
@@ -45,7 +43,10 @@ Deno.serve(async (req) => {
       .eq("user_id", user.id)
       .maybeSingle();
     if (!callerProfile || callerProfile.role !== "coach" || !callerProfile.is_approved) {
-      return new Response(JSON.stringify({ error: "Forbidden" }), {
+      const detail = !callerProfile
+        ? "no profile row for caller"
+        : `role=${callerProfile.role}, is_approved=${callerProfile.is_approved}`;
+      return new Response(JSON.stringify({ error: "Forbidden", detail }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -65,11 +66,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Delete profile and user_roles first (cascade should handle it, but be explicit)
     await adminClient.from("user_roles").delete().eq("user_id", userId);
     await adminClient.from("profiles").delete().eq("user_id", userId);
 
-    // Delete the auth user
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(userId);
     if (deleteError) {
       return new Response(JSON.stringify({ error: deleteError.message }), {
