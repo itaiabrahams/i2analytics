@@ -381,6 +381,92 @@ export type Database = {
           },
         ]
       }
+      game_tags: {
+        Row: {
+          created_at: string
+          description: string
+          game_id: string
+          id: string
+          minute: number
+          quarter: number
+          score: number
+          second: number
+          type: string
+          video_timestamp_seconds: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          game_id: string
+          id?: string
+          minute: number
+          quarter: number
+          score?: number
+          second?: number
+          type: string
+          video_timestamp_seconds?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          game_id?: string
+          id?: string
+          minute?: number
+          quarter?: number
+          score?: number
+          second?: number
+          type?: string
+          video_timestamp_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_tags_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      games: {
+        Row: {
+          coach_id: string
+          created_at: string
+          date: string
+          id: string
+          notes: string
+          opponent: string
+          player_id: string
+          status: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          date: string
+          id?: string
+          notes?: string
+          opponent: string
+          player_id: string
+          status?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string
+          opponent?: string
+          player_id?: string
+          status?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -603,6 +689,7 @@ export type Database = {
           age_category: string | null
           avatar_url: string | null
           coach_id: string | null
+          courtiq_enabled: boolean
           created_at: string
           display_name: string
           id: string
@@ -624,6 +711,7 @@ export type Database = {
           age_category?: string | null
           avatar_url?: string | null
           coach_id?: string | null
+          courtiq_enabled?: boolean
           created_at?: string
           display_name: string
           id?: string
@@ -645,6 +733,7 @@ export type Database = {
           age_category?: string | null
           avatar_url?: string | null
           coach_id?: string | null
+          courtiq_enabled?: boolean
           created_at?: string
           display_name?: string
           id?: string
@@ -659,6 +748,36 @@ export type Database = {
           team?: string | null
           team_coach_approved?: boolean
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string | null
+          endpoint: string
+          id: string
+          p256dh: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_agent?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1012,8 +1131,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      enable_player_courtiq: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
       get_active_courtiq_questions: { Args: never; Returns: Json }
       get_courtiq_leaderboard: { Args: { _period: string }; Returns: Json }
+      get_shot_leaderboard: {
+        Args: { _cutoff?: string }
+        Returns: {
+          attempts: number
+          made: number
+          player_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1021,6 +1152,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_current_user_coach: { Args: never; Returns: boolean }
       is_head_coach: { Args: { _user_id: string }; Returns: boolean }
       is_user_approved: { Args: { _user_id: string }; Returns: boolean }
       submit_courtiq_answer: {
