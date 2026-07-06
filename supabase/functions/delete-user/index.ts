@@ -13,10 +13,7 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Missing auth" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ error: "Missing auth" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -25,10 +22,7 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     const token = authHeader.replace(/^Bearer\s+/i, "");
-    const {
-      data: { user },
-      error: authError,
-    } = await adminClient.auth.getUser(token);
+    const { data: { user }, error: authError } = await adminClient.auth.getUser(token);
     if (authError || !user) {
       return new Response(
         JSON.stringify({ error: "Unauthorized", detail: authError?.message ?? "no user for token" }),
@@ -36,7 +30,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Any approved coach is an admin — same definition the app UI uses
+    // Any approved coach is an admin
     const { data: callerProfile } = await adminClient
       .from("profiles")
       .select("role, is_approved")
@@ -46,24 +40,15 @@ Deno.serve(async (req) => {
       const detail = !callerProfile
         ? "no profile row for caller"
         : `role=${callerProfile.role}, is_approved=${callerProfile.is_approved}`;
-      return new Response(JSON.stringify({ error: "Forbidden", detail }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ error: "Forbidden", detail }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const { userId } = await req.json();
     if (!userId) {
-      return new Response(JSON.stringify({ error: "Missing userId" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ error: "Missing userId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     if (userId === user.id) {
-      return new Response(JSON.stringify({ error: "Cannot delete yourself" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ error: "Cannot delete yourself" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     await adminClient.from("user_roles").delete().eq("user_id", userId);
@@ -71,19 +56,13 @@ Deno.serve(async (req) => {
 
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(userId);
     if (deleteError) {
-      return new Response(JSON.stringify({ error: deleteError.message }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ error: deleteError.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
