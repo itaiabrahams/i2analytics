@@ -19,16 +19,14 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Verify the caller is a coach
-    const userClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: { user } } = await userClient.auth.getUser();
+    // Validate the caller's JWT with the service-role client — no anon key.
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    const { data: { user } } = await adminClient.auth.getUser(token);
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
     const { data: coachProfile } = await adminClient
       .from("profiles")
       .select("role, is_approved")
