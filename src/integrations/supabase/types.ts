@@ -85,6 +85,51 @@ export type Database = {
           },
         ]
       }
+      clubs: {
+        Row: {
+          city: string | null
+          color_primary: string | null
+          color_secondary: string | null
+          created_at: string
+          id: string
+          initials: string | null
+          is_approved: boolean
+          logo_url: string | null
+          name: string
+          region: string | null
+          requested_by: string | null
+          slug: string | null
+        }
+        Insert: {
+          city?: string | null
+          color_primary?: string | null
+          color_secondary?: string | null
+          created_at?: string
+          id?: string
+          initials?: string | null
+          is_approved?: boolean
+          logo_url?: string | null
+          name: string
+          region?: string | null
+          requested_by?: string | null
+          slug?: string | null
+        }
+        Update: {
+          city?: string | null
+          color_primary?: string | null
+          color_secondary?: string | null
+          created_at?: string
+          id?: string
+          initials?: string | null
+          is_approved?: boolean
+          logo_url?: string | null
+          name?: string
+          region?: string | null
+          requested_by?: string | null
+          slug?: string | null
+        }
+        Relationships: []
+      }
       courtiq_answers: {
         Row: {
           answer_time_ms: number
@@ -698,6 +743,7 @@ export type Database = {
           payment_status: string
           phone_number: string | null
           position: string | null
+          privacy_accepted_at: string | null
           role: Database["public"]["Enums"]["app_role"]
           subscription_note: string | null
           subscription_tier: Database["public"]["Enums"]["subscription_tier"]
@@ -720,6 +766,7 @@ export type Database = {
           payment_status?: string
           phone_number?: string | null
           position?: string | null
+          privacy_accepted_at?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           subscription_note?: string | null
           subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
@@ -742,6 +789,7 @@ export type Database = {
           payment_status?: string
           phone_number?: string | null
           position?: string | null
+          privacy_accepted_at?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           subscription_note?: string | null
           subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
