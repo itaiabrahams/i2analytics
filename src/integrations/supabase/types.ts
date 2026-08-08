@@ -737,6 +737,7 @@ export type Database = {
           courtiq_enabled: boolean
           created_at: string
           display_name: string
+          football_enabled: boolean
           id: string
           is_approved: boolean
           is_demo: boolean
@@ -760,6 +761,7 @@ export type Database = {
           courtiq_enabled?: boolean
           created_at?: string
           display_name: string
+          football_enabled?: boolean
           id?: string
           is_approved?: boolean
           is_demo?: boolean
@@ -783,6 +785,7 @@ export type Database = {
           courtiq_enabled?: boolean
           created_at?: string
           display_name?: string
+          football_enabled?: boolean
           id?: string
           is_approved?: boolean
           is_demo?: boolean
@@ -1015,6 +1018,252 @@ export type Database = {
           },
         ]
       }
+      taxonomy_categories: {
+        Row: {
+          active: boolean
+          id: string
+          key: string
+          label_he: string
+          outcome_set_key: string
+          phase_id: string
+          sort_order: number
+          state: string | null
+        }
+        Insert: {
+          active?: boolean
+          id?: string
+          key: string
+          label_he: string
+          outcome_set_key?: string
+          phase_id: string
+          sort_order?: number
+          state?: string | null
+        }
+        Update: {
+          active?: boolean
+          id?: string
+          key?: string
+          label_he?: string
+          outcome_set_key?: string
+          phase_id?: string
+          sort_order?: number
+          state?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxonomy_categories_phase_id_fkey"
+            columns: ["phase_id"]
+            isOneToOne: false
+            referencedRelation: "taxonomy_phases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      taxonomy_field_options: {
+        Row: {
+          field_id: string
+          id: string
+          label_he: string
+          sort_order: number
+          value: string
+        }
+        Insert: {
+          field_id: string
+          id?: string
+          label_he: string
+          sort_order?: number
+          value: string
+        }
+        Update: {
+          field_id?: string
+          id?: string
+          label_he?: string
+          sort_order?: number
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxonomy_field_options_field_id_fkey"
+            columns: ["field_id"]
+            isOneToOne: false
+            referencedRelation: "taxonomy_fields"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      taxonomy_fields: {
+        Row: {
+          id: string
+          key: string
+          label_he: string
+          required: boolean
+          sort_order: number
+          sport: string
+          target_category_id: string | null
+          target_tag_id: string | null
+        }
+        Insert: {
+          id?: string
+          key: string
+          label_he: string
+          required?: boolean
+          sort_order?: number
+          sport: string
+          target_category_id?: string | null
+          target_tag_id?: string | null
+        }
+        Update: {
+          id?: string
+          key?: string
+          label_he?: string
+          required?: boolean
+          sort_order?: number
+          sport?: string
+          target_category_id?: string | null
+          target_tag_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxonomy_fields_target_category_id_fkey"
+            columns: ["target_category_id"]
+            isOneToOne: false
+            referencedRelation: "taxonomy_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "taxonomy_fields_target_tag_id_fkey"
+            columns: ["target_tag_id"]
+            isOneToOne: false
+            referencedRelation: "taxonomy_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      taxonomy_outcomes: {
+        Row: {
+          id: string
+          label_he: string
+          polarity: number
+          set_key: string
+          sort_order: number
+          sport: string
+          value: string
+        }
+        Insert: {
+          id?: string
+          label_he: string
+          polarity?: number
+          set_key: string
+          sort_order?: number
+          sport: string
+          value: string
+        }
+        Update: {
+          id?: string
+          label_he?: string
+          polarity?: number
+          set_key?: string
+          sort_order?: number
+          sport?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      taxonomy_phases: {
+        Row: {
+          color_token: string
+          id: string
+          key: string
+          label_he: string
+          sort_order: number
+          sport: string
+        }
+        Insert: {
+          color_token?: string
+          id?: string
+          key: string
+          label_he: string
+          sort_order?: number
+          sport: string
+        }
+        Update: {
+          color_token?: string
+          id?: string
+          key?: string
+          label_he?: string
+          sort_order?: number
+          sport?: string
+        }
+        Relationships: []
+      }
+      taxonomy_tags: {
+        Row: {
+          active: boolean
+          category_id: string
+          code: string
+          default_score: number
+          description_he: string
+          id: string
+          key: string
+          label_he: string
+          sort_order: number
+        }
+        Insert: {
+          active?: boolean
+          category_id: string
+          code: string
+          default_score?: number
+          description_he?: string
+          id?: string
+          key: string
+          label_he: string
+          sort_order?: number
+        }
+        Update: {
+          active?: boolean
+          category_id?: string
+          code?: string
+          default_score?: number
+          description_he?: string
+          id?: string
+          key?: string
+          label_he?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taxonomy_tags_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "taxonomy_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      taxonomy_zones: {
+        Row: {
+          id: string
+          key: string
+          label_he: string
+          sort_order: number
+          sport: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          label_he: string
+          sort_order?: number
+          sport: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          label_he?: string
+          sort_order?: number
+          sport?: string
+        }
+        Relationships: []
+      }
       team_coach_feedback: {
         Row: {
           category: string
@@ -1180,6 +1429,10 @@ export type Database = {
     }
     Functions: {
       enable_player_courtiq: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
+      enable_player_football: {
         Args: { target_user_id: string }
         Returns: undefined
       }
