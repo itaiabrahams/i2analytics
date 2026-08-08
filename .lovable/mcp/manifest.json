@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://mzlakkhodbqdhamjrhah.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "count-my-shots",
+      "version": "0.1.0",
+      "title": "count my shots"
+    },
+    "tools": [
+      {
+        "name": "get_my_profile",
+        "title": "Get my profile",
+        "description": "Get the signed-in user's profile: name, role, team, age category, subscription tier and approval status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_shot_sessions",
+        "title": "List shooting sessions",
+        "description": "List shooting (Shot Tracker) sessions visible to the signed-in user, with makes, attempts and shooting percentage per session.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "player_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Optional player id. Coaches can pass a player id; players see only their own sessions."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "description": "Maximum number of sessions to return."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_video_sessions",
+        "title": "List video analysis sessions",
+        "description": "List game / video analysis sessions visible to the signed-in user, including box-score stats and the overall analysis score.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "player_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Optional player id (coaches only)."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "description": "Maximum number of sessions to return."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_player_goals",
+        "title": "List player goals",
+        "description": "List training goals visible to the signed-in user, with progress percentage and status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "player_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Optional player id (coaches only)."
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "active",
+                "completed"
+              ],
+              "description": "Filter by goal status."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_courtiq_stats",
+        "title": "Get Court IQ stats",
+        "description": "Get Court IQ trivia stats (points, streaks, correct answers) for the signed-in user or a given player.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "player_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Optional player id (coaches only). Defaults to the signed-in user."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
