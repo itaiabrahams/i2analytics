@@ -426,6 +426,87 @@ export type Database = {
           },
         ]
       }
+      game_events: {
+        Row: {
+          category_key: string
+          clock_minute: number
+          clock_second: number
+          created_at: string
+          created_by: string | null
+          description: string
+          field_values: Json
+          game_id: string
+          id: string
+          outcome_set_key: string | null
+          outcome_value: string | null
+          period: number
+          phase_key: string
+          player_id: string
+          score: number
+          tag_id: string
+          tag_key: string
+          video_timestamp_seconds: number | null
+          zone_key: string | null
+        }
+        Insert: {
+          category_key: string
+          clock_minute: number
+          clock_second?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          field_values?: Json
+          game_id: string
+          id?: string
+          outcome_set_key?: string | null
+          outcome_value?: string | null
+          period?: number
+          phase_key: string
+          player_id: string
+          score?: number
+          tag_id: string
+          tag_key: string
+          video_timestamp_seconds?: number | null
+          zone_key?: string | null
+        }
+        Update: {
+          category_key?: string
+          clock_minute?: number
+          clock_second?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          field_values?: Json
+          game_id?: string
+          id?: string
+          outcome_set_key?: string | null
+          outcome_value?: string | null
+          period?: number
+          phase_key?: string
+          player_id?: string
+          score?: number
+          tag_id?: string
+          tag_key?: string
+          video_timestamp_seconds?: number | null
+          zone_key?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_events_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_events_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "taxonomy_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       game_tags: {
         Row: {
           created_at: string
@@ -482,6 +563,7 @@ export type Database = {
           notes: string
           opponent: string
           player_id: string
+          sport: string
           status: string
           updated_at: string
           video_url: string | null
@@ -494,6 +576,7 @@ export type Database = {
           notes?: string
           opponent: string
           player_id: string
+          sport?: string
           status?: string
           updated_at?: string
           video_url?: string | null
@@ -506,6 +589,7 @@ export type Database = {
           notes?: string
           opponent?: string
           player_id?: string
+          sport?: string
           status?: string
           updated_at?: string
           video_url?: string | null
