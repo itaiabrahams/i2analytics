@@ -99,7 +99,19 @@ const NewSession = () => {
       if (existingSessions && existingSessions.length > 0) {
         // Merge into existing session — only update fields that have values
         sessionId = existingSessions[0].id;
-        const updatePayload: Record<string, any> = {
+        const updatePayload: {
+          coach_id: string;
+          points: number;
+          assists: number;
+          rebounds: number;
+          steals: number;
+          turnovers: number;
+          fg_percentage: number;
+          video_url?: string;
+          meeting_url?: string;
+          coach_notes?: string;
+          overall_score?: number;
+        } = {
           coach_id: user.id,
           points: gameStats.points,
           assists: gameStats.assists,
