@@ -29,6 +29,7 @@ import FloatingLogo from "./components/FloatingLogo";
 import MobileTopBar from "./components/MobileTopBar";
 import AccessibilityWidget from "./components/AccessibilityWidget";
 import AccessibilityPage from "./pages/AccessibilityPage";
+import OAuthConsent from "./pages/OAuthConsent";
 import cmsLogo from "@/assets/cms-logo-mark.png";
 
 const queryClient = new QueryClient();
@@ -66,6 +67,7 @@ const AppRoutes = () => {
         <AccessibilityWidget />
         <Routes>
           <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
+          <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
           <Route path="/accessibility" element={<AccessibilityPage />} />
           <Route path="*" element={<LandingPage />} />
         </Routes>
@@ -114,6 +116,7 @@ const AppRoutes = () => {
             <Route path="/courtiq/profile" element={<PlayerNavWrap><CourtIQProfilePage /></PlayerNavWrap>} />
             <Route path="/accessibility" element={<PlayerNavWrap><AccessibilityPage /></PlayerNavWrap>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="*" element={<PlayerNavWrap><ShotTracker /></PlayerNavWrap>} />
           </>
         ) : isPremiumPlayer ? (
@@ -132,6 +135,7 @@ const AppRoutes = () => {
             <Route path="/session/:sessionId" element={<PlayerNavWrap><SessionDetail /></PlayerNavWrap>} />
             <Route path="/accessibility" element={<PlayerNavWrap><AccessibilityPage /></PlayerNavWrap>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="*" element={<PlayerNavWrap><PlayerProfile /></PlayerNavWrap>} />
           </>
         ) : (
@@ -160,6 +164,7 @@ const AppRoutes = () => {
             <Route path="/admin-tasks" element={<CoachWrap><AdminTasksPage /></CoachWrap>} />
             <Route path="/accessibility" element={<CoachWrap><AccessibilityPage /></CoachWrap>} />
             <Route path="/team-feedback/:token" element={<TeamCoachFeedback />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="*" element={<CoachWrap><NotFound /></CoachWrap>} />
           </>
         )}
